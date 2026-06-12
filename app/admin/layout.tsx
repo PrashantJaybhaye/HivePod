@@ -23,7 +23,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="p-2">
+    <div className="p-4 sm:p-6 md:p-8 lg:p-12 max-w-7xl mx-auto w-full">
       {children}
     </div>
   );

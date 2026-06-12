@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect, use } from "react";
-import { collection, getDocs, query, where, doc, getDoc } from "firebase/firestore";
+import { collection, getDocs, query, where, doc, getDoc, deleteDoc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import Link from "next/link";
-import { ArrowLeft, FileAudio, FileText, Image as ImageIcon } from "lucide-react";
+import { ArrowLeft, FileAudio, FileText, Image as ImageIcon, Pencil, Trash2, X, Check } from "lucide-react";
 import UploadMaterial from "@/components/UploadMaterial";
 
 export default function AdminFolderPage({ params }: { params: Promise<{ id: string }> }) {
@@ -13,6 +13,10 @@ export default function AdminFolderPage({ params }: { params: Promise<{ id: stri
   
   const [folder, setFolder] = useState<any>(null);
   const [materials, setMaterials] = useState<any[]>([]);
+
+  // Edit State
+  const [editingMaterialId, setEditingMaterialId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState("");
 
   const fetchFolderAndMaterials = async () => {
     const folderSnap = await getDoc(doc(db, "folders", folderId));
@@ -28,10 +32,45 @@ export default function AdminFolderPage({ params }: { params: Promise<{ id: stri
     setMaterials(materialsData);
   };
 
+  const handleDeleteMaterial = async (materialIdToDel: string) => {
+    if (!confirm("Are you sure you want to delete this material? (Note: This only removes the database record, not the file from Storage)")) return;
+    
+    try {
+      await deleteDoc(doc(db, "materials", materialIdToDel));
+      fetchFolderAndMaterials();
+    } catch (error) {
+      console.error("Error deleting material:", error);
+      alert("Failed to delete material");
+    }
+  };
+
+  const startEditing = (material: any) => {
+    setEditingMaterialId(material.id);
+    setEditTitle(material.title);
+  };
+
+  const cancelEditing = () => {
+    setEditingMaterialId(null);
+    setEditTitle("");
+  };
+
+  const handleUpdateMaterial = async (materialIdToUpdate: string) => {
+    if (!editTitle.trim()) return;
+    
+    try {
+      await updateDoc(doc(db, "materials", materialIdToUpdate), {
+        title: editTitle
+      });
+      setEditingMaterialId(null);
+      fetchFolderAndMaterials();
+    } catch (error) {
+      console.error("Error updating material:", error);
+      alert("Failed to update material");
+    }
+  };
+
   useEffect(() => {
     fetchFolderAndMaterials();
-    // We can poll or use onSnapshot for realtime, but let's just fetch once 
-    // and provide a refresh button if needed.
     const interval = setInterval(fetchFolderAndMaterials, 5000);
     return () => clearInterval(interval);
   }, [folderId]);
@@ -54,22 +93,56 @@ export default function AdminFolderPage({ params }: { params: Promise<{ id: stri
         <h2 className="text-xl font-semibold mb-4 text-foreground">Materials in this Folder</h2>
         <div className="flex flex-col gap-3">
           {materials.map((mat) => (
-            <div key={mat.id} className="bg-card border border-border rounded-lg p-4 flex items-center gap-4 hover:border-primary transition">
-              <div className="p-3 bg-background rounded-full text-primary">
+            <div key={mat.id} className="bg-card border border-border rounded-lg p-4 flex flex-col md:flex-row items-start md:items-center gap-4 hover:border-primary transition relative group">
+              <div className="p-3 bg-background rounded-full text-primary shrink-0">
                 {mat.type === "audio" && <FileAudio size={24} />}
                 {mat.type === "pdf" && <FileText size={24} />}
                 {mat.type === "image" && <ImageIcon size={24} />}
               </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-lg text-foreground">{mat.title}</h3>
-                <p className="text-sm text-gray-400 capitalize">{mat.type} File</p>
-                {mat.type === "audio" && !mat.transcript && (
-                  <p className="text-xs text-yellow-500 mt-1">Transcription pending...</p>
-                )}
-              </div>
-              <a href={mat.url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-sm">
-                View/Download
-              </a>
+              
+              {editingMaterialId === mat.id ? (
+                <div className="flex-1 flex flex-col md:flex-row items-start md:items-center gap-3 w-full">
+                  <input
+                    type="text"
+                    className="flex-1 w-full bg-background border border-border rounded-md px-2 py-1.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary text-sm font-semibold"
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                  />
+                  <div className="flex justify-end gap-2 shrink-0">
+                    <button onClick={cancelEditing} className="p-1.5 rounded bg-white/5 hover:bg-white/10 text-gray-400">
+                      <X size={16} />
+                    </button>
+                    <button onClick={() => handleUpdateMaterial(mat.id)} className="p-1.5 rounded bg-green-500/20 hover:bg-green-500/30 text-green-400">
+                      <Check size={16} />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="flex-1 min-w-0 pr-12 md:pr-0">
+                    <h3 className="font-semibold text-lg text-foreground truncate">{mat.title}</h3>
+                    <p className="text-sm text-gray-400 capitalize">{mat.type} File</p>
+                    {mat.type === "audio" && !mat.transcript && (
+                      <p className="text-xs text-yellow-500 mt-1">Transcription pending...</p>
+                    )}
+                  </div>
+                  
+                  <div className="flex items-center gap-4 mt-3 md:mt-0 w-full md:w-auto justify-between md:justify-end">
+                    <a href={mat.url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-sm font-medium">
+                      View/Download
+                    </a>
+                    
+                    <div className="flex gap-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button onClick={() => startEditing(mat)} className="p-1.5 rounded-md bg-white/5 hover:bg-white/10 text-gray-400 transition-colors">
+                        <Pencil size={14} />
+                      </button>
+                      <button onClick={() => handleDeleteMaterial(mat.id)} className="p-1.5 rounded-md bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-colors">
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           ))}
           {materials.length === 0 && (

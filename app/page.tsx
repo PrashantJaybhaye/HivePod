@@ -11,6 +11,8 @@ import StatCard from "@/components/StatCard";
 import CourseCard from "@/components/CourseCard";
 import { BookOpen, Target, Clock, Zap, Activity, UserCircle, FileCheck, LineChart } from "lucide-react";
 import { recordLoginForStreak } from "@/lib/tracking";
+import CourseSkeleton from "@/components/CourseSkeleton";
+import EmptyState from "@/components/EmptyState";
 
 export default function Home() {
   const { user, isAdmin } = useAuth();
@@ -20,9 +22,11 @@ export default function Home() {
   const [userStats, setUserStats] = useState({ timeInvestedMinutes: 0, currentStreak: 0 });
   const [completedItemsByCourse, setCompletedItemsByCourse] = useState<Record<string, number>>({});
   const [courseItemCounts, setCourseItemCounts] = useState<Record<string, number>>({});
+  const [isDataLoading, setIsDataLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsDataLoading(true);
       // 1. Fetch courses
       const coursesSnap = await getDocs(collection(db, "courses"));
       const coursesData = coursesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -72,6 +76,7 @@ export default function Home() {
         });
         setCompletedItemsByCourse(completedCounts);
       }
+      setIsDataLoading(false);
     };
     fetchData();
   }, [user]);
@@ -104,26 +109,29 @@ export default function Home() {
 
   if (!user) {
     return (
-      <div className="flex-1 flex items-center justify-center min-h-screen bg-background">
-        <div className="bg-card p-8 rounded-2xl border border-border w-full max-w-md shadow-2xl">
-          <h1 className="text-3xl font-bold text-center text-primary mb-8">HivePod Login</h1>
+      <div className="flex-1 flex items-center justify-center min-h-[100dvh] bg-background p-4 sm:p-6">
+        <div className="bg-[#0a0a0a]/80 backdrop-blur-xl p-6 sm:p-8 md:p-10 rounded-3xl border border-white/5 w-full max-w-md shadow-2xl">
+          <div className="text-center mb-8">
+            <h1 className="text-2xl font-semibold text-white mb-2">Sign in to HivePod</h1>
+            <p className="text-sm text-gray-500">Use your HivePod ID to continue.</p>
+          </div>
           <form onSubmit={handleLogin} className="flex flex-col gap-4">
             <input 
               type="email" 
               placeholder="Email address" 
-              className="bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:border-primary transition-colors"
+              className="bg-white/5 border border-white/5 rounded-xl px-4 py-3.5 text-white placeholder:text-gray-500 focus:outline-none focus:border-white/20 transition-colors"
               value={email}
               onChange={e => setEmail(e.target.value)}
             />
             <input 
               type="password" 
               placeholder="Password" 
-              className="bg-background border border-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:border-primary transition-colors"
+              className="bg-white/5 border border-white/5 rounded-xl px-4 py-3.5 text-white placeholder:text-gray-500 focus:outline-none focus:border-white/20 transition-colors"
               value={password}
               onChange={e => setPassword(e.target.value)}
             />
-            <button type="submit" className="bg-linear-to-r from-primary to-secondary text-white font-bold py-3 rounded-xl hover:opacity-90 transition-opacity mt-4">
-              Access Dashboard
+            <button type="submit" className="bg-white text-black font-medium py-3.5 rounded-xl hover:bg-gray-200 transition-colors mt-4 flex items-center justify-center gap-2">
+              Sign In
             </button>
           </form>
         </div>
@@ -137,11 +145,11 @@ export default function Home() {
 
   return (
     <div className="flex flex-col flex-1 bg-background">
-      <main className="flex-1 p-4 md:p-8">
+      <main className="flex-1 px-4 sm:px-6 md:px-12 lg:px-20 py-8 lg:py-12 max-w-7xl mx-auto w-full">
         {/* Welcome Section */}
-        <div className="mb-10 flex justify-between items-start">
+        <div className="mb-10 flex flex-col sm:flex-row justify-between items-start gap-4">
           <div>
-            <h2 className="text-3xl font-bold text-foreground mb-2">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-tight text-white mb-2">
               {capitalizedName}, welcome! You're gonna love it here!
             </h2>
             <p className="text-gray-400">
@@ -200,59 +208,24 @@ export default function Home() {
           <p className="text-sm text-gray-400 mb-6">Pick up where you left off — showing your {courses.length} recent courses</p>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {coursesWithCalculations.map((course, index) => {
-              return (
-              <CourseCard 
-                key={course.id}
-                id={course.id}
-                title={course.title}
-                description={course.description}
-                index={index}
-                totalItems={course.totalItems}
-                completedItems={course.completedItems}
-                progressPercentage={course.progressPercentage}
-              />
-            )})}
-            {courses.length === 0 && (
-              <div className="col-span-full p-8 border border-dashed border-border rounded-xl text-center text-gray-500">
-                You aren't enrolled in any courses yet.
-              </div>
+            {isDataLoading ? (
+              Array.from({ length: 4 }).map((_, i) => <CourseSkeleton key={i} />)
+            ) : courses.length === 0 ? (
+              <EmptyState />
+            ) : (
+              coursesWithCalculations.map((course, index) => (
+                <CourseCard 
+                  key={course.id}
+                  id={course.id}
+                  title={course.title}
+                  description={course.description}
+                  index={index}
+                  totalItems={course.totalItems}
+                  completedItems={course.completedItems}
+                  progressPercentage={course.progressPercentage}
+                />
+              ))
             )}
-          </div>
-        </div>
-
-        {/* Recent Activity Section */}
-        <div className="mt-12">
-          <div className="flex justify-between items-center mb-4">
-            <div>
-              <h3 className="text-xl font-bold text-foreground">Recent activity</h3>
-              <p className="text-sm text-gray-400">Last 2 events</p>
-            </div>
-            <LineChart className="text-gray-500" size={20} />
-          </div>
-
-          <div className="bg-card rounded-2xl border border-border overflow-hidden">
-            <div className="flex items-center justify-between p-4 border-b border-border hover:bg-[#1a1a1c] transition-colors cursor-pointer">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-background border border-border flex items-center justify-center relative shrink-0">
-                  <FileCheck size={18} className="text-gray-400" />
-                  <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-blue-500 rounded-full border-2 border-card"></div>
-                </div>
-                <span className="text-sm font-medium text-gray-200">Started assessment: CCNA Topic ...</span>
-              </div>
-              <span className="text-xs text-gray-500">2 days ago</span>
-            </div>
-            
-            <div className="flex items-center justify-between p-4 hover:bg-[#1a1a1c] transition-colors cursor-pointer">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-background border border-border flex items-center justify-center relative shrink-0">
-                  <UserCircle size={18} className="text-gray-400" />
-                  <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-gray-400 rounded-full border-2 border-card"></div>
-                </div>
-                <span className="text-sm font-medium text-gray-200">Updated profile</span>
-              </div>
-              <span className="text-xs text-gray-500">4 days ago</span>
-            </div>
           </div>
         </div>
 

@@ -13,7 +13,7 @@ export default function Header({ toggleSidebar }: { toggleSidebar?: () => void }
   if (pathname.includes("/admin")) title = "Admin Panel";
   
   return (
-    <header className="h-20 border-b border-border bg-background flex items-center justify-between px-4 md:px-8 sticky top-0 z-10 w-full">
+    <header className="h-16 border-b border-white/5 bg-background/80 backdrop-blur-md flex items-center justify-between px-4 md:px-8 sticky top-0 z-10 w-full">
       <div className="flex items-center gap-4">
         {toggleSidebar && (
           <button onClick={toggleSidebar} className="md:hidden text-gray-400 hover:text-white">
@@ -21,27 +21,13 @@ export default function Header({ toggleSidebar }: { toggleSidebar?: () => void }
           </button>
         )}
         <div>
-          <h1 className="text-lg md:text-xl font-bold text-foreground">{title}</h1>
-          <p className="text-xs md:text-sm text-gray-500">{format(today, "EEEE, MMM d")}</p>
+          <h1 className="text-base md:text-lg font-semibold text-white">{title}</h1>
+          <p className="text-xs text-gray-500 font-medium">{format(today, "EEEE, MMM d")}</p>
         </div>
       </div>
 
       <div className="flex items-center gap-4 md:gap-6 text-gray-400">
-        <button className="hover:text-white transition-colors">
-          <Search size={20} />
-        </button>
-        <button className="hover:text-white transition-colors relative">
-          <Bell size={20} />
-          <span className="absolute top-0 right-0 w-2 h-2 bg-primary rounded-full"></span>
-        </button>
-        
-        {/* Mock Theme Toggle */}
-        <div className="hidden md:flex items-center gap-2 bg-card rounded-full p-1 border border-border">
-          <div className="bg-primary text-white p-1 rounded-full">
-            <Moon size={14} />
-          </div>
-          <div className="w-4 h-4 rounded-full bg-white mr-1"></div>
-        </div>
+        {/* Removed dummy notification bell and mock theme toggle */}
       </div>
     </header>
   );

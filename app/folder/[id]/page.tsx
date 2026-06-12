@@ -39,9 +39,9 @@ export default function PublicFolderPage({ params }: { params: Promise<{ id: str
   if (!folder) return <div className="p-8 max-w-6xl mx-auto">Loading folder...</div>;
 
   return (
-    <div className="p-8 max-w-6xl mx-auto w-full flex flex-col md:flex-row gap-8 h-[calc(100vh-80px)]">
+    <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto w-full flex flex-col md:flex-row gap-6 md:gap-8 min-h-[calc(100dvh-80px)] md:h-[calc(100dvh-80px)]">
       {/* Sidebar: List of Materials */}
-      <div className="w-full md:w-1/3 md:border-r border-border md:pr-8 overflow-y-auto">
+      <div className="w-full md:w-1/3 md:border-r border-border md:pr-8 md:overflow-y-auto">
         <Link href={`/course/${folder.courseId}`} className="text-primary hover:underline flex items-center gap-2 mb-6 w-fit">
           <ArrowLeft size={16} /> Back to Course
         </Link>

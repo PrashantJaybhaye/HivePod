@@ -15,8 +15,7 @@ export default function StatCard({ title, value, subtext, icon: Icon, index = 0 
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.1 }}
-      whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
-      className="bg-card rounded-2xl p-6 border border-border flex flex-col justify-between hover:border-gray-600 transition-colors shadow-lg"
+      className="bg-[#0a0a0a]/50 backdrop-blur-md rounded-2xl p-5 md:p-6 border border-white/5 flex flex-col justify-between hover:bg-[#0a0a0a]/80 transition-colors"
     >
       <div className="flex justify-between items-start mb-6">
         <span className="text-xs font-semibold tracking-wider text-gray-500 uppercase">
@@ -25,8 +24,8 @@ export default function StatCard({ title, value, subtext, icon: Icon, index = 0 
         <Icon size={16} className="text-gray-500" />
       </div>
       <div>
-        <div className="text-3xl font-bold text-foreground mb-1">{value}</div>
-        <div className="text-sm text-gray-500">{subtext}</div>
+        <div className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight text-white mb-1">{value}</div>
+        <div className="text-xs md:text-sm text-gray-500 font-medium">{subtext}</div>
       </div>
     </motion.div>
   );
