@@ -36,16 +36,26 @@ export default function PublicFolderPage({ params }: { params: Promise<{ id: str
     fetchFolderAndMaterials();
   }, [folderId]);
 
-  if (!folder) return <div className="p-8 max-w-6xl mx-auto">Loading folder...</div>;
+  if (!folder) return <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto w-full">Loading folder...</div>;
 
   return (
-    <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto w-full flex flex-col md:flex-row gap-6 md:gap-8 min-h-[calc(100dvh-80px)] md:h-[calc(100dvh-80px)]">
-      {/* Sidebar: List of Materials */}
-      <div className="w-full md:w-1/3 md:border-r border-border md:pr-8 md:overflow-y-auto">
-        <Link href={`/course/${folder.courseId}`} className="text-primary hover:underline flex items-center gap-2 mb-6 w-fit">
+    <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto w-full flex flex-col gap-6 md:gap-8 h-auto md:h-[calc(100dvh-80px)]">
+      <div className="md:hidden">
+        <Link href={`/course/${folder.courseId}`} className="text-primary hover:underline flex items-center gap-2 mb-4 w-fit">
           <ArrowLeft size={16} /> Back to Course
         </Link>
-        <h1 className="text-2xl font-bold text-foreground mb-6">{folder.title}</h1>
+        <h1 className="text-2xl font-bold text-foreground">{folder.title}</h1>
+      </div>
+
+      <div className="flex flex-col-reverse md:flex-row gap-6 md:gap-8 flex-1 min-h-0">
+        {/* Sidebar: List of Materials */}
+        <div className="w-full md:w-1/3 md:border-r border-border md:pr-8 md:overflow-y-auto shrink-0 flex flex-col">
+          <div className="hidden md:block">
+            <Link href={`/course/${folder.courseId}`} className="text-primary hover:underline flex items-center gap-2 mb-6 w-fit">
+              <ArrowLeft size={16} /> Back to Course
+            </Link>
+            <h1 className="text-2xl font-bold text-foreground mb-6">{folder.title}</h1>
+          </div>
         
         <div className="flex flex-col gap-3">
           {materials.map((mat) => (
@@ -71,8 +81,8 @@ export default function PublicFolderPage({ params }: { params: Promise<{ id: str
         </div>
       </div>
 
-      {/* Main Content: Player / Viewer */}
-      <div className="w-full md:w-2/3 flex flex-col h-full overflow-hidden">
+        {/* Main Content: Player / Viewer */}
+        <div className="w-full md:w-2/3 flex flex-col h-auto md:h-full overflow-hidden flex-1 mb-8 md:mb-0">
         {activeMaterial ? (
           <div className="flex flex-col h-full bg-card border border-border rounded-xl p-6">
             <div className="flex justify-between items-center mb-6">
@@ -135,10 +145,11 @@ export default function PublicFolderPage({ params }: { params: Promise<{ id: str
             )}
           </div>
         ) : (
-          <div className="flex-1 flex items-center justify-center text-gray-500">
+          <div className="flex-1 flex items-center justify-center text-gray-500 py-12 md:py-0 bg-card rounded-xl border border-border">
             Select a material from the left to view it here.
           </div>
         )}
+        </div>
       </div>
     </div>
   );

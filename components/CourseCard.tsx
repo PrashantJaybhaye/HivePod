@@ -21,7 +21,7 @@ export default function CourseCard({
   const statusDot = progressPercentage === 0 ? "bg-blue-500" : progressPercentage === 100 ? "bg-green-500" : "bg-yellow-500";
 
   return (
-    <div className="bg-[#0a0a0a] rounded-xl p-5 border border-white/10 flex flex-col h-full hover:border-white/20 transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-black/50 group">
+    <div className="bg-[#0a0a0a] rounded-xl p-4 sm:p-5 border border-white/10 flex flex-col h-full hover:border-white/20 transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-black/50 group">
       
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
@@ -36,16 +36,16 @@ export default function CourseCard({
         </span>
       </div>
 
-      <h3 className="text-lg font-semibold text-white mb-2 line-clamp-2">
+      <h3 className="text-base sm:text-lg font-semibold text-white mb-1.5 sm:mb-2 line-clamp-2">
         {title}
       </h3>
       
-      <p className="text-sm text-gray-400 mb-4 line-clamp-2 flex-1">
+      <p className="text-xs sm:text-sm text-gray-400 mb-4 line-clamp-2 flex-1 leading-relaxed">
         {description || "No description available for this course. Start learning today!"}
       </p>
 
       {/* Meta info row */}
-      <div className="flex items-center gap-4 text-xs text-gray-400 mb-5 pb-5 border-b border-white/5">
+      <div className="flex items-center gap-3 sm:gap-4 text-[11px] sm:text-xs text-gray-400 mb-4 sm:mb-5 pb-4 sm:pb-5 border-b border-white/5">
         <div className="flex items-center gap-1.5">
           <BookOpen size={14} className="text-gray-500" />
           <span>{totalItems} Lessons</span>

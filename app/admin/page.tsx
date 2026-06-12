@@ -93,46 +93,50 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="space-y-8">
-      <div className="bg-card p-4 sm:p-6 md:p-8 rounded-lg border border-border">
-        <h2 className="text-xl md:text-2xl font-bold tracking-tight mb-4 text-primary">Create New Course</h2>
-        <form onSubmit={handleCreateCourse} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Course Title</label>
-            <input
-              type="text"
-              className="w-full bg-background border border-border rounded-md px-3 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              value={newCourseTitle}
-              onChange={(e) => setNewCourseTitle(e.target.value)}
-              placeholder="e.g. Advanced React"
-              required
-            />
+    <div className="p-4 sm:p-6 md:p-8 space-y-6 md:space-y-8 max-w-7xl mx-auto w-full">
+      <div className="bg-card p-4 md:p-5 rounded-lg border border-border">
+        <h2 className="text-lg md:text-xl font-bold tracking-tight mb-3 text-primary">Create New Course</h2>
+        <form onSubmit={handleCreateCourse} className="flex flex-col gap-3">
+          <div className="flex flex-col md:flex-row gap-3">
+            <div className="flex-1">
+              <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wider">Course Title</label>
+              <input
+                type="text"
+                className="w-full bg-background border border-border rounded-md px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                value={newCourseTitle}
+                onChange={(e) => setNewCourseTitle(e.target.value)}
+                placeholder="e.g. Advanced React"
+                required
+              />
+            </div>
+            <div className="flex-[2]">
+              <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wider">Description</label>
+              <input
+                type="text"
+                className="w-full bg-background border border-border rounded-md px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                value={newCourseDesc}
+                onChange={(e) => setNewCourseDesc(e.target.value)}
+                placeholder="Course description..."
+              />
+            </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Description</label>
-            <textarea
-              className="w-full bg-background border border-border rounded-md px-3 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              value={newCourseDesc}
-              onChange={(e) => setNewCourseDesc(e.target.value)}
-              placeholder="Course description..."
-              rows={3}
-            />
+          <div className="flex justify-end">
+            <button
+              type="submit"
+              disabled={loading}
+              className="bg-primary text-white text-sm font-medium px-5 py-1.5 rounded-md hover:bg-primary-hover disabled:opacity-50 transition-colors"
+            >
+              {loading ? "Creating..." : "Create Course"}
+            </button>
           </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-hover disabled:opacity-50 transition-colors"
-          >
-            {loading ? "Creating..." : "Create Course"}
-          </button>
         </form>
       </div>
 
       <div>
-        <h2 className="text-xl font-semibold mb-4 text-foreground">Your Courses</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <h2 className="text-lg md:text-xl font-semibold mb-4 text-foreground">Your Courses</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
           {courses.map((course) => (
-            <div key={course.id} className="bg-card border border-border rounded-lg p-4 flex flex-col h-full hover:border-white/10 transition-colors relative group">
+            <div key={course.id} className="bg-card border border-border rounded-xl p-4 flex flex-col h-full hover:border-white/10 transition-colors relative group min-h-[120px]">
               {editingCourseId === course.id ? (
                 <div className="flex flex-col gap-3 h-full">
                   <input
@@ -167,10 +171,10 @@ export default function AdminPage() {
                     </button>
                   </div>
                   
-                  <Link href={`/admin/course/${course.id}`} className="flex-1 flex flex-col">
-                    <h3 className="font-semibold text-lg text-foreground pr-16">{course.title}</h3>
-                    <p className="text-sm text-gray-400 mt-2 line-clamp-3">{course.description}</p>
-                    <div className="mt-auto pt-4 text-primary text-sm font-medium hover:underline">
+                  <Link href={`/admin/course/${course.id}`} className="flex-1 flex flex-col pt-1">
+                    <h3 className="font-semibold text-base text-foreground pr-14 line-clamp-1">{course.title}</h3>
+                    <p className="text-xs text-gray-400 mt-1 line-clamp-2">{course.description}</p>
+                    <div className="mt-auto pt-3 text-primary text-[10px] font-semibold uppercase tracking-wider">
                       Manage Folders &rarr;
                     </div>
                   </Link>

@@ -78,26 +78,26 @@ export default function AdminFolderPage({ params }: { params: Promise<{ id: stri
   if (!folder) return <div className="p-8">Loading...</div>;
 
   return (
-    <div className="space-y-8">
+    <div className="p-4 sm:p-6 md:p-8 space-y-6 md:space-y-8 max-w-7xl mx-auto w-full">
       <Link href={`/admin/course/${folder.courseId}`} className="text-primary hover:underline flex items-center gap-2">
         <ArrowLeft size={16} /> Back to Course
       </Link>
       
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">{folder.title}</h1>
+      <div className="border-b border-border pb-3 md:pb-4">
+        <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-foreground">{folder.title}</h1>
       </div>
 
       <UploadMaterial courseId={folder.courseId} folderId={folderId} />
 
       <div>
-        <h2 className="text-xl font-semibold mb-4 text-foreground">Materials in this Folder</h2>
-        <div className="flex flex-col gap-3">
+        <h2 className="text-lg md:text-xl font-semibold mb-3 text-foreground">Materials in this Folder</h2>
+        <div className="flex flex-col gap-2 md:gap-3">
           {materials.map((mat) => (
-            <div key={mat.id} className="bg-card border border-border rounded-lg p-4 flex flex-col md:flex-row items-start md:items-center gap-4 hover:border-primary transition relative group">
-              <div className="p-3 bg-background rounded-full text-primary shrink-0">
-                {mat.type === "audio" && <FileAudio size={24} />}
-                {mat.type === "pdf" && <FileText size={24} />}
-                {mat.type === "image" && <ImageIcon size={24} />}
+            <div key={mat.id} className="bg-card border border-border rounded-xl p-3 flex flex-col md:flex-row items-start md:items-center gap-3 hover:border-primary transition relative group">
+              <div className="p-2 bg-background rounded-full text-primary shrink-0">
+                {mat.type === "audio" && <FileAudio size={18} />}
+                {mat.type === "pdf" && <FileText size={18} />}
+                {mat.type === "image" && <ImageIcon size={18} />}
               </div>
               
               {editingMaterialId === mat.id ? (
@@ -120,10 +120,10 @@ export default function AdminFolderPage({ params }: { params: Promise<{ id: stri
               ) : (
                 <>
                   <div className="flex-1 min-w-0 pr-12 md:pr-0">
-                    <h3 className="font-semibold text-lg text-foreground truncate">{mat.title}</h3>
-                    <p className="text-sm text-gray-400 capitalize">{mat.type} File</p>
+                    <h3 className="font-semibold text-sm md:text-base text-foreground truncate">{mat.title}</h3>
+                    <p className="text-xs text-gray-400 capitalize">{mat.type} File</p>
                     {mat.type === "audio" && !mat.transcript && (
-                      <p className="text-xs text-yellow-500 mt-1">Transcription pending...</p>
+                      <p className="text-[10px] text-yellow-500 mt-0.5 tracking-wide uppercase">Transcription pending...</p>
                     )}
                   </div>
                   

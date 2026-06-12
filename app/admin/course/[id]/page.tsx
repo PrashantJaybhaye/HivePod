@@ -109,22 +109,22 @@ export default function AdminCoursePage({ params }: { params: Promise<{ id: stri
   if (!course) return <div className="p-8">Loading...</div>;
 
   return (
-    <div className="space-y-8">
+    <div className="p-4 sm:p-6 md:p-8 space-y-6 md:space-y-8 max-w-7xl mx-auto w-full">
       <Link href="/admin" className="text-primary hover:underline flex items-center gap-2">
         <ArrowLeft size={16} /> Back to Dashboard
       </Link>
       
-      <div>
-        <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-tight text-foreground">{course.title}</h1>
-        <p className="text-gray-400 mt-2 md:text-lg">{course.description}</p>
+      <div className="border-b border-border pb-4 md:pb-5">
+        <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-foreground">{course.title}</h1>
+        <p className="text-sm md:text-base text-gray-400 mt-2">{course.description}</p>
       </div>
 
-      <div className="bg-card p-4 sm:p-6 rounded-lg border border-border">
-        <h2 className="text-xl font-semibold mb-4 text-primary">Create New Folder</h2>
-        <form onSubmit={handleCreateFolder} className="flex flex-col sm:flex-row gap-4">
+      <div className="bg-card p-4 rounded-lg border border-border flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <h2 className="text-base md:text-lg font-semibold text-primary whitespace-nowrap">Create New Folder</h2>
+        <form onSubmit={handleCreateFolder} className="flex flex-1 flex-col sm:flex-row gap-3 w-full md:max-w-md md:justify-end">
           <input
             type="text"
-            className="flex-1 bg-background border border-border rounded-md px-3 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            className="flex-1 bg-background border border-border rounded-md px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             value={newFolderTitle}
             onChange={(e) => setNewFolderTitle(e.target.value)}
             placeholder="e.g. Chapter 1: Introduction"
@@ -133,7 +133,7 @@ export default function AdminCoursePage({ params }: { params: Promise<{ id: stri
           <button
             type="submit"
             disabled={loading}
-            className="bg-primary text-white px-6 py-2 rounded-md hover:bg-primary-hover disabled:opacity-50 transition-colors"
+            className="bg-primary text-white text-sm font-medium px-4 py-1.5 rounded-md hover:bg-primary-hover disabled:opacity-50 transition-colors whitespace-nowrap"
           >
             {loading ? "Creating..." : "Create"}
           </button>
@@ -141,10 +141,10 @@ export default function AdminCoursePage({ params }: { params: Promise<{ id: stri
       </div>
 
       <div>
-        <h2 className="text-xl font-semibold mb-4 text-foreground">Folders in this Course</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <h2 className="text-lg md:text-xl font-semibold mb-4 text-foreground">Folders in this Course</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
           {folders.map((folder) => (
-            <div key={folder.id} className="bg-card border border-border rounded-lg p-4 flex flex-col h-full hover:border-white/10 transition-colors relative group">
+            <div key={folder.id} className="bg-card border border-border rounded-xl p-4 flex flex-col h-full hover:border-white/10 transition-colors relative group min-h-[90px]">
               {editingFolderId === folder.id ? (
                 <div className="flex flex-col gap-3 h-full">
                   <input
@@ -173,9 +173,9 @@ export default function AdminCoursePage({ params }: { params: Promise<{ id: stri
                     </button>
                   </div>
                   
-                  <Link href={`/admin/folder/${folder.id}`} className="flex-1 flex flex-col pt-1">
-                    <h3 className="font-semibold text-lg text-foreground pr-14">{folder.title}</h3>
-                    <p className="text-sm text-gray-400 mt-2">Click to manage materials</p>
+                  <Link href={`/admin/folder/${folder.id}`} className="flex-1 flex flex-col justify-center">
+                    <h3 className="font-semibold text-sm md:text-base text-foreground pr-14 line-clamp-1">{folder.title}</h3>
+                    <p className="text-xs text-gray-400 mt-1">Manage materials &rarr;</p>
                   </Link>
                 </>
               )}
