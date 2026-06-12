@@ -22,7 +22,7 @@ export default function AdminFolderPage({ params }: { params: Promise<{ id: stri
 
     const q = query(collection(db, "materials"), where("folderId", "==", folderId));
     const materialSnap = await getDocs(q);
-    const materialsData = materialSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const materialsData = materialSnap.docs.map(d => ({ id: d.id, ...(d.data() as any) }));
     // Sort by creation date
     materialsData.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
     setMaterials(materialsData);

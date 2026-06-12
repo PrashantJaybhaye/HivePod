@@ -5,6 +5,8 @@ import { collection, getDocs, query, where, doc, getDoc } from "firebase/firesto
 import { db } from "@/lib/firebase";
 import Link from "next/link";
 import { ArrowLeft, FileAudio, FileText, Image as ImageIcon, Download } from "lucide-react";
+import { useAuth } from "@/components/AuthProvider";
+import SmartAudioPlayer from "@/components/SmartAudioPlayer";
 
 export default function PublicFolderPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -13,6 +15,7 @@ export default function PublicFolderPage({ params }: { params: Promise<{ id: str
   const [folder, setFolder] = useState<any>(null);
   const [materials, setMaterials] = useState<any[]>([]);
   const [activeMaterial, setActiveMaterial] = useState<any>(null);
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchFolderAndMaterials = async () => {
@@ -82,12 +85,23 @@ export default function PublicFolderPage({ params }: { params: Promise<{ id: str
             {/* Audio Player */}
             {activeMaterial.type === "audio" && (
               <div className="flex flex-col h-full overflow-hidden">
-                <audio 
-                  controls 
-                  src={activeMaterial.url} 
-                  className="w-full mb-6 outline-none" 
-                  autoPlay={false}
-                />
+                <div className="mb-6">
+                  {user && (
+                    <SmartAudioPlayer 
+                      url={activeMaterial.url} 
+                      userId={user.uid} 
+                      materialId={activeMaterial.id} 
+                      courseId={folder.courseId}
+                    />
+                  )}
+                  {!user && (
+                    <audio 
+                      controls 
+                      src={activeMaterial.url} 
+                      className="w-full outline-none" 
+                    />
+                  )}
+                </div>
                 
                 <div className="flex-1 overflow-y-auto pr-4 scrollbar-thin">
                   <h3 className="text-lg font-semibold text-gray-300 mb-4 sticky top-0 bg-card py-2 z-10">Transcript</h3>

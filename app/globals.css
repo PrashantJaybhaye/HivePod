@@ -1,15 +1,15 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: #0f0f11;
+  --color-background: #0a0a0a; /* Deep black */
   --color-foreground: #fafafa;
-  --color-primary: #ea580c; /* Orange */
-  --color-primary-hover: #c2410c;
-  --color-secondary: #dc2626; /* Red */
-  --color-secondary-hover: #b91c1c;
-  --color-card: #18181b;
+  --color-primary: #ef4444; /* Red gradient start */
+  --color-primary-hover: #dc2626;
+  --color-secondary: #f97316; /* Orange gradient end */
+  --color-secondary-hover: #ea580c;
+  --color-card: #141414; /* Muted dark grey */
   --color-card-foreground: #fafafa;
-  --color-border: #27272a;
+  --color-border: #262626;
 }
 
 :root {
