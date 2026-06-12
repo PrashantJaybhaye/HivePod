@@ -15,9 +15,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col md:ml-[220px] min-w-0 transition-all duration-300 relative z-0 h-screen overflow-hidden">
+      <main className="flex-1 flex flex-col md:ml-[260px] min-w-0 transition-all duration-300 relative z-0 h-screen overflow-hidden">
         <Header toggleSidebar={toggleSidebar} />
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto pt-6">
           {children}
         </div>
       </main>

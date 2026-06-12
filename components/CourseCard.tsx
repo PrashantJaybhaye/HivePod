@@ -21,7 +21,7 @@ export default function CourseCard({
   const statusDot = progressPercentage === 0 ? "bg-blue-500" : progressPercentage === 100 ? "bg-green-500" : "bg-yellow-500";
 
   return (
-    <div className="bg-[#0a0a0a] rounded-xl p-4 sm:p-5 border border-white/10 flex flex-col h-full hover:border-white/20 transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-black/50 group">
+    <div className="bg-[#0a0a0a] rounded-xl p-4 sm:p-5 border border-white/10 flex flex-col h-full group">
       
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
@@ -36,7 +36,7 @@ export default function CourseCard({
         </span>
       </div>
 
-      <h3 className="text-base sm:text-lg font-semibold text-white mb-1.5 sm:mb-2 line-clamp-2">
+      <h3 className="text-base sm:text-lg font-semibold text-neutral-200 mb-1.5 sm:mb-2 line-clamp-2">
         {title}
       </h3>
       
@@ -60,14 +60,14 @@ export default function CourseCard({
       <div className="mb-5">
         <div className="flex items-end justify-between mb-2">
           <div className="flex items-end gap-1">
-            <span className="text-lg font-bold text-white leading-none">{progressPercentage}%</span>
+            <span className="text-lg font-bold text-neutral-200 leading-none">{progressPercentage}%</span>
           </div>
           <span className="text-xs text-gray-500 font-medium">{completedItems} / {totalItems || 0} items</span>
         </div>
         
         <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden">
           <div 
-            className="bg-blue-500 h-full rounded-full transition-all duration-500 group-hover:bg-blue-400"
+            className="bg-primary h-full rounded-full transition-all duration-500 group-hover:bg-red-400"
             style={{ width: `${progressPercentage}%` }}
           ></div>
         </div>

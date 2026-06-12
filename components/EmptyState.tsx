@@ -15,7 +15,7 @@ export default function EmptyState({
       <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mb-6">
         <BookOpen size={32} className="text-gray-500" />
       </div>
-      <h3 className="text-xl font-semibold text-white mb-2">{title}</h3>
+      <h3 className="text-xl font-semibold text-neutral-200 mb-2">{title}</h3>
       <p className="text-sm text-gray-500 max-w-sm mb-8">{description}</p>
       
       <Link href="/">

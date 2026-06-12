@@ -112,7 +112,7 @@ export default function Home() {
       <div className="flex-1 flex items-center justify-center min-h-[100dvh] bg-background p-4 sm:p-6">
         <div className="bg-[#0a0a0a]/80 backdrop-blur-xl p-6 sm:p-8 md:p-10 rounded-3xl border border-white/5 w-full max-w-md shadow-2xl">
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-semibold text-white mb-2">Sign in to HivePod</h1>
+            <h1 className="text-2xl font-semibold text-neutral-200 mb-2">Sign in to HivePod</h1>
             <p className="text-sm text-gray-500">Use your HivePod ID to continue.</p>
           </div>
           <form onSubmit={handleLogin} className="flex flex-col gap-4">
@@ -149,8 +149,8 @@ export default function Home() {
         {/* Welcome Section */}
         <div className="mb-10 flex flex-col sm:flex-row justify-between items-start gap-4">
           <div>
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-tight text-white mb-2">
-              {capitalizedName}, welcome! You're gonna love it here!
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-tight text-neutral-200 mb-2">
+              {capitalizedName}, welcome! You're going to love it here!
             </h2>
             <p className="text-gray-400">
               Your journey of a thousand miles begins with a single click.
@@ -207,7 +207,7 @@ export default function Home() {
           <h3 className="text-xl font-bold text-foreground mb-1">Continue learning</h3>
           <p className="text-sm text-gray-400 mb-6">Pick up where you left off — showing your {courses.length} recent courses</p>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             {isDataLoading ? (
               Array.from({ length: 4 }).map((_, i) => <CourseSkeleton key={i} />)
             ) : courses.length === 0 ? (
