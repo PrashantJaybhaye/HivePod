@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { User, onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 
 interface AuthContextType {
@@ -28,22 +28,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (currentUser) {
         try {
-          // Check for admin status
           const userRef = doc(db, "users", currentUser.uid);
           const userSnap = await getDoc(userRef);
+
+          // Build metadata from Firebase Auth profile
+          const providerData = currentUser.providerData[0];
+          const metadata = {
+            uid: currentUser.uid,
+            email: currentUser.email,
+            displayName: currentUser.displayName || null,
+            photoURL: currentUser.photoURL || null,
+            phoneNumber: currentUser.phoneNumber || null,
+            provider: providerData?.providerId || "unknown",
+            lastLoginAt: serverTimestamp(),
+          };
           
           if (userSnap.exists()) {
+            // Existing user — update metadata, preserve isAdmin & other fields
             setIsAdmin(userSnap.data().isAdmin === true);
+            await setDoc(userRef, metadata, { merge: true });
           } else {
-            // Create default user doc
+            // New user — create full document
             await setDoc(userRef, {
-              email: currentUser.email,
+              ...metadata,
               isAdmin: false,
+              createdAt: serverTimestamp(),
             });
             setIsAdmin(false);
           }
         } catch (error) {
-          console.error("Error fetching user data:", error);
+          console.error("Error syncing user data:", error);
           setIsAdmin(false);
         }
       } else {

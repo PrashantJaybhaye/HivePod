@@ -1,23 +1,19 @@
 "use client";
 
 import { useAuth } from "@/components/AuthProvider";
-import { signInWithEmailAndPassword, signOut } from "firebase/auth";
-import { auth, db } from "@/lib/firebase";
-import { useState, useEffect } from "react";
+import { db } from "@/lib/firebase";
+import { useEffect, useState } from "react";
 import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import Link from "next/link";
-import Header from "@/components/Header";
 import StatCard from "@/components/StatCard";
 import CourseCard from "@/components/CourseCard";
-import { BookOpen, Target, Clock, Zap, Activity, UserCircle, FileCheck, LineChart } from "lucide-react";
+import { BookOpen, Target, Clock, Zap } from "lucide-react";
 import { recordLoginForStreak } from "@/lib/tracking";
 import CourseSkeleton from "@/components/CourseSkeleton";
 import EmptyState from "@/components/EmptyState";
 
 export default function Home() {
   const { user, isAdmin } = useAuth();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [courses, setCourses] = useState<any[]>([]);
   const [userStats, setUserStats] = useState({ timeInvestedMinutes: 0, currentStreak: 0 });
   const [completedItemsByCourse, setCompletedItemsByCourse] = useState<Record<string, number>>({});
@@ -98,50 +94,8 @@ export default function Home() {
     return { ...course, totalItems, completedItems, progressPercentage };
   });
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-    } catch (error) {
-      alert("Login failed. Check credentials or create an account in Firebase Console.");
-    }
-  };
-
-  if (!user) {
-    return (
-      <div className="flex-1 flex items-center justify-center min-h-[100dvh] bg-background p-4 sm:p-6">
-        <div className="bg-[#0a0a0a]/80 backdrop-blur-xl p-6 sm:p-8 md:p-10 rounded-3xl border border-white/5 w-full max-w-md shadow-2xl">
-          <div className="text-center mb-8">
-            <h1 className="text-2xl font-semibold text-neutral-200 mb-2">Sign in to HivePod</h1>
-            <p className="text-sm text-gray-500">Use your HivePod ID to continue.</p>
-          </div>
-          <form onSubmit={handleLogin} className="flex flex-col gap-4">
-            <input 
-              type="email" 
-              placeholder="Email address" 
-              className="bg-white/5 border border-white/5 rounded-xl px-4 py-3.5 text-white placeholder:text-gray-500 focus:outline-none focus:border-white/20 transition-colors"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-            />
-            <input 
-              type="password" 
-              placeholder="Password" 
-              className="bg-white/5 border border-white/5 rounded-xl px-4 py-3.5 text-white placeholder:text-gray-500 focus:outline-none focus:border-white/20 transition-colors"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-            />
-            <button type="submit" className="bg-white text-black font-medium py-3.5 rounded-xl hover:bg-gray-200 transition-colors mt-4 flex items-center justify-center gap-2">
-              Sign In
-            </button>
-          </form>
-        </div>
-      </div>
-    );
-  }
-
   // Determine user's first name for greeting
-  const firstName = user.email ? user.email.split('@')[0].replace(/[^a-zA-Z]/g, '') : "Student";
-  const capitalizedName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
+  const firstName = user?.displayName?.split(" ")[0] || user?.email?.split("@")[0] || "Student";
 
   return (
     <div className="flex flex-col flex-1 bg-background">
@@ -150,24 +104,19 @@ export default function Home() {
         <div className="mb-10 flex flex-col sm:flex-row justify-between items-start gap-4">
           <div>
             <h2 className="text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-tight text-neutral-200 mb-2">
-              {capitalizedName}, welcome! You're going to love it here!
+              {firstName}, welcome! You're going to love it here!
             </h2>
             <p className="text-gray-400">
               Your journey of a thousand miles begins with a single click.
             </p>
           </div>
-          <div className="flex gap-4">
-             {isAdmin && (
-               <Link href="/admin">
-                 <button className="bg-card border border-border px-4 py-2 rounded-lg text-sm hover:border-primary transition-colors">
-                   Admin Panel
-                 </button>
-               </Link>
-             )}
-             <button onClick={() => signOut(auth)} className="bg-card border border-border px-4 py-2 rounded-lg text-sm hover:border-red-500 hover:text-red-500 transition-colors">
-               Sign Out
-             </button>
-          </div>
+          {isAdmin && (
+            <Link href="/admin">
+              <button className="bg-card border border-border px-4 py-2 rounded-lg text-sm hover:border-primary transition-colors">
+                Admin Panel
+              </button>
+            </Link>
+          )}
         </div>
 
         {/* Stats Row */}

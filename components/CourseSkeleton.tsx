@@ -1,6 +1,6 @@
 export default function CourseSkeleton() {
   return (
-    <div className="bg-[#0a0a0a] rounded-xl p-4 sm:p-5 border border-white/10 flex flex-col h-full animate-pulse">
+    <div className="bg-background rounded-xl p-4 sm:p-5 border border-white/10 flex flex-col h-full animate-pulse">
       
       {/* Header */}
       <div className="flex items-center justify-between mb-3.5">

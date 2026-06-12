@@ -21,7 +21,7 @@ export default function CourseCard({
   const statusDot = progressPercentage === 0 ? "bg-blue-500" : progressPercentage === 100 ? "bg-green-500" : "bg-yellow-500";
 
   return (
-    <div className="bg-[#0a0a0a] rounded-xl p-4 sm:p-5 border border-white/10 flex flex-col h-full group">
+    <div className="bg-background rounded-xl p-4 sm:p-5 border border-white/10 flex flex-col h-full group">
       
       {/* Header */}
       <div className="flex items-center justify-between mb-3">

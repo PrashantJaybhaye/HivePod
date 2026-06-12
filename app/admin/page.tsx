@@ -109,7 +109,7 @@ export default function AdminPage() {
                 required
               />
             </div>
-            <div className="flex-[2]">
+            <div className="flex-2">
               <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wider">Description</label>
               <input
                 type="text"

@@ -11,7 +11,7 @@ export default function EmptyState({
   description = "You aren't enrolled in any courses at the moment. When you join a course, it will appear here." 
 }: EmptyStateProps) {
   return (
-    <div className="col-span-full flex flex-col items-center justify-center p-12 text-center rounded-2xl border border-white/5 bg-[#0a0a0a]/30 backdrop-blur-md">
+    <div className="col-span-full flex flex-col items-center justify-center p-12 text-center rounded-2xl border border-white/5 bg-background/30 backdrop-blur-md">
       <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mb-6">
         <BookOpen size={32} className="text-gray-500" />
       </div>

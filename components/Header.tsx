@@ -1,23 +1,35 @@
 "use client";
 
-import { Bell, Search, Menu, LogOut } from "lucide-react";
+import { useState } from "react";
+import { Bell, Search, Menu, LogOut, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "./AuthProvider";
 import { auth } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
 
 export default function Header({ toggleSidebar }: { toggleSidebar?: () => void }) {
   const pathname = usePathname();
+  const router = useRouter();
   const { user } = useAuth();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
+    if (isLoggingOut) return;
+    setIsLoggingOut(true);
     try {
       await signOut(auth);
+      router.replace("/login");
     } catch (error) {
       console.error("Error signing out:", error);
+      setIsLoggingOut(false);
     }
   };
+
+  // Derive display info from Firebase user
+  const displayName = user?.displayName || user?.email?.split("@")[0] || "User";
+  const displayInitial = (user?.displayName?.[0] || user?.email?.[0] || "U").toUpperCase();
+  const photoURL = user?.photoURL;
 
   let title = "Dashboard";
   if (pathname.includes("/course")) title = "Course View";
@@ -56,11 +68,20 @@ export default function Header({ toggleSidebar }: { toggleSidebar?: () => void }
 
         {/* User Profile Info */}
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-full bg-[#dc2626]/20 text-[#ef4444] border border-[#dc2626]/30 flex items-center justify-center text-xs font-bold shrink-0">
-            {user?.email?.substring(0, 1).toUpperCase() || "P"}
-          </div>
+          {photoURL ? (
+            <img
+              src={photoURL}
+              alt={displayName}
+              className="w-7 h-7 rounded-full object-cover border border-white/10 shrink-0"
+              referrerPolicy="no-referrer"
+            />
+          ) : (
+            <div className="w-7 h-7 rounded-full bg-primary-hover/20 text-[#ef4444] border border-primary-hover/30 flex items-center justify-center text-xs font-bold shrink-0">
+              {displayInitial}
+            </div>
+          )}
           <span className="text-[13px] font-medium text-neutral-200 truncate hidden sm:inline max-w-[100px]">
-            {user?.email ? user.email.split('@')[0] : "Prashant"}
+            {displayName}
           </span>
         </div>
 
@@ -70,10 +91,11 @@ export default function Header({ toggleSidebar }: { toggleSidebar?: () => void }
         {/* Logout Button */}
         <button 
           onClick={handleLogout}
-          className="text-xs text-gray-400 hover:text-white border border-white/10 hover:border-white/20 px-2 sm:px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer"
+          disabled={isLoggingOut}
+          className="text-xs text-gray-400 hover:text-white border border-white/10 hover:border-white/20 px-2 sm:px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <span className="hidden sm:inline">Log Out</span>
-          <LogOut size={12} />
+          <span className="hidden sm:inline">{isLoggingOut ? "Logging out..." : "Log Out"}</span>
+          {isLoggingOut ? <Loader2 size={12} className="animate-spin" /> : <LogOut size={12} />}
         </button>
       </div>
     </header>

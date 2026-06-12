@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/components/AuthProvider";
 import { useState, useEffect } from "react";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import CourseCard from "@/components/CourseCard";
 import CourseSkeleton from "@/components/CourseSkeleton";
@@ -11,7 +11,7 @@ import { BookOpen, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function MyCourses() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, isAdmin, loading: authLoading } = useAuth();
   const router = useRouter();
   
   const [courses, setCourses] = useState<any[]>([]);
@@ -33,7 +33,19 @@ export default function MyCourses() {
       try {
         // 1. Fetch courses
         const coursesSnap = await getDocs(collection(db, "courses"));
-        const coursesData = coursesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        let coursesData = coursesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        
+        // 1.5 Filter by approved requests if not admin
+        if (!isAdmin) {
+          const reqQuery = query(
+            collection(db, "course_requests"),
+            where("userId", "==", user.uid),
+            where("status", "==", "approved")
+          );
+          const reqSnap = await getDocs(reqQuery);
+          const approvedCourseIds = new Set(reqSnap.docs.map(d => d.data().courseId));
+          coursesData = coursesData.filter(c => approvedCourseIds.has(c.id));
+        }
         
         // 2. Fetch item counts
         const materialsSnap = await getDocs(collection(db, "materials"));

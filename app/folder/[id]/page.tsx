@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect, use } from "react";
-import { collection, getDocs, query, where, doc, getDoc } from "firebase/firestore";
+import { collection, getDocs, query, where, doc, getDoc, limit } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import Link from "next/link";
-import { ArrowLeft, FileAudio, FileText, Image as ImageIcon, Download } from "lucide-react";
+import { ArrowLeft, FileAudio, FileText, Image as ImageIcon, Download, Lock } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import SmartAudioPlayer from "@/components/SmartAudioPlayer";
 
@@ -15,14 +15,40 @@ export default function PublicFolderPage({ params }: { params: Promise<{ id: str
   const [folder, setFolder] = useState<any>(null);
   const [materials, setMaterials] = useState<any[]>([]);
   const [activeMaterial, setActiveMaterial] = useState<any>(null);
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
+  const [hasAccess, setHasAccess] = useState<boolean | null>(null);
 
   useEffect(() => {
     const fetchFolderAndMaterials = async () => {
       const folderSnap = await getDoc(doc(db, "folders", folderId));
+      let folderData: any = null;
       if (folderSnap.exists()) {
-        setFolder({ id: folderSnap.id, ...folderSnap.data() });
+        folderData = { id: folderSnap.id, ...folderSnap.data() };
+        setFolder(folderData);
       }
+
+      if (!folderData) return;
+
+      let approved = false;
+      if (isAdmin) {
+        approved = true;
+      } else if (user) {
+        const reqQuery = query(
+          collection(db, "course_requests"),
+          where("userId", "==", user.uid),
+          where("courseId", "==", folderData.courseId),
+          where("status", "==", "approved"),
+          limit(1)
+        );
+        const reqSnap = await getDocs(reqQuery);
+        if (!reqSnap.empty) {
+          approved = true;
+        }
+      }
+
+      setHasAccess(approved);
+
+      if (!approved) return;
 
       const q = query(collection(db, "materials"), where("folderId", "==", folderId));
       const materialSnap = await getDocs(q);
@@ -34,9 +60,26 @@ export default function PublicFolderPage({ params }: { params: Promise<{ id: str
       }
     };
     fetchFolderAndMaterials();
-  }, [folderId]);
+  }, [folderId, user, isAdmin]);
 
   if (!folder) return <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto w-full">Loading folder...</div>;
+
+  if (hasAccess === null) return <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto w-full text-gray-400">Verifying access...</div>;
+
+  if (!hasAccess) {
+    return (
+      <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto w-full flex flex-col items-center justify-center min-h-[50vh]">
+        <Lock className="text-primary mb-4" size={48} />
+        <h2 className="text-2xl font-bold text-foreground mb-2">Access Denied</h2>
+        <p className="text-gray-400 mb-6">You don't have permission to view the materials in this folder.</p>
+        <Link href={`/course/${folder.courseId}`}>
+          <button className="bg-primary text-white px-6 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors">
+            Return to Course
+          </button>
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto w-full flex flex-col gap-6 md:gap-8 h-auto md:h-[calc(100dvh-80px)]">
