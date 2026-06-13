@@ -37,7 +37,7 @@ export default function Header({ toggleSidebar }: { toggleSidebar?: () => void }
   if (pathname.includes("/admin")) title = "Admin Portal";
 
   return (
-    <header className="h-14 shrink-0 border-b border-white/[0.04] bg-[#0f0f11]/60 backdrop-blur-2xl flex items-center justify-between px-6 sticky top-0 z-10 w-full">
+    <header className="h-14 shrink-0 border-b border-white/[0.04] bg-[#060606]/60 backdrop-blur-2xl flex items-center justify-between px-6 sticky top-0 z-10 w-full">
       <div className="flex items-center gap-4">
         {toggleSidebar && (
           <button 

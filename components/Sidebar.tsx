@@ -27,7 +27,7 @@ export default function Sidebar({ isOpen = false, setIsOpen }: SidebarProps) {
   ];
 
   return (
-    <aside className={`w-[260px] shrink-0 bg-[#0f0f11]/80 border-r border-white/[0.04] backdrop-blur-2xl h-screen flex flex-col fixed left-0 top-0 z-20 transition-transform duration-300
+    <aside className={`w-[260px] shrink-0 bg-[#060606]/80 border-r border-white/[0.04] backdrop-blur-2xl h-screen flex flex-col fixed left-0 top-0 z-20 transition-transform duration-300
       ${isOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0
     `}>
       {/* Brand Header */}
