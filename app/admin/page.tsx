@@ -4,93 +4,160 @@ import { useState, useEffect } from "react";
 import { collection, getDocs, addDoc, serverTimestamp, doc, deleteDoc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import Link from "next/link";
-import { Pencil, Trash2, X, Check } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { 
+  Pencil, 
+  Trash2, 
+  X, 
+  Plus, 
+  BookOpen, 
+  Headphones, 
+  FileText, 
+  Zap, 
+  ChevronRight,
+  Globe,
+  Clock,
+  Layers
+} from "lucide-react";
 
 export default function AdminPage() {
+  const router = useRouter();
   const [courses, setCourses] = useState<any[]>([]);
-  const [newCourseTitle, setNewCourseTitle] = useState("");
-  const [newCourseDesc, setNewCourseDesc] = useState("");
-  const [newCategory, setNewCategory] = useState("");
-  const [newInstructor, setNewInstructor] = useState("");
-  const [newDifficulty, setNewDifficulty] = useState("Beginner");
-  const [newRating, setNewRating] = useState("4.8");
-  const [newReviewsCount, setNewReviewsCount] = useState("12");
-  const [newAudioTracks, setNewAudioTracks] = useState("0");
-  const [newResourcesCount, setNewResourcesCount] = useState("0");
-  const [newXpReward, setNewXpReward] = useState("100");
-  const [newLanguage, setNewLanguage] = useState("English");
-  const [newUpdatedAtText, setNewUpdatedAtText] = useState("Updated Today");
-  const [newAudioDuration, setNewAudioDuration] = useState("2 hrs");
   const [loading, setLoading] = useState(false);
-  
-  // Edit State
+  const [dbLoading, setDbLoading] = useState(true);
+
+  // Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<"create" | "edit">("create");
   const [editingCourseId, setEditingCourseId] = useState<string | null>(null);
-  const [editTitle, setEditTitle] = useState("");
-  const [editDesc, setEditDesc] = useState("");
-  const [editCategory, setEditCategory] = useState("");
-  const [editInstructor, setEditInstructor] = useState("");
-  const [editDifficulty, setEditDifficulty] = useState("Beginner");
-  const [editRating, setEditRating] = useState("4.8");
-  const [editReviewsCount, setEditReviewsCount] = useState("12");
-  const [editAudioTracks, setEditAudioTracks] = useState("0");
-  const [editResourcesCount, setEditResourcesCount] = useState("0");
-  const [editXpReward, setEditXpReward] = useState("100");
-  const [editLanguage, setEditLanguage] = useState("English");
-  const [editUpdatedAtText, setEditUpdatedAtText] = useState("Updated Today");
-  const [editAudioDuration, setEditAudioDuration] = useState("2 hrs");
+
+  // Shared Form States (Ratings and reviews removed)
+  const [courseTitle, setCourseTitle] = useState("");
+  const [courseDesc, setCourseDesc] = useState("");
+  const [category, setCategory] = useState("");
+  const [instructor, setInstructor] = useState("");
+  const [difficulty, setDifficulty] = useState("Beginner");
+  const [audioTracks, setAudioTracks] = useState("0");
+  const [resourcesCount, setResourcesCount] = useState("0");
+  const [xpReward, setXpReward] = useState("100");
+  const [language, setLanguage] = useState("English");
+  const [updatedAtText, setUpdatedAtText] = useState("Updated Today");
+  const [audioDuration, setAudioDuration] = useState("2 hrs");
 
   const fetchCourses = async () => {
-    const querySnapshot = await getDocs(collection(db, "courses"));
-    const coursesData = querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
-    setCourses(coursesData);
+    setDbLoading(true);
+    try {
+      const querySnapshot = await getDocs(collection(db, "courses"));
+      const coursesData = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setCourses(coursesData);
+    } catch (error) {
+      console.error("Error fetching courses:", error);
+    } finally {
+      setDbLoading(false);
+    }
   };
 
   useEffect(() => {
     fetchCourses();
   }, []);
 
+  const resetForm = () => {
+    setCourseTitle("");
+    setCourseDesc("");
+    setCategory("");
+    setInstructor("");
+    setDifficulty("Beginner");
+    setAudioTracks("0");
+    setResourcesCount("0");
+    setXpReward("100");
+    setLanguage("English");
+    setUpdatedAtText("Updated Today");
+    setAudioDuration("2 hrs");
+    setEditingCourseId(null);
+  };
+
+  const handleOpenCreateModal = () => {
+    resetForm();
+    setModalMode("create");
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEditModal = (course: any) => {
+    setEditingCourseId(course.id);
+    setCourseTitle(course.title || "");
+    setCourseDesc(course.description || "");
+    setCategory(course.category || "");
+    setInstructor(course.instructor || "");
+    setDifficulty(course.difficulty || "Beginner");
+    setAudioTracks(course.audioTracks?.toString() || "0");
+    setResourcesCount(course.resourcesCount?.toString() || "0");
+    setXpReward(course.xpReward?.toString() || "100");
+    setLanguage(course.language || "English");
+    setUpdatedAtText(course.updatedAtText || "Updated Today");
+    setAudioDuration(course.audioDuration || "2 hrs");
+    setModalMode("edit");
+    setIsModalOpen(true);
+  };
+
   const handleCreateCourse = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newCourseTitle.trim()) return;
+    if (!courseTitle.trim()) return;
 
     setLoading(true);
     try {
       await addDoc(collection(db, "courses"), {
-        title: newCourseTitle.trim(),
-        description: newCourseDesc.trim(),
-        category: newCategory.trim() || "IT & Tech",
-        instructor: newInstructor.trim() || "HivePod Faculty Team",
-        difficulty: newDifficulty,
-        rating: parseFloat(newRating) || 4.8,
-        reviewsCount: parseInt(newReviewsCount) || 12,
-        audioTracks: parseInt(newAudioTracks) || 0,
-        resourcesCount: parseInt(newResourcesCount) || 0,
-        xpReward: parseInt(newXpReward) || 100,
-        language: newLanguage.trim() || "English",
-        updatedAtText: newUpdatedAtText.trim() || "Updated Today",
-        audioDuration: newAudioDuration.trim() || "2 hrs",
+        title: courseTitle.trim(),
+        description: courseDesc.trim(),
+        category: category.trim() || "IT & Tech",
+        instructor: instructor.trim() || "HivePod Faculty Team",
+        difficulty: difficulty,
+        audioTracks: parseInt(audioTracks) || 0,
+        resourcesCount: parseInt(resourcesCount) || 0,
+        xpReward: parseInt(xpReward) || 100,
+        language: language.trim() || "English",
+        updatedAtText: updatedAtText.trim() || "Updated Today",
+        audioDuration: audioDuration.trim() || "2 hrs",
         createdAt: serverTimestamp(),
       });
-      setNewCourseTitle("");
-      setNewCourseDesc("");
-      setNewCategory("");
-      setNewInstructor("");
-      setNewDifficulty("Beginner");
-      setNewRating("4.8");
-      setNewReviewsCount("12");
-      setNewAudioTracks("0");
-      setNewResourcesCount("0");
-      setNewXpReward("100");
-      setNewLanguage("English");
-      setNewUpdatedAtText("Updated Today");
-      setNewAudioDuration("2 hrs");
+      setIsModalOpen(false);
+      resetForm();
       fetchCourses();
     } catch (error) {
       console.error("Error adding course:", error);
       alert("Failed to create course");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateCourse = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingCourseId || !courseTitle.trim()) return;
+
+    setLoading(true);
+    try {
+      await updateDoc(doc(db, "courses", editingCourseId), {
+        title: courseTitle.trim(),
+        description: courseDesc.trim(),
+        category: category.trim() || "IT & Tech",
+        instructor: instructor.trim() || "HivePod Faculty Team",
+        difficulty: difficulty,
+        audioTracks: parseInt(audioTracks) || 0,
+        resourcesCount: parseInt(resourcesCount) || 0,
+        xpReward: parseInt(xpReward) || 100,
+        language: language.trim() || "English",
+        updatedAtText: updatedAtText.trim() || "Updated Today",
+        audioDuration: audioDuration.trim() || "2 hrs"
+      });
+      setIsModalOpen(false);
+      resetForm();
+      fetchCourses();
+    } catch (error) {
+      console.error("Error updating course:", error);
+      alert("Failed to update course");
     } finally {
       setLoading(false);
     }
@@ -108,472 +175,354 @@ export default function AdminPage() {
     }
   };
 
-  const startEditing = (course: any) => {
-    setEditingCourseId(course.id);
-    setEditTitle(course.title);
-    setEditDesc(course.description || "");
-    setEditCategory(course.category || "");
-    setEditInstructor(course.instructor || "");
-    setEditDifficulty(course.difficulty || "Beginner");
-    setEditRating(course.rating?.toString() || "4.8");
-    setEditReviewsCount(course.reviewsCount?.toString() || "12");
-    setEditAudioTracks(course.audioTracks?.toString() || "0");
-    setEditResourcesCount(course.resourcesCount?.toString() || "0");
-    setEditXpReward(course.xpReward?.toString() || "100");
-    setEditLanguage(course.language || "English");
-    setEditUpdatedAtText(course.updatedAtText || "Updated Today");
-    setEditAudioDuration(course.audioDuration || "2 hrs");
-  };
-
-  const cancelEditing = () => {
-    setEditingCourseId(null);
-    setEditTitle("");
-    setEditDesc("");
-    setEditCategory("");
-    setEditInstructor("");
-    setEditDifficulty("Beginner");
-    setEditRating("4.8");
-    setEditReviewsCount("12");
-    setEditAudioTracks("0");
-    setEditResourcesCount("0");
-    setEditXpReward("100");
-    setEditLanguage("English");
-    setEditUpdatedAtText("Updated Today");
-    setEditAudioDuration("2 hrs");
-  };
-
-  const handleUpdateCourse = async (courseId: string) => {
-    if (!editTitle.trim()) return;
-    
-    try {
-      await updateDoc(doc(db, "courses", courseId), {
-        title: editTitle.trim(),
-        description: editDesc.trim(),
-        category: editCategory.trim() || "IT & Tech",
-        instructor: editInstructor.trim() || "HivePod Faculty Team",
-        difficulty: editDifficulty,
-        rating: parseFloat(editRating) || 4.8,
-        reviewsCount: parseInt(editReviewsCount) || 12,
-        audioTracks: parseInt(editAudioTracks) || 0,
-        resourcesCount: parseInt(editResourcesCount) || 0,
-        xpReward: parseInt(editXpReward) || 100,
-        language: editLanguage.trim() || "English",
-        updatedAtText: editUpdatedAtText.trim() || "Updated Today",
-        audioDuration: editAudioDuration.trim() || "2 hrs"
-      });
-      setEditingCourseId(null);
-      fetchCourses();
-    } catch (error) {
-      console.error("Error updating course:", error);
-      alert("Failed to update course");
-    }
-  };
+  // Dashboard aggregates
+  const totalCourses = courses.length;
+  const totalAudioPods = courses.reduce((sum, c) => sum + (c.audioTracks || 0), 0);
+  const totalPDFs = courses.reduce((sum, c) => sum + (c.resourcesCount || 0), 0);
+  const totalXP = courses.reduce((sum, c) => sum + (c.xpReward || 0), 0);
 
   return (
-    <div className="flex flex-col flex-1">
-      <main className="flex-1 pt-0 pb-8 w-full">
-        {/* Premium Header */}
-        <div className="relative mb-8 rounded-2xl bg-[#111111] border border-white/10 overflow-hidden shadow-lg">
-          <div className="absolute inset-0 bg-linear-to-r from-primary/10 via-transparent to-blue-500/10 opacity-50"></div>
-          
-          <div className="relative px-6 py-5 md:px-8 md:py-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-            <div className="flex items-center gap-5">
-              <div>
-                <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white mb-1">
-                  Admin Dashboard
-                </h2>
-                <p className="text-sm text-gray-400">
-                  Manage your platform's courses and content.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-5 bg-black/30 backdrop-blur-sm rounded-xl px-5 py-2.5 border border-white/5">
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold text-white">{courses.length}</span>
-                <span className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Total Courses</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Create Course Section */}
-        <div className="mb-8 bg-[#111111] p-5 md:p-6 rounded-2xl border border-white/10 shadow-md">
-          <h2 className="text-lg font-bold tracking-tight mb-4 text-white flex items-center gap-2">
-            <span className="w-1.5 h-5 bg-primary rounded-full inline-block"></span>
-            Create New Course
-          </h2>
-          <form onSubmit={handleCreateCourse} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Course Title</label>
-                <input
-                  type="text"
-                  className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary transition-colors placeholder:text-gray-600"
-                  value={newCourseTitle}
-                  onChange={(e) => setNewCourseTitle(e.target.value)}
-                  placeholder="e.g. Advanced React"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Category</label>
-                <input
-                  type="text"
-                  className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary transition-colors placeholder:text-gray-600"
-                  value={newCategory}
-                  onChange={(e) => setNewCategory(e.target.value)}
-                  placeholder="e.g. Web Development"
-                />
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Instructor</label>
-                <input
-                  type="text"
-                  className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary transition-colors placeholder:text-gray-600"
-                  value={newInstructor}
-                  onChange={(e) => setNewInstructor(e.target.value)}
-                  placeholder="e.g. Dr. Jane Smith"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Difficulty</label>
-                <select
-                  className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary transition-colors cursor-pointer"
-                  value={newDifficulty}
-                  onChange={(e) => setNewDifficulty(e.target.value)}
-                >
-                  <option value="Beginner">Beginner</option>
-                  <option value="Intermediate">Intermediate</option>
-                  <option value="Advanced">Advanced</option>
-                </select>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Rating</label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    min="1"
-                    max="5"
-                    className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary transition-colors"
-                    value={newRating}
-                    onChange={(e) => setNewRating(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Reviews</label>
-                  <input
-                    type="number"
-                    min="0"
-                    className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary transition-colors"
-                    value={newReviewsCount}
-                    onChange={(e) => setNewReviewsCount(e.target.value)}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* New Metadata Form Fields */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Audio Pods</label>
-                <input
-                  type="number"
-                  min="0"
-                  className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary transition-colors"
-                  value={newAudioTracks}
-                  onChange={(e) => setNewAudioTracks(e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">PDF Resources</label>
-                <input
-                  type="number"
-                  min="0"
-                  className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary transition-colors"
-                  value={newResourcesCount}
-                  onChange={(e) => setNewResourcesCount(e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">XP Reward</label>
-                <input
-                  type="number"
-                  min="0"
-                  className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary transition-colors"
-                  value={newXpReward}
-                  onChange={(e) => setNewXpReward(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Language</label>
-                <input
-                  type="text"
-                  className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary transition-colors placeholder:text-gray-600"
-                  value={newLanguage}
-                  onChange={(e) => setNewLanguage(e.target.value)}
-                  placeholder="e.g. English"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Update Frequency</label>
-                <input
-                  type="text"
-                  className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary transition-colors placeholder:text-gray-600"
-                  value={newUpdatedAtText}
-                  onChange={(e) => setNewUpdatedAtText(e.target.value)}
-                  placeholder="e.g. Updated Weekly"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Audio Listening Hours</label>
-                <input
-                  type="text"
-                  className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary transition-colors placeholder:text-gray-600"
-                  value={newAudioDuration}
-                  onChange={(e) => setNewAudioDuration(e.target.value)}
-                  placeholder="e.g. 4.5 hrs"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Description</label>
-              <textarea
-                className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary transition-colors placeholder:text-gray-600 min-h-[80px]"
-                value={newCourseDesc}
-                onChange={(e) => setNewCourseDesc(e.target.value)}
-                placeholder="Brief course description..."
-              />
-            </div>
-
-            <div className="flex justify-end pt-2">
-              <button
-                type="submit"
-                disabled={loading}
-                className="bg-primary text-white text-sm font-semibold px-6 py-2.5 rounded-xl hover:bg-primary-hover disabled:opacity-50 transition-colors cursor-pointer"
-              >
-                {loading ? "Creating..." : "Create Course"}
-              </button>
-            </div>
-          </form>
-        </div>
-
-        {/* Course List */}
+    <div className="flex flex-col flex-1 pb-16 px-4 md:px-0 bg-background">
+      {/* Apple Developer Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-5 border-b border-white/10 mb-8">
         <div>
-          <div className="mb-5 flex items-center justify-between">
-            <h3 className="text-xl font-bold text-neutral-200">
-              Manage Courses
-            </h3>
+          <h1 className="text-2xl font-semibold tracking-tight text-white">
+            Courses
+          </h1>
+          <p className="text-xs text-[#86868b] mt-0.5">
+            Create and manage course syllabi, files, and metadata settings.
+          </p>
+        </div>
+        
+        <button 
+          onClick={handleOpenCreateModal}
+          className="self-start sm:self-center bg-white hover:bg-[#e8e8ed] text-black text-xs font-semibold px-3.5 py-1.5 rounded-lg transition-colors duration-150 flex items-center gap-1.5 cursor-pointer"
+        >
+          <Plus size={14} className="stroke-[2.5]" />
+          New Course
+        </button>
+      </div>
+
+      {/* Analytics Widgets Grid (Apple Style) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="bg-[#1c1c1e]/40 border border-white/5 rounded-2xl p-4 flex flex-col justify-between">
+          <span className="text-[10px] text-[#86868b] font-semibold tracking-wider uppercase mb-2">Total Courses</span>
+          <span className="text-2xl font-semibold text-white tracking-tight">{totalCourses}</span>
+        </div>
+        <div className="bg-[#1c1c1e]/40 border border-white/5 rounded-2xl p-4 flex flex-col justify-between">
+          <span className="text-[10px] text-[#86868b] font-semibold tracking-wider uppercase mb-2">Audio Tracks</span>
+          <span className="text-2xl font-semibold text-white tracking-tight">{totalAudioPods}</span>
+        </div>
+        <div className="bg-[#1c1c1e]/40 border border-white/5 rounded-2xl p-4 flex flex-col justify-between">
+          <span className="text-[10px] text-[#86868b] font-semibold tracking-wider uppercase mb-2">PDF Resources</span>
+          <span className="text-2xl font-semibold text-white tracking-tight">{totalPDFs}</span>
+        </div>
+        <div className="bg-[#1c1c1e]/40 border border-white/5 rounded-2xl p-4 flex flex-col justify-between">
+          <span className="text-[10px] text-[#86868b] font-semibold tracking-wider uppercase mb-2">XP Reward Total</span>
+          <span className="text-2xl font-semibold text-white tracking-tight">{totalXP}</span>
+        </div>
+      </div>
+
+      {/* Courses iOS-Widget Grid */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-sm font-semibold text-[#86868b] uppercase tracking-wider">Curriculum Catalog</h2>
+        </div>
+        
+        {dbLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map((n) => (
+              <div key={n} className="bg-white/[0.01] border border-white/5 rounded-2xl h-44 shimmer-bg"></div>
+            ))}
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {courses.map((course) => (
-              <div key={course.id} className="bg-[#111111] border border-white/10 rounded-2xl p-5 flex flex-col h-full hover:border-primary/50 transition-all duration-300 relative group min-h-[200px] shadow-sm hover:shadow-primary/5">
-                {editingCourseId === course.id ? (
-                  <div className="flex flex-col gap-3 h-full overflow-y-auto">
+              <div 
+                key={course.id} 
+                className="bg-[#1c1c1e]/30 border border-white/5 hover:border-white/10 rounded-2xl p-4 flex flex-col justify-between h-full min-h-[220px] transition-all duration-200 group relative hover:bg-white/[0.02] shadow-xs cursor-pointer hover:-translate-y-0.5"
+                onClick={() => router.push(`/admin/course/${course.id}`)}
+              >
+                {/* Header: Category Badge and Pencil/Trash Actions */}
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-[9px] text-[#86868b] bg-white/5 border border-white/5 px-2 py-0.5 rounded-md font-semibold tracking-wider uppercase">
+                    {course.category || "IT & Tech"}
+                  </span>
+                  
+                  <div className="flex gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity duration-150 relative z-10">
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenEditModal(course);
+                      }} 
+                      className="p-1 rounded-md bg-white/5 hover:bg-white/10 text-[#86868b] hover:text-white border border-white/5 hover:border-white/10 transition-colors cursor-pointer" 
+                      title="Edit"
+                    >
+                      <Pencil size={11} />
+                    </button>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteCourse(course.id);
+                      }} 
+                      className="p-1 rounded-md bg-white/5 hover:bg-red-500/10 text-[#86868b] hover:text-red-400 border border-white/5 hover:border-red-500/10 transition-colors cursor-pointer" 
+                      title="Delete"
+                    >
+                      <Trash2 size={11} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Course Metadata Content */}
+                <div className="flex-1 flex flex-col mt-1">
+                  <h3 className="font-semibold text-sm text-white tracking-tight leading-snug line-clamp-2 mb-1 group-hover:text-primary transition-colors">
+                    {course.title}
+                  </h3>
+                  <p className="text-[11px] text-[#86868b] line-clamp-2 leading-normal flex-1 mb-3">
+                    {course.description || "No description provided."}
+                  </p>
+
+                  {/* iOS-Widget Styled Metrics Box */}
+                  <div className="grid grid-cols-3 gap-2 bg-white/[0.02] border border-white/5 rounded-xl p-2 my-3 text-center">
                     <div>
-                      <label className="block text-[10px] text-gray-400 font-bold mb-1 uppercase tracking-wider">Title</label>
-                      <input
-                        type="text"
-                        className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-1.5 text-white focus:outline-none focus:border-primary text-xs font-semibold"
-                        value={editTitle}
-                        onChange={(e) => setEditTitle(e.target.value)}
-                      />
+                      <span className="text-[9px] text-[#86868b] block mb-0.5 uppercase tracking-wider font-semibold">Pods</span>
+                      <span className="text-xs font-semibold text-white flex items-center justify-center gap-1">
+                        <Headphones size={11} className="text-primary shrink-0" />
+                        {course.audioTracks || 0}
+                      </span>
                     </div>
-                    
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <label className="block text-[10px] text-gray-400 font-bold mb-1 uppercase tracking-wider">Category</label>
-                        <input
-                          type="text"
-                          className="w-full bg-black/50 border border-white/10 rounded-lg px-2 py-1 text-white focus:outline-none focus:border-primary text-xs"
-                          value={editCategory}
-                          onChange={(e) => setEditCategory(e.target.value)}
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[10px] text-gray-400 font-bold mb-1 uppercase tracking-wider">Instructor</label>
-                        <input
-                          type="text"
-                          className="w-full bg-black/50 border border-white/10 rounded-lg px-2 py-1 text-white focus:outline-none focus:border-primary text-xs"
-                          value={editInstructor}
-                          onChange={(e) => setEditInstructor(e.target.value)}
-                        />
-                      </div>
+                    <div className="border-x border-white/5">
+                      <span className="text-[9px] text-[#86868b] block mb-0.5 uppercase tracking-wider font-semibold">PDFs</span>
+                      <span className="text-xs font-semibold text-white flex items-center justify-center gap-1">
+                        <FileText size={11} className="text-primary shrink-0" />
+                        {course.resourcesCount || 0}
+                      </span>
                     </div>
-
-                    <div className="grid grid-cols-3 gap-2">
-                      <div>
-                        <label className="block text-[10px] text-gray-400 font-bold mb-1 uppercase tracking-wider">Difficulty</label>
-                        <select
-                          className="w-full bg-black/50 border border-white/10 rounded-lg px-2 py-1 text-white focus:outline-none focus:border-primary text-xs cursor-pointer"
-                          value={editDifficulty}
-                          onChange={(e) => setEditDifficulty(e.target.value)}
-                        >
-                          <option value="Beginner">Beginner</option>
-                          <option value="Intermediate">Intermediate</option>
-                          <option value="Advanced">Advanced</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-[10px] text-gray-400 font-bold mb-1 uppercase tracking-wider">Rating</label>
-                        <input
-                          type="number"
-                          step="0.1"
-                          min="1"
-                          max="5"
-                          className="w-full bg-black/50 border border-white/10 rounded-lg px-2 py-1 text-white focus:outline-none focus:border-primary text-xs"
-                          value={editRating}
-                          onChange={(e) => setEditRating(e.target.value)}
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[10px] text-gray-400 font-bold mb-1 uppercase tracking-wider">Reviews</label>
-                        <input
-                          type="number"
-                          min="0"
-                          className="w-full bg-black/50 border border-white/10 rounded-lg px-2 py-1 text-white focus:outline-none focus:border-primary text-xs"
-                          value={editReviewsCount}
-                          onChange={(e) => setEditReviewsCount(e.target.value)}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <label className="block text-[10px] text-gray-400 font-bold mb-1 uppercase tracking-wider">Audio Pods</label>
-                        <input
-                          type="number"
-                          className="w-full bg-black/50 border border-white/10 rounded-lg px-2 py-1 text-white focus:outline-none focus:border-primary text-xs"
-                          value={editAudioTracks}
-                          onChange={(e) => setEditAudioTracks(e.target.value)}
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[10px] text-gray-400 font-bold mb-1 uppercase tracking-wider">PDF Resources</label>
-                        <input
-                          type="number"
-                          className="w-full bg-black/50 border border-white/10 rounded-lg px-2 py-1 text-white focus:outline-none focus:border-primary text-xs"
-                          value={editResourcesCount}
-                          onChange={(e) => setEditResourcesCount(e.target.value)}
-                        />
-                      </div>
-                    </div>
-
                     <div>
-                      <label className="block text-[10px] text-gray-400 font-bold mb-1 uppercase tracking-wider">XP Reward</label>
-                      <input
-                        type="number"
-                        className="w-full bg-black/50 border border-white/10 rounded-lg px-2 py-1 text-white focus:outline-none focus:border-primary text-xs"
-                        value={editXpReward}
-                        onChange={(e) => setEditXpReward(e.target.value)}
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-2">
-                      <div>
-                        <label className="block text-[10px] text-gray-400 font-bold mb-1 uppercase tracking-wider">Language</label>
-                        <input
-                          type="text"
-                          className="w-full bg-black/50 border border-white/10 rounded-lg px-2 py-1 text-white focus:outline-none focus:border-primary text-xs"
-                          value={editLanguage}
-                          onChange={(e) => setEditLanguage(e.target.value)}
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[10px] text-gray-400 font-bold mb-1 uppercase tracking-wider">Update Freq</label>
-                        <input
-                          type="text"
-                          className="w-full bg-black/50 border border-white/10 rounded-lg px-2 py-1 text-white focus:outline-none focus:border-primary text-xs"
-                          value={editUpdatedAtText}
-                          onChange={(e) => setEditUpdatedAtText(e.target.value)}
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[10px] text-gray-400 font-bold mb-1 uppercase tracking-wider">Listen Time</label>
-                        <input
-                          type="text"
-                          className="w-full bg-black/50 border border-white/10 rounded-lg px-2 py-1 text-white focus:outline-none focus:border-primary text-xs"
-                          value={editAudioDuration}
-                          onChange={(e) => setEditAudioDuration(e.target.value)}
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-[10px] text-gray-400 font-bold mb-1 uppercase tracking-wider">Description</label>
-                      <textarea
-                        className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-1.5 text-white focus:outline-none focus:border-primary text-xs flex-1 resize-none"
-                        value={editDesc}
-                        onChange={(e) => setEditDesc(e.target.value)}
-                        rows={2}
-                      />
-                    </div>
-
-                    <div className="flex justify-end gap-2 mt-auto pt-2">
-                      <button onClick={cancelEditing} className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 transition-colors">
-                        <X size={16} />
-                      </button>
-                      <button onClick={() => handleUpdateCourse(course.id)} className="p-1.5 rounded-lg bg-primary/20 hover:bg-primary/30 text-primary transition-colors">
-                        <Check size={16} />
-                      </button>
+                      <span className="text-[9px] text-[#86868b] block mb-0.5 uppercase tracking-wider font-semibold">XP</span>
+                      <span className="text-xs font-semibold text-white flex items-center justify-center gap-1">
+                        <Zap size={11} className="text-primary shrink-0" />
+                        {course.xpReward || 0}
+                      </span>
                     </div>
                   </div>
-                ) : (
-                  <>
-                    <div className="absolute top-4 right-4 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-10 bg-[#111111]/80 backdrop-blur-sm p-1 rounded-lg border border-white/5">
-                      <button onClick={() => startEditing(course)} className="p-1.5 rounded-md hover:bg-white/10 text-gray-400 transition-colors" title="Edit">
-                        <Pencil size={14} />
-                      </button>
-                      <button onClick={() => handleDeleteCourse(course.id)} className="p-1.5 rounded-md hover:bg-red-500/20 text-red-400 transition-colors" title="Delete">
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                    
-                    <Link href={`/admin/course/${course.id}`} className="flex-1 flex flex-col pt-1">
-                      <h3 className="font-bold text-lg text-white pr-14 line-clamp-1 group-hover:text-primary transition-colors">{course.title}</h3>
-                      <p className="text-sm text-gray-400 mt-2 line-clamp-2 leading-relaxed">{course.description}</p>
-                      
-                      {/* Enriched Display on Admin Card */}
-                      <div className="mt-4 pt-3 border-t border-white/5 grid grid-cols-2 gap-2 text-[11px] text-gray-400">
-                        <div><span className="text-gray-600">Cat:</span> {course.category || "IT & Tech"}</div>
-                        <div><span className="text-gray-600">Inst:</span> {course.instructor || "HivePod Team"}</div>
-                        <div><span className="text-gray-600">Diff:</span> {course.difficulty || "Beginner"}</div>
-                        <div><span className="text-gray-600">Rating:</span> {course.rating || "4.8"} ({course.reviewsCount || "12"})</div>
-                        <div><span className="text-gray-600">Pods:</span> {course.audioTracks || 0}</div>
-                        <div><span className="text-gray-600">PDFs:</span> {course.resourcesCount || 0}</div>
-                        <div><span className="text-gray-600">XP:</span> {course.xpReward || 100}</div>
-                        <div><span className="text-gray-600">Lang:</span> {course.language || "English"}</div>
-                        <div><span className="text-gray-600">Update:</span> {course.updatedAtText || "Updated Today"}</div>
-                        <div><span className="text-gray-600">Listen Time:</span> {course.audioDuration || "2 hrs"}</div>
-                      </div>
 
-                      <div className="mt-auto pt-5 flex items-center justify-between">
-                        <span className="text-primary text-xs font-bold uppercase tracking-wider flex items-center gap-1">
-                          Manage Content <span className="text-lg leading-none">&rarr;</span>
-                        </span>
-                      </div>
-                    </Link>
-                  </>
-                )}
+                  {/* Apple Spec Sheet Key-Value Grid */}
+                  <div className="space-y-1 text-[10px] text-white/50 border-t border-white/5 pt-3 mb-1">
+                    <div className="flex items-center justify-between gap-4">
+                      <span className="text-[#86868b]">Instructor</span>
+                      <span className="text-white font-medium truncate max-w-[110px]">{course.instructor || "Faculty Team"}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[#86868b]">Difficulty</span>
+                      <span className="text-white font-medium">{course.difficulty || "Beginner"}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[#86868b]">Listening Time</span>
+                      <span className="text-white font-medium">{course.audioDuration || "2 hrs"}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer link overlay indicator */}
+                <div className="mt-3.5 pt-2.5 border-t border-white/5 flex items-center justify-between text-[11px] text-primary font-semibold hover:text-primary/85 transition-colors">
+                  <span>Manage Track</span>
+                  <ChevronRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
+                </div>
               </div>
             ))}
+            
             {courses.length === 0 && (
-              <div className="col-span-full py-12 text-center border border-dashed border-white/10 rounded-2xl bg-white/5">
-                <p className="text-gray-400 text-sm">No courses available. Create your first course above!</p>
+              <div className="col-span-full py-12 text-center border border-dashed border-white/10 rounded-2xl bg-[#1c1c1e]/10">
+                <BookOpen size={24} className="mx-auto text-[#86868b]/30 mb-2" />
+                <p className="text-xs text-[#86868b] font-medium">No courses listed yet</p>
+                <button 
+                  onClick={handleOpenCreateModal}
+                  className="mt-3 text-xs bg-white text-black font-semibold px-3 py-1.5 rounded-lg hover:bg-[#e8e8ed] transition-colors"
+                >
+                  Add Your First Course
+                </button>
               </div>
             )}
           </div>
+        )}
+      </div>
+
+      {/* Apple Settings Sheet-Style Modal Dialog */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-[#1c1c1e] border border-white/10 rounded-2xl w-full max-w-lg shadow-2xl flex flex-col overflow-hidden max-h-[90vh]">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-[#1c1c1e]">
+              <div>
+                <h3 className="text-base font-bold text-white">
+                  {modalMode === "create" ? "Add Course" : "Edit Course Details"}
+                </h3>
+              </div>
+              <button 
+                onClick={() => setIsModalOpen(false)}
+                className="p-1 rounded-md hover:bg-white/5 text-[#86868b] hover:text-white transition-colors cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Modal Form */}
+            <form onSubmit={modalMode === "create" ? handleCreateCourse : handleUpdateCourse} className="flex-1 overflow-y-auto p-6 space-y-4">
+              
+              {/* Field 1: Title */}
+              <div>
+                <label className="block text-[10px] font-semibold text-[#86868b] mb-1 uppercase tracking-wider">Title</label>
+                <input
+                  type="text"
+                  className="w-full bg-[#2c2c2e]/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary transition-colors placeholder:text-white/20"
+                  value={courseTitle}
+                  onChange={(e) => setCourseTitle(e.target.value)}
+                  placeholder="e.g. Advanced Network Security"
+                  required
+                />
+              </div>
+
+              {/* Field 2: Description */}
+              <div>
+                <label className="block text-[10px] font-semibold text-[#86868b] mb-1 uppercase tracking-wider">Description</label>
+                <textarea
+                  className="w-full bg-[#2c2c2e]/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary transition-colors placeholder:text-white/20 min-h-[70px] resize-y"
+                  value={courseDesc}
+                  onChange={(e) => setCourseDesc(e.target.value)}
+                  placeholder="Brief course objectives and details..."
+                />
+              </div>
+
+              {/* Field 3: Category & Instructor */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-semibold text-[#86868b] mb-1 uppercase tracking-wider">Category</label>
+                  <input
+                    type="text"
+                    className="w-full bg-[#2c2c2e]/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary transition-colors"
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    placeholder="e.g. IT & Tech"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-semibold text-[#86868b] mb-1 uppercase tracking-wider">Instructor</label>
+                  <input
+                    type="text"
+                    className="w-full bg-[#2c2c2e]/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary transition-colors"
+                    value={instructor}
+                    onChange={(e) => setInstructor(e.target.value)}
+                    placeholder="e.g. Faculty Team"
+                  />
+                </div>
+              </div>
+
+              {/* Field 4: Difficulty & Language */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-semibold text-[#86868b] mb-1 uppercase tracking-wider">Difficulty</label>
+                  <select
+                    className="w-full bg-[#2c2c2e] border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary cursor-pointer"
+                    value={difficulty}
+                    onChange={(e) => setDifficulty(e.target.value)}
+                  >
+                    <option value="Beginner" className="bg-[#1c1c1e] text-white">Beginner</option>
+                    <option value="Intermediate" className="bg-[#1c1c1e] text-white">Intermediate</option>
+                    <option value="Advanced" className="bg-[#1c1c1e] text-white">Advanced</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-semibold text-[#86868b] mb-1 uppercase tracking-wider">Language</label>
+                  <input
+                    type="text"
+                    className="w-full bg-[#2c2c2e]/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary"
+                    value={language}
+                    onChange={(e) => setLanguage(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              {/* Field 5: Audio Pods & PDF count */}
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-[10px] font-semibold text-[#86868b] mb-1 uppercase tracking-wider">Audio Tracks</label>
+                  <input
+                    type="number"
+                    min="0"
+                    className="w-full bg-[#2c2c2e]/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary"
+                    value={audioTracks}
+                    onChange={(e) => setAudioTracks(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-semibold text-[#86868b] mb-1 uppercase tracking-wider">PDF Resources</label>
+                  <input
+                    type="number"
+                    min="0"
+                    className="w-full bg-[#2c2c2e]/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary"
+                    value={resourcesCount}
+                    onChange={(e) => setResourcesCount(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-semibold text-[#86868b] mb-1 uppercase tracking-wider">XP Reward</label>
+                  <input
+                    type="number"
+                    min="0"
+                    className="w-full bg-[#2c2c2e]/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary"
+                    value={xpReward}
+                    onChange={(e) => setXpReward(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              {/* Field 6: Duration & Update Freq */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-semibold text-[#86868b] mb-1 uppercase tracking-wider">Listen Time</label>
+                  <input
+                    type="text"
+                    className="w-full bg-[#2c2c2e]/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary"
+                    value={audioDuration}
+                    onChange={(e) => setAudioDuration(e.target.value)}
+                    placeholder="e.g. 2 hrs"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-semibold text-[#86868b] mb-1 uppercase tracking-wider">Update Freq</label>
+                  <input
+                    type="text"
+                    className="w-full bg-[#2c2c2e]/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary"
+                    value={updatedAtText}
+                    onChange={(e) => setUpdatedAtText(e.target.value)}
+                    placeholder="e.g. Updated Today"
+                  />
+                </div>
+              </div>
+
+              {/* Footer Actions */}
+              <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="bg-transparent hover:bg-white/5 border border-white/10 text-[#f5f5f7] text-xs font-semibold px-4 py-2 rounded-md transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="bg-white hover:bg-[#e8e8ed] text-black text-xs font-semibold px-4 py-2 rounded-md transition-colors cursor-pointer"
+                >
+                  {loading ? "Saving..." : (modalMode === "create" ? "Create Course" : "Save Changes")}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-      </main>
+      )}
     </div>
   );
 }

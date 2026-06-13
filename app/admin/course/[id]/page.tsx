@@ -4,7 +4,7 @@ import { useState, useEffect, use } from "react";
 import { collection, getDocs, addDoc, serverTimestamp, query, where, doc, getDoc, deleteDoc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import Link from "next/link";
-import { ArrowLeft, Pencil, Trash2, X, Check } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2, X, Plus, ChevronRight, Folder } from "lucide-react";
 
 export default function AdminCoursePage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -12,15 +12,18 @@ export default function AdminCoursePage({ params }: { params: Promise<{ id: stri
   
   const [course, setCourse] = useState<any>(null);
   const [folders, setFolders] = useState<any[]>([]);
-  const [newFolderTitle, setNewFolderTitle] = useState("");
   const [loading, setLoading] = useState(false);
+  const [dbLoading, setDbLoading] = useState(true);
 
-  // Edit State
+  // Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<"create" | "edit">("create");
   const [editingFolderId, setEditingFolderId] = useState<string | null>(null);
-  const [editTitle, setEditTitle] = useState("");
+  const [folderTitle, setFolderTitle] = useState("");
 
-  useEffect(() => {
-    const fetchCourseAndFolders = async () => {
+  const fetchCourseAndFolders = async () => {
+    setDbLoading(true);
+    try {
       // Fetch Course
       const courseSnap = await getDoc(doc(db, "courses", courseId));
       if (courseSnap.exists()) {
@@ -32,28 +35,49 @@ export default function AdminCoursePage({ params }: { params: Promise<{ id: stri
       const folderSnap = await getDocs(q);
       const foldersData = folderSnap.docs.map(d => ({ id: d.id, ...d.data() }));
       setFolders(foldersData);
-    };
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setDbLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchCourseAndFolders();
   }, [courseId]);
 
+  const resetForm = () => {
+    setFolderTitle("");
+    setEditingFolderId(null);
+  };
+
+  const handleOpenCreateModal = () => {
+    resetForm();
+    setModalMode("create");
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEditModal = (folder: any) => {
+    setEditingFolderId(folder.id);
+    setFolderTitle(folder.title || "");
+    setModalMode("edit");
+    setIsModalOpen(true);
+  };
+
   const handleCreateFolder = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newFolderTitle.trim()) return;
+    if (!folderTitle.trim()) return;
 
     setLoading(true);
     try {
       await addDoc(collection(db, "folders"), {
         courseId,
-        title: newFolderTitle,
+        title: folderTitle.trim(),
         createdAt: serverTimestamp(),
       });
-      setNewFolderTitle("");
-      
-      // Refetch
-      const q = query(collection(db, "folders"), where("courseId", "==", courseId));
-      const folderSnap = await getDocs(q);
-      const foldersData = folderSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-      setFolders(foldersData);
+      setIsModalOpen(false);
+      resetForm();
+      fetchCourseAndFolders();
     } catch (error) {
       console.error("Error adding folder:", error);
       alert("Failed to create folder");
@@ -62,11 +86,24 @@ export default function AdminCoursePage({ params }: { params: Promise<{ id: stri
     }
   };
 
-  const fetchFolders = async () => {
-    const q = query(collection(db, "folders"), where("courseId", "==", courseId));
-    const folderSnap = await getDocs(q);
-    const foldersData = folderSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-    setFolders(foldersData);
+  const handleUpdateFolder = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingFolderId || !folderTitle.trim()) return;
+
+    setLoading(true);
+    try {
+      await updateDoc(doc(db, "folders", editingFolderId), {
+        title: folderTitle.trim()
+      });
+      setIsModalOpen(false);
+      resetForm();
+      fetchCourseAndFolders();
+    } catch (error) {
+      console.error("Error updating folder:", error);
+      alert("Failed to update folder");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDeleteFolder = async (folderIdToDel: string) => {
@@ -74,150 +111,172 @@ export default function AdminCoursePage({ params }: { params: Promise<{ id: stri
     
     try {
       await deleteDoc(doc(db, "folders", folderIdToDel));
-      fetchFolders();
+      fetchCourseAndFolders();
     } catch (error) {
       console.error("Error deleting folder:", error);
       alert("Failed to delete folder");
     }
   };
 
-  const startEditing = (folder: any) => {
-    setEditingFolderId(folder.id);
-    setEditTitle(folder.title);
-  };
-
-  const cancelEditing = () => {
-    setEditingFolderId(null);
-    setEditTitle("");
-  };
-
-  const handleUpdateFolder = async (folderIdToUpdate: string) => {
-    if (!editTitle.trim()) return;
-    
-    try {
-      await updateDoc(doc(db, "folders", folderIdToUpdate), {
-        title: editTitle
-      });
-      setEditingFolderId(null);
-      fetchFolders();
-    } catch (error) {
-      console.error("Error updating folder:", error);
-      alert("Failed to update folder");
-    }
-  };
-
-  if (!course) return <div className="p-8">Loading...</div>;
+  if (!course) return <div className="p-8 text-center text-xs text-[#86868b]">Loading course curriculum...</div>;
 
   return (
-    <div className="flex flex-col flex-1 bg-background">
-      <main className="flex-1 px-4 sm:px-6 md:px-12 lg:px-20 pt-3 pb-8 lg:pt-6 lg:pb-12 max-w-7xl mx-auto w-full">
-        {/* Navigation & Header */}
-        <Link href="/admin" className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-6 text-sm font-medium">
-          <ArrowLeft size={16} /> Back to Dashboard
-        </Link>
+    <div className="flex flex-col flex-1 pb-16 px-4 md:px-0">
+      {/* Apple Style Navigation Back link */}
+      <Link href="/admin" className="inline-flex items-center gap-1.5 text-xs text-[#86868b] hover:text-white transition-colors duration-150 mb-5 font-semibold">
+        <ArrowLeft size={12} /> Courses
+      </Link>
+
+      {/* Apple Developer Course Banner Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-5 border-b border-white/10 mb-8">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-2xl font-semibold tracking-tight text-white truncate">
+            {course.title}
+          </h1>
+          <p className="text-xs text-[#86868b] mt-0.5 truncate max-w-2xl">
+            {course.description || "Manage course structures and syllabus files."}
+          </p>
+        </div>
         
-        <div className="relative mb-8 rounded-2xl bg-[#111111] border border-white/10 overflow-hidden shadow-lg">
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-blue-500/10 opacity-50"></div>
-          
-          <div className="relative px-6 py-5 md:px-8 md:py-6 flex flex-col gap-2">
-            <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white">{course.title}</h1>
-            <p className="text-sm md:text-base text-gray-400 max-w-3xl leading-relaxed">{course.description}</p>
-          </div>
-        </div>
+        <button 
+          onClick={handleOpenCreateModal}
+          className="self-start sm:self-center bg-white hover:bg-[#e8e8ed] text-black text-xs font-semibold px-3.5 py-1.5 rounded-lg transition-colors duration-150 flex items-center gap-1.5 cursor-pointer shrink-0"
+        >
+          <Plus size={14} className="stroke-[2.5]" />
+          New Folder
+        </button>
+      </div>
 
-        {/* Create Folder Section */}
-        <div className="mb-8 bg-[#111111] p-5 md:p-6 rounded-2xl border border-white/10 shadow-md">
-          <h2 className="text-lg font-bold tracking-tight mb-4 text-white flex items-center gap-2">
-            <span className="w-1.5 h-5 bg-primary rounded-full inline-block"></span>
-            Create New Folder
-          </h2>
-          <form onSubmit={handleCreateFolder} className="flex flex-col sm:flex-row gap-4 items-end">
-            <div className="flex-1 w-full">
-              <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Folder Name</label>
-              <input
-                type="text"
-                className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary transition-colors placeholder:text-gray-600"
-                value={newFolderTitle}
-                onChange={(e) => setNewFolderTitle(e.target.value)}
-                placeholder="e.g. Chapter 1: Introduction"
-                required
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full sm:w-auto bg-primary text-white text-sm font-semibold px-6 py-2.5 rounded-xl hover:bg-primary-hover disabled:opacity-50 transition-colors whitespace-nowrap h-[42px] flex items-center justify-center"
-            >
-              {loading ? "Creating..." : "Create Folder"}
-            </button>
-          </form>
+      {/* Folders iOS-Widget Grid */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-sm font-semibold text-[#86868b] uppercase tracking-wider">Folders</h2>
         </div>
-
-        {/* Folders List */}
-        <div>
-          <div className="mb-5 flex items-center justify-between">
-            <h3 className="text-xl font-bold text-neutral-200">
-              Course Folders
-            </h3>
+        
+        {dbLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {[1, 2, 3].map((n) => (
+              <div key={n} className="bg-white/[0.01] border border-white/5 rounded-2xl h-32 shimmer-bg"></div>
+            ))}
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-5">
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {folders.map((folder) => (
-              <div key={folder.id} className="bg-[#111111] border border-white/10 rounded-2xl p-5 flex flex-col h-full hover:border-primary/50 transition-all duration-300 relative group min-h-[120px] shadow-sm hover:shadow-primary/5">
-                {editingFolderId === folder.id ? (
-                  <div className="flex flex-col gap-3 h-full">
-                    <input
-                      type="text"
-                      className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-primary text-sm font-semibold"
-                      value={editTitle}
-                      onChange={(e) => setEditTitle(e.target.value)}
-                    />
-                    <div className="flex justify-end gap-2 mt-auto pt-2">
-                      <button onClick={cancelEditing} className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 transition-colors">
-                        <X size={16} />
-                      </button>
-                      <button onClick={() => handleUpdateFolder(folder.id)} className="p-1.5 rounded-lg bg-primary/20 hover:bg-primary/30 text-primary transition-colors">
-                        <Check size={16} />
-                      </button>
-                    </div>
+              <div 
+                key={folder.id} 
+                className="bg-[#1c1c1e]/30 border border-white/5 hover:border-white/10 rounded-2xl p-4 flex flex-col justify-between h-full min-h-[140px] transition-all duration-200 group relative hover:bg-white/[0.02] shadow-xs"
+              >
+                {/* Header: Folder Icon and Pencil/Trash Actions */}
+                <div className="flex justify-between items-center mb-1">
+                  <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center text-[#86868b]">
+                    <Folder size={16} />
                   </div>
-                ) : (
-                  <>
-                    <div className="absolute top-4 right-4 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-10 bg-[#111111]/80 backdrop-blur-sm p-1 rounded-lg border border-white/5">
-                      <button onClick={() => startEditing(folder)} className="p-1.5 rounded-md hover:bg-white/10 text-gray-400 transition-colors" title="Edit">
-                        <Pencil size={14} />
-                      </button>
-                      <button onClick={() => handleDeleteFolder(folder.id)} className="p-1.5 rounded-md hover:bg-red-500/20 text-red-400 transition-colors" title="Delete">
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                    
-                    <Link href={`/admin/folder/${folder.id}`} className="flex-1 flex flex-col justify-center pt-2">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0 text-gray-400 group-hover:text-primary transition-colors">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-1.2-1.8A2 2 0 0 0 7.55 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>
-                        </div>
-                        <h3 className="font-bold text-base text-white pr-10 line-clamp-2 group-hover:text-primary transition-colors">{folder.title}</h3>
-                      </div>
-                      
-                      <div className="mt-auto pt-3 flex items-center">
-                        <span className="text-gray-500 group-hover:text-gray-300 text-xs font-semibold tracking-wide flex items-center gap-1 transition-colors">
-                          Manage materials <span className="text-sm leading-none">&rarr;</span>
-                        </span>
-                      </div>
-                    </Link>
-                  </>
-                )}
+                  
+                  <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+                    <button 
+                      onClick={() => handleOpenEditModal(folder)} 
+                      className="p-1 text-[#86868b] hover:text-white transition-colors cursor-pointer" 
+                      title="Edit"
+                    >
+                      <Pencil size={11} />
+                    </button>
+                    <button 
+                      onClick={() => handleDeleteFolder(folder.id)} 
+                      className="p-1 text-[#86868b] hover:text-red-400 transition-colors cursor-pointer" 
+                      title="Delete"
+                    >
+                      <Trash2 size={11} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Content Link */}
+                <Link href={`/admin/folder/${folder.id}`} className="flex-1 flex flex-col cursor-pointer mt-3">
+                  <h3 className="font-semibold text-sm text-white tracking-tight leading-snug line-clamp-2 group-hover:text-primary transition-colors">
+                    {folder.title}
+                  </h3>
+                </Link>
+
+                {/* Footer Link */}
+                <Link 
+                  href={`/admin/folder/${folder.id}`} 
+                  className="mt-4 pt-2 border-t border-white/5 flex items-center justify-between text-[11px] text-primary font-semibold hover:text-primary/85 transition-colors"
+                >
+                  <span>Manage Materials</span>
+                  <ChevronRight size={12} />
+                </Link>
               </div>
             ))}
+            
             {folders.length === 0 && (
-              <div className="col-span-full py-12 text-center border border-dashed border-white/10 rounded-2xl bg-white/5">
-                <p className="text-gray-400 text-sm">No folders found in this course. Create one above!</p>
+              <div className="col-span-full py-12 text-center border border-dashed border-white/10 rounded-2xl bg-[#1c1c1e]/10">
+                <Folder size={24} className="mx-auto text-[#86868b]/30 mb-2" />
+                <p className="text-xs text-[#86868b] font-medium">No folders in this course yet</p>
+                <button 
+                  onClick={handleOpenCreateModal}
+                  className="mt-3 text-xs bg-white text-black font-semibold px-3 py-1.5 rounded-lg hover:bg-[#e8e8ed] transition-colors"
+                >
+                  Create Your First Folder
+                </button>
               </div>
             )}
           </div>
+        )}
+      </div>
+
+      {/* Apple Settings Sheet-Style Modal Dialog */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-[#1c1c1e] border border-white/10 rounded-2xl w-full max-w-md shadow-2xl flex flex-col overflow-hidden">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-[#1c1c1e]">
+              <h3 className="text-base font-bold text-white">
+                {modalMode === "create" ? "New Folder" : "Rename Folder"}
+              </h3>
+              <button 
+                onClick={() => setIsModalOpen(false)}
+                className="p-1 rounded-md hover:bg-white/5 text-[#86868b] hover:text-white transition-colors cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Modal Form */}
+            <form onSubmit={modalMode === "create" ? handleCreateFolder : handleUpdateFolder} className="p-6 space-y-4">
+              <div>
+                <label className="block text-[10px] font-semibold text-[#86868b] mb-1 uppercase tracking-wider">Folder Title</label>
+                <input
+                  type="text"
+                  className="w-full bg-[#2c2c2e]/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary transition-colors placeholder:text-white/20"
+                  value={folderTitle}
+                  onChange={(e) => setFolderTitle(e.target.value)}
+                  placeholder="e.g. Chapter 1: Introduction to Network Ports"
+                  required
+                />
+              </div>
+
+              {/* Footer Actions */}
+              <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="bg-transparent hover:bg-white/5 border border-white/10 text-[#f5f5f7] text-xs font-semibold px-4 py-2 rounded-md transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="bg-white hover:bg-[#e8e8ed] text-black text-xs font-semibold px-4 py-2 rounded-md transition-colors cursor-pointer"
+                >
+                  {loading ? "Saving..." : (modalMode === "create" ? "Create Folder" : "Save Changes")}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-      </main>
+      )}
     </div>
   );
 }
