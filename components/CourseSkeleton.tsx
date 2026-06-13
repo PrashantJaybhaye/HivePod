@@ -1,52 +1,73 @@
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
+
 export default function CourseSkeleton() {
   return (
-    <div className="relative flex flex-col h-full rounded-2xl border border-white/6 bg-neutral-900/40 p-5 overflow-hidden min-h-[360px]">
+    <Card className="relative overflow-hidden rounded-2xl border border-white/8 bg-white/1.5 bg-linear-to-b from-white/4 to-transparent backdrop-blur-[32px] flex flex-col h-full shadow-[0_8px_32px_0_rgba(0,0,0,0.5)]">
+      {/* Liquid glass light reflection sheen */}
+      <div className="absolute inset-0 bg-linear-to-tr from-transparent via-white/1 to-white/4 pointer-events-none" />
+
+      {/* Top border catch-light effect */}
+      <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-white/12 to-transparent pointer-events-none" />
+
       {/* Card Header Shimmer */}
-      <div className="flex flex-row justify-between items-center pb-3.5 relative z-10">
+      <CardHeader className="flex flex-row justify-between items-center space-y-0 pb-3 relative z-10">
         <div className="h-5 w-24 rounded-full shimmer-bg"></div>
         <div className="h-5 w-16 rounded-full shimmer-bg"></div>
-      </div>
+      </CardHeader>
 
       {/* Card Content Shimmer */}
-      <div className="flex-1 flex flex-col pt-1 pb-0 relative z-10">
+      <CardContent className="flex-1 flex flex-col pt-1 pb-0 relative z-10">
         {/* Title */}
-        <div className="h-6 w-4/5 rounded-md shimmer-bg mb-3"></div>
+        <div className="h-5 w-4/5 rounded-md shimmer-bg mb-2"></div>
 
         {/* Description */}
-        <div className="space-y-2 mb-4 flex-1 mt-1">
-          <div className="h-3.5 w-full rounded-md shimmer-bg"></div>
-          <div className="h-3.5 w-5/6 rounded-md shimmer-bg"></div>
+        <div className="space-y-1.5 mb-3">
+          <div className="h-3 w-full rounded shimmer-bg"></div>
+          <div className="h-3 w-5/6 rounded shimmer-bg"></div>
         </div>
 
-        {/* Badges Shimmer */}
-        <div className="flex gap-2 mb-4.5">
-          <div className="h-6 w-16 rounded-full shimmer-bg"></div>
-          <div className="h-6 w-14 rounded-full shimmer-bg"></div>
+        {/* Instructor & Active Students Row Shimmer */}
+        <div className="flex items-center justify-between gap-2 mb-4">
+          <div className="h-3 w-28 rounded shimmer-bg"></div>
         </div>
 
-        {/* Spec Sheet Row Shimmer */}
-        <div className="flex items-center gap-2.5 mb-4 pt-3.5 border-t border-white/5 mt-auto">
-          <div className="h-3 w-14 rounded shimmer-bg"></div>
-          <div className="w-1 h-1 rounded-full bg-white/10"></div>
-          <div className="h-3 w-10 rounded shimmer-bg"></div>
-          <div className="w-1 h-1 rounded-full bg-white/10"></div>
-          <div className="h-3 w-16 rounded shimmer-bg"></div>
+        {/* iOS-Style Badges Shimmer */}
+        <div className="flex gap-1.5 mb-4 mt-1">
+          <div className="h-5 w-16 rounded-full shimmer-bg"></div>
+          <div className="h-5 w-14 rounded-full shimmer-bg"></div>
+        </div>
+
+        {/* iOS-Style Product Sheet Spec Row Shimmer */}
+        <div className="flex flex-col gap-1.5 mb-4 mt-auto pt-3.5 border-t border-white/6">
+          <div className="flex items-center gap-2.5">
+            <div className="h-3 w-14 rounded shimmer-bg"></div>
+            <div className="w-px h-2.5 bg-white/15 shrink-0"></div>
+            <div className="h-3 w-10 rounded shimmer-bg"></div>
+            <div className="w-px h-2.5 bg-white/15 shrink-0"></div>
+            <div className="h-3 w-16 rounded shimmer-bg"></div>
+          </div>
+          <div className="h-2.5 w-20 rounded shimmer-bg"></div>
         </div>
 
         {/* Progress Shimmer */}
-        <div className="mb-5.5">
+        <div className="mb-4">
           <div className="flex justify-between items-center mb-1.5">
             <div className="h-3 w-12 rounded shimmer-bg"></div>
-            <div className="h-3 w-8 rounded shimmer-bg"></div>
+            <div className="h-3 w-16 rounded shimmer-bg"></div>
           </div>
-          <div className="h-1.5 w-full bg-white/5 rounded-full shimmer-bg"></div>
+          <div className="h-1.5 w-full bg-white/6 rounded-full shimmer-bg"></div>
         </div>
-      </div>
+      </CardContent>
 
       {/* Action Button Shimmer */}
-      <div className="pt-2 pb-5 border-0 bg-transparent mt-auto relative z-10">
-        <div className="w-full h-10 rounded-xl shimmer-bg"></div>
-      </div>
-    </div>
+      <CardFooter className="pt-2 pb-5 px-6 border-0 bg-transparent mt-auto relative z-10">
+        <div className="w-full h-[38px] rounded-xl shimmer-bg"></div>
+      </CardFooter>
+    </Card>
   );
 }
