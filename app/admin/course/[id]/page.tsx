@@ -154,56 +154,50 @@ export default function AdminCoursePage({ params }: { params: Promise<{ id: stri
         </div>
         
         {dbLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 pt-2">
             {[1, 2, 3].map((n) => (
               <div key={n} className="bg-white/[0.01] border border-white/5 rounded-2xl h-32 shimmer-bg"></div>
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 pt-2">
             {folders.map((folder) => (
               <div 
                 key={folder.id} 
-                className="bg-[#1c1c1e]/30 border border-white/5 hover:border-white/10 rounded-2xl p-4 flex flex-col justify-between h-full min-h-[140px] transition-all duration-200 group relative hover:bg-white/[0.02] shadow-xs"
+                className="relative group flex flex-col items-center p-4 rounded-[20px] select-none text-center w-full"
               >
-                {/* Header: Folder Icon and Pencil/Trash Actions */}
-                <div className="flex justify-between items-center mb-1">
-                  <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center text-[#86868b]">
-                    <Folder size={16} />
-                  </div>
-                  
-                  <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
-                    <button 
-                      onClick={() => handleOpenEditModal(folder)} 
-                      className="p-1 text-[#86868b] hover:text-white transition-colors cursor-pointer" 
-                      title="Edit"
-                    >
-                      <Pencil size={11} />
-                    </button>
-                    <button 
-                      onClick={() => handleDeleteFolder(folder.id)} 
-                      className="p-1 text-[#86868b] hover:text-red-400 transition-colors cursor-pointer" 
-                      title="Delete"
-                    >
-                      <Trash2 size={11} />
-                    </button>
-                  </div>
+                {/* Action buttons on hover (absolute top-right) */}
+                <div className="absolute top-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-10">
+                  <button 
+                    onClick={() => handleOpenEditModal(folder)} 
+                    className="p-1.5 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 text-white/70 hover:text-white transition-all cursor-pointer" 
+                    title="Edit"
+                  >
+                    <Pencil size={11} />
+                  </button>
+                  <button 
+                    onClick={() => handleDeleteFolder(folder.id)} 
+                    className="p-1.5 rounded-lg bg-white/5 border border-white/5 hover:bg-red-500/10 text-white/70 hover:text-red-400 transition-all cursor-pointer" 
+                    title="Delete"
+                  >
+                    <Trash2 size={11} />
+                  </button>
                 </div>
 
-                {/* Content Link */}
-                <Link href={`/admin/folder/${folder.id}`} className="flex-1 flex flex-col cursor-pointer mt-3">
-                  <h3 className="font-semibold text-sm text-white tracking-tight leading-snug line-clamp-2 group-hover:text-primary transition-colors">
-                    {folder.title}
-                  </h3>
-                </Link>
+                <Link href={`/admin/folder/${folder.id}`} className="flex flex-col items-center w-full">
+                  {/* Clean Flat iOS/macOS Folder Icon using folderr.png */}
+                  <div className="relative w-20 h-20 mb-2 shrink-0">
+                    <img 
+                      src="/folderr.png" 
+                      alt="Folder Icon" 
+                      className="w-full h-full object-contain" 
+                    />
+                  </div>
 
-                {/* Footer Link */}
-                <Link 
-                  href={`/admin/folder/${folder.id}`} 
-                  className="mt-4 pt-2 border-t border-white/5 flex items-center justify-between text-[11px] text-primary font-semibold hover:text-primary/85 transition-colors"
-                >
-                  <span>Manage Materials</span>
-                  <ChevronRight size={12} />
+                  {/* Folder Title */}
+                  <span className="text-[11px] font-medium text-white/90 tracking-normal leading-snug line-clamp-2 px-1.5 w-full drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">
+                    {folder.title}
+                  </span>
                 </Link>
               </div>
             ))}

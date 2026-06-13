@@ -118,81 +118,81 @@ export default function PublicCoursePage({ params }: { params: Promise<{ id: str
   const derivedReviewsCount = course.reviewsCount || 45;
 
   return (
-    <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto w-full space-y-8">
+    <div className="p-4 sm:p-5 md:p-6 max-w-7xl mx-auto w-full space-y-5">
       {/* iOS-style Back Chevron Button */}
-      <Link href="/my-courses" className="inline-flex items-center gap-1.5 text-xs font-semibold text-white/60 hover:text-white transition-colors bg-white/4 border border-white/8 px-3.5 py-2 rounded-full cursor-pointer w-fit">
-        <ChevronLeft size={14} /> Back to Courses
+      <Link href="/my-courses" className="inline-flex items-center gap-1.5 text-xs font-semibold text-white/60 hover:text-white transition-colors bg-white/4 border border-white/8 px-3 py-1.5 rounded-full cursor-pointer w-fit">
+        <ChevronLeft size={13} /> Back to Courses
       </Link>
 
       {/* Glassmorphic Hero Banner */}
-      <div className="relative overflow-hidden rounded-2xl border border-white/8 bg-white/1.5 bg-linear-to-b from-white/4 to-transparent backdrop-blur-[32px] p-6 md:p-8 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)]">
+      <div className="relative overflow-hidden rounded-2xl border border-white/6 bg-white/1.5 bg-linear-to-b from-white/4 to-transparent backdrop-blur-[32px] p-5 md:p-6 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)]">
         {/* Liquid sheen light reflection */}
         <div className="absolute inset-0 bg-linear-to-tr from-transparent via-white/1 to-white/4 pointer-events-none" />
         <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-white/12 to-transparent pointer-events-none" />
 
-        <div className="relative z-10 space-y-4">
+        <div className="relative z-10 space-y-3">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide bg-[#ff453a]/10 border border-[#ff453a]/20 text-[#ff453a] uppercase">
+            <span className="rounded-full px-2 py-0.5 text-[9px] font-bold tracking-wide bg-[#ff453a]/10 border border-[#ff453a]/20 text-[#ff453a] uppercase">
               Course
             </span>
-            <span className="text-[10px] text-white/50 bg-white/4 border border-white/8 px-2.5 py-0.5 rounded-full font-medium">
+            <span className="text-[9px] text-white/50 bg-white/4 border border-white/8 px-2 py-0.5 rounded-full font-semibold">
               {derivedCategory}
             </span>
-            <span className="text-[10px] text-white/50 bg-white/4 border border-white/8 px-2.5 py-0.5 rounded-full font-medium flex items-center gap-1">
-              <BarChart2 size={10} /> {derivedDifficulty}
+            <span className="text-[9px] text-white/50 bg-white/4 border border-white/8 px-2 py-0.5 rounded-full font-semibold flex items-center gap-1">
+              <BarChart2 size={9} /> {derivedDifficulty}
             </span>
             {course.audioTracks > 0 && (
-              <span className="text-[10px] bg-[#5e5ce6]/10 text-[#7d7aff] border border-[#5e5ce6]/20 px-2.5 py-0.5 rounded-full font-semibold flex items-center gap-1">
-                <Headphones size={10} /> {course.audioTracks} Pods
+              <span className="text-[9px] bg-[#5e5ce6]/10 text-[#7d7aff] border border-[#5e5ce6]/20 px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
+                <Headphones size={9} /> {course.audioTracks} Pods
               </span>
             )}
             {course.resourcesCount > 0 && (
-              <span className="text-[10px] bg-[#64d2ff]/10 text-[#64d2ff] border border-[#64d2ff]/20 px-2.5 py-0.5 rounded-full font-semibold flex items-center gap-1">
-                <FileText size={10} /> {course.resourcesCount} PDFs
+              <span className="text-[9px] bg-[#64d2ff]/10 text-[#64d2ff] border border-[#64d2ff]/20 px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
+                <FileText size={9} /> {course.resourcesCount} PDFs
               </span>
             )}
             {course.xpReward > 0 && (
-              <span className="text-[10px] bg-[#ff9f0a]/10 text-[#ff9f0a] border border-[#ff9f0a]/20 px-2.5 py-0.5 rounded-full font-semibold flex items-center gap-1">
-                <Zap size={10} /> +{course.xpReward} XP
+              <span className="text-[9px] bg-[#ff9f0a]/10 text-[#ff9f0a] border border-[#ff9f0a]/20 px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
+                <Zap size={9} /> +{course.xpReward} XP
               </span>
             )}
           </div>
 
-          <div className="space-y-1.5">
-            <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white">{course.title}</h1>
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-white/50">
-              <div>by <span className="text-white/70 font-semibold">{derivedInstructor}</span></div>
-              <div className="w-px h-3 bg-white/15" />
-              <div className="flex items-center gap-1 text-[#ffb300] font-semibold">
+          <div className="space-y-1">
+            <h1 className="text-xl md:text-2xl font-extrabold tracking-tight text-white leading-tight">{course.title}</h1>
+            <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] text-white/45">
+              <div>by <span className="text-white/60 font-semibold">{derivedInstructor}</span></div>
+              <div className="w-px h-2.5 bg-white/10 shrink-0" />
+              <div className="flex items-center gap-0.5 text-[#ffb300] font-semibold">
                 <span>★</span>
                 <span>{derivedRating.toFixed(1)}</span>
-                <span className="text-white/40 font-normal">({derivedReviewsCount} reviews)</span>
+                <span className="text-white/35 font-normal">({derivedReviewsCount})</span>
               </div>
 
               {course.audioDuration && (
                 <>
-                  <div className="w-px h-3 bg-white/15" />
-                  <span className="text-white/70 font-medium">{course.audioDuration}</span>
+                  <div className="w-px h-2.5 bg-white/10 shrink-0" />
+                  <span className="text-white/65 font-medium">{course.audioDuration}</span>
                 </>
               )}
 
               {course.language && (
                 <>
-                  <div className="w-px h-3 bg-white/15" />
-                  <span className="text-white/70 font-medium">{course.language}</span>
+                  <div className="w-px h-2.5 bg-white/10 shrink-0" />
+                  <span className="text-white/65 font-medium">{course.language}</span>
                 </>
               )}
 
               {course.updatedAtText && (
                 <>
-                  <div className="w-px h-3 bg-white/15" />
-                  <span className="text-white/35 font-normal">{course.updatedAtText}</span>
+                  <div className="w-px h-2.5 bg-white/10 shrink-0" />
+                  <span className="text-white/30 font-normal">{course.updatedAtText}</span>
                 </>
               )}
             </div>
           </div>
 
-          <p className="text-sm text-white/70 max-w-3xl leading-relaxed">{course.description}</p>
+          <p className="text-xs text-white/60 max-w-3xl leading-relaxed font-normal">{course.description}</p>
         </div>
       </div>
 
@@ -203,23 +203,29 @@ export default function PublicCoursePage({ params }: { params: Promise<{ id: str
       ) : (
         <>
           {accessStatus === "approved" ? (
-            <div className="space-y-4">
-              <h2 className="text-lg font-bold text-white tracking-tight flex items-center gap-2">
-                <span className="w-1 h-4 bg-[#ff453a] rounded-full" />
+            <div className="space-y-3">
+              <h2 className="text-base font-bold text-white tracking-tight flex items-center gap-2">
+                <span className="w-1 h-3.5 bg-[#ff453a] rounded-full" />
                 Course Folders
               </h2>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 pt-2">
                 {folders.map((folder) => (
-                  <Link href={`/folder/${folder.id}`} key={folder.id}>
-                    <div className="bg-white/2 border border-white/8 backdrop-blur-md rounded-xl p-4 flex items-center justify-between hover:border-white/20 active:scale-[0.98] transition-all duration-200 cursor-pointer shadow-md group">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="p-2 bg-[#ff453a]/10 rounded-lg text-[#ff453a] border border-[#ff453a]/20">
-                          <Folder size={18} />
-                        </div>
-                        <h3 className="font-semibold text-sm text-white line-clamp-1 min-w-0">{folder.title}</h3>
+                  <Link href={`/folder/${folder.id}`} key={folder.id} className="block w-full">
+                    <div className="flex flex-col items-center p-4 rounded-[20px] cursor-pointer text-center select-none w-full">
+                      {/* Clean Flat iOS/macOS Folder Icon using folderr.png */}
+                      <div className="relative w-20 h-20 mb-2 shrink-0">
+                        <img 
+                          src="/folderr.png" 
+                          alt="Folder Icon" 
+                          className="w-full h-full object-contain" 
+                        />
                       </div>
-                      <ChevronRight size={14} className="text-white/40 group-hover:text-white/80 transition-colors" />
+
+                      {/* Folder Title */}
+                      <span className="text-[11px] font-medium text-white/90 tracking-normal leading-snug line-clamp-2 px-1.5 w-full drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">
+                        {folder.title}
+                      </span>
                     </div>
                   </Link>
                 ))}
