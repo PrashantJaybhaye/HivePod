@@ -15,8 +15,30 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "HivePod - Courses & Audio",
-  description: "Platform for sharing courses, audio lectures, and more.",
+  title: "HivePod - Learning & Podcasting Platform",
+  description: "A premium platform for creators to share courses, host audio lectures, and build communities.",
+  applicationName: "HivePod",
+  keywords: ["Learning", "Courses", "Podcasting", "Audio Lectures", "Community"],
+  openGraph: {
+    title: "HivePod - Learning & Podcasting Platform",
+    description: "A premium platform for creators to share courses, host audio lectures, and build communities.",
+    siteName: "HivePod",
+    images: [
+      {
+        url: "/logo.png",
+        width: 800,
+        height: 600,
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "HivePod - Learning & Podcasting Platform",
+    description: "A premium platform for creators to share courses, host audio lectures, and build communities.",
+    images: ["/logo.png"],
+  },
 };
 
 export default function RootLayout({
