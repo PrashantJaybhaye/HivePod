@@ -59,28 +59,6 @@ export default function Header({ toggleSidebar }: { toggleSidebar?: () => void }
         </h1>
       </div>
 
-      {/* Center Links - iOS style pill nav */}
-      <nav className="absolute left-1/2 -translate-x-1/2 hidden lg:flex items-center gap-1 bg-white/3 border border-white/5 p-1 rounded-full text-xs font-bold">
-        <Link 
-          href="/" 
-          className="text-white px-3.5 py-1.5 rounded-full hover:bg-white/4 transition-all cursor-pointer"
-        >
-          Catalog
-        </Link>
-        <Link 
-          href="/" 
-          className="text-white/50 px-3.5 py-1.5 rounded-full hover:text-white hover:bg-white/4 transition-all cursor-pointer"
-        >
-          Community
-        </Link>
-        <Link 
-          href="/" 
-          className="text-white/50 px-3.5 py-1.5 rounded-full hover:text-white hover:bg-white/4 transition-all cursor-pointer"
-        >
-          Support
-        </Link>
-      </nav>
-
       {/* Right Controls */}
       <div className="flex items-center gap-3.5 text-white/50">
         <button className="hover:text-white transition-colors cursor-pointer p-1.5 rounded-lg hover:bg-white/5">

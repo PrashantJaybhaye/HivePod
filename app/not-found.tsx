@@ -14,14 +14,14 @@ export default function GlobalNotFound() {
         </h1>
 
         {/* Simple mock search bar */}
-        <div className="w-full max-w-sm relative mt-6 mb-8">
+        {/* <div className="w-full max-w-sm relative mt-6 mb-8">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-[#86868b]" />
           <input
             type="text"
             placeholder="Search HivePod"
             className="w-full h-10 pl-11 pr-4 rounded-xl border border-[#d2d2d7] dark:border-[#424245] bg-white dark:bg-[#1d1d1f] focus:outline-none focus:border-[#06c] dark:focus:border-[#2997ff] transition-colors text-sm text-[#1d1d1f] dark:text-white placeholder:text-[#86868b]"
           />
-        </div>
+        </div> */}
 
         {/* Apple-style blue links */}
         <div className="flex items-center gap-4">
