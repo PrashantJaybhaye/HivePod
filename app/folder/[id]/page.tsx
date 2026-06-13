@@ -4,7 +4,7 @@ import { useState, useEffect, use } from "react";
 import { collection, getDocs, query, where, doc, getDoc, limit } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import Link from "next/link";
-import { ArrowLeft, FileAudio, FileText, Image as ImageIcon, Download, Lock } from "lucide-react";
+import { ArrowLeft, FileAudio, FileText, Image as ImageIcon, Download, Lock, XCircle } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import SmartAudioPlayer from "@/components/SmartAudioPlayer";
 import { safeConvertToDate, safeGetMillis } from "@/lib/utils";
@@ -79,15 +79,48 @@ export default function PublicFolderPage({ params }: { params: Promise<{ id: str
 
   if (!hasAccess) {
     return (
-      <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto w-full flex flex-col items-center justify-center min-h-[50vh]">
-        <Lock className="text-primary mb-4" size={48} />
-        <h2 className="text-2xl font-bold text-foreground mb-2">Access Denied</h2>
-        <p className="text-gray-400 mb-6">You don't have permission to view the materials in this folder.</p>
-        <Link href={`/course/${folder.courseId}`}>
-          <button className="bg-primary text-white px-6 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors">
-            Return to Course
-          </button>
-        </Link>
+      <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto w-full flex items-center justify-center min-h-[70vh]">
+        {/* Aurora Fluid Mesh Lock Screen */}
+        <div className="relative w-full max-w-sm rounded-3xl border border-white/6 bg-white/[0.02] backdrop-blur-3xl p-6 md:p-8 shadow-[0_24px_50px_rgba(0,0,0,0.5)] text-center flex flex-col items-center overflow-hidden">
+          <style>{`
+            @keyframes float-blob-1 {
+              0%, 100% { transform: translate(0, 0) scale(1); }
+              33% { transform: translate(25px, -30px) scale(1.15); }
+              66% { transform: translate(-20px, 20px) scale(0.9); }
+            }
+            @keyframes float-blob-2 {
+              0%, 100% { transform: translate(0, 0) scale(1); }
+              50% { transform: translate(-30px, 25px) scale(1.2); }
+            }
+            @keyframes float-blob-3 {
+              0%, 100% { transform: translate(0, 0) scale(1); }
+              50% { transform: translate(20px, 20px) scale(0.85); }
+            }
+            .animate-blob-1 { animation: float-blob-1 12s ease-in-out infinite; }
+            .animate-blob-2 { animation: float-blob-2 15s ease-in-out infinite; }
+            .animate-blob-3 { animation: float-blob-3 10s ease-in-out infinite; }
+          `}</style>
+
+          {/* Floating Fluid Mesh Blobs */}
+          <div className="absolute top-0 left-0 w-28 h-28 bg-[#ff453a]/15 blur-2xl rounded-full animate-blob-1 pointer-events-none" />
+          <div className="absolute bottom-0 right-0 w-28 h-28 bg-[#ff2d55]/10 blur-2xl rounded-full animate-blob-2 pointer-events-none" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-[#bf5af2]/5 blur-2xl rounded-full animate-blob-3 pointer-events-none" />
+
+          {/* Frosted Glass Emblem */}
+          <div className="w-12 h-12 rounded-2xl bg-white/[0.04] border border-white/[0.12] shadow-inner backdrop-blur-xl flex items-center justify-center text-[#ff453a] mb-5 relative overflow-hidden shrink-0">
+            <div className="absolute inset-0 bg-linear-to-tr from-transparent via-[#ff453a]/5 to-[#ff453a]/15 pointer-events-none" />
+            <XCircle size={18} />
+          </div>
+
+          <h3 className="text-sm font-extrabold text-white mb-1.5 tracking-tight">Access Denied</h3>
+          <p className="text-xs text-white/55 mb-5 max-w-[260px] leading-relaxed relative z-10">You don't have permission to view the materials in this folder. Your access may have expired or been revoked.</p>
+          
+          <Link href={`/course/${folder.courseId}`} className="w-full relative z-10">
+            <button className="w-full bg-[#ff453a]/20 hover:bg-[#ff453a]/30 border border-[#ff453a]/30 text-white font-bold py-2 rounded-xl text-xs active:scale-[0.98] transition-all duration-200 tracking-wider shadow-lg">
+              Return to Course
+            </button>
+          </Link>
+        </div>
       </div>
     );
   }

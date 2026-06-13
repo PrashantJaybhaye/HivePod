@@ -232,52 +232,104 @@ export default function PublicCoursePage({ params }: { params: Promise<{ id: str
               </div>
             </div>
           ) : (
-            /* iOS Style macOS Security Lock Panel */
-            <div className="bg-white/1.5 border border-white/8 rounded-2xl p-8 flex flex-col items-center justify-center text-center max-w-md mx-auto shadow-xl relative overflow-hidden backdrop-blur-md">
-              <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
+            /* Premium iOS Glassmorphic Security Status Card */
+            /* Aurora Fluid Mesh Lock Screen */
+            <div className="relative w-full max-w-sm mx-auto rounded-3xl border border-white/6 bg-white/[0.02] backdrop-blur-3xl p-6 md:p-8 shadow-[0_24px_50px_rgba(0,0,0,0.5)] text-center flex flex-col items-center overflow-hidden">
+              <style>{`
+                @keyframes float-blob-1 {
+                  0%, 100% { transform: translate(0, 0) scale(1); }
+                  33% { transform: translate(25px, -30px) scale(1.15); }
+                  66% { transform: translate(-20px, 20px) scale(0.9); }
+                }
+                @keyframes float-blob-2 {
+                  0%, 100% { transform: translate(0, 0) scale(1); }
+                  50% { transform: translate(-30px, 25px) scale(1.2); }
+                }
+                @keyframes float-blob-3 {
+                  0%, 100% { transform: translate(0, 0) scale(1); }
+                  50% { transform: translate(20px, 20px) scale(0.85); }
+                }
+                .animate-blob-1 { animation: float-blob-1 12s ease-in-out infinite; }
+                .animate-blob-2 { animation: float-blob-2 15s ease-in-out infinite; }
+                .animate-blob-3 { animation: float-blob-3 10s ease-in-out infinite; }
+              `}</style>
 
               {!user ? (
                 <>
-                  <div className="p-4 bg-white/3 border border-white/8 rounded-full text-white/50 mb-4 shadow-inner">
-                    <Lock size={32} />
+                  {/* Floating Fluid Mesh Blobs */}
+                  <div className="absolute top-0 left-0 w-28 h-28 bg-[#0a84ff]/10 blur-2xl rounded-full animate-blob-1 pointer-events-none" />
+                  <div className="absolute bottom-0 right-0 w-28 h-28 bg-[#5e5ce6]/10 blur-2xl rounded-full animate-blob-2 pointer-events-none" />
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-[#bf5af2]/5 blur-2xl rounded-full animate-blob-3 pointer-events-none" />
+
+                  {/* Frosted Glass Emblem */}
+                  <div className="w-12 h-12 rounded-2xl bg-white/[0.04] border border-white/[0.12] shadow-inner backdrop-blur-xl flex items-center justify-center text-white/90 mb-5 relative overflow-hidden shrink-0">
+                    <div className="absolute inset-0 bg-linear-to-tr from-transparent via-white/5 to-white/10 pointer-events-none" />
+                    <Lock size={18} />
                   </div>
-                  <h3 className="text-lg font-bold text-white mb-1">Login Required</h3>
-                  <p className="text-xs text-white/60 mb-6 leading-relaxed">You must be logged in to request access and view files in this course.</p>
-                  <Link href="/" className="w-full">
-                    <button className="w-full bg-[#ff453a] hover:bg-[#ff453a]/90 text-white font-semibold py-2.5 rounded-xl active:scale-[0.98] transition-all duration-150 cursor-pointer shadow-[0_4px_12px_rgba(255,69,58,0.2)]">
+
+                  <h3 className="text-sm font-extrabold text-white mb-1.5 tracking-tight">Login Required</h3>
+                  <p className="text-xs text-white/55 mb-5 max-w-[260px] leading-relaxed relative z-10">You must be logged in to request access and view files in this course.</p>
+                  
+                  <Link href="/" className="w-full relative z-10">
+                    <button className="w-full bg-white/[0.08] hover:bg-white/[0.15] border border-white/[0.12] text-white font-bold py-2 rounded-xl text-xs active:scale-[0.98] transition-all duration-200 tracking-wider shadow-lg">
                       Go to Login
                     </button>
                   </Link>
                 </>
               ) : accessStatus === "pending" ? (
                 <>
-                  <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-full text-yellow-500 mb-4 shadow-inner">
-                    <CheckCircle2 size={32} className="animate-pulse" />
+                  {/* Floating Fluid Mesh Blobs */}
+                  <div className="absolute top-0 left-0 w-28 h-28 bg-[#ff9f0a]/15 blur-2xl rounded-full animate-blob-1 pointer-events-none" />
+                  <div className="absolute bottom-0 right-0 w-28 h-28 bg-[#ffb300]/10 blur-2xl rounded-full animate-blob-2 pointer-events-none" />
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-[#ff453a]/5 blur-2xl rounded-full animate-blob-3 pointer-events-none" />
+
+                  {/* Frosted Glass Emblem */}
+                  <div className="w-12 h-12 rounded-2xl bg-white/[0.04] border border-white/[0.12] shadow-inner backdrop-blur-xl flex items-center justify-center text-[#ff9f0a] mb-5 relative overflow-hidden shrink-0">
+                    <div className="absolute inset-0 bg-linear-to-tr from-transparent via-[#ff9f0a]/5 to-[#ff9f0a]/15 pointer-events-none" />
+                    <CheckCircle2 size={18} />
                   </div>
-                  <h3 className="text-lg font-bold text-white mb-1">Access Requested</h3>
-                  <p className="text-xs text-white/60 leading-relaxed">Your access request is currently pending administrator approval. We will notify you once verified.</p>
+
+                  <h3 className="text-sm font-extrabold text-white mb-1.5 tracking-tight">Access Requested</h3>
+                  <p className="text-xs text-white/55 max-w-[260px] leading-relaxed relative z-10">Your access request is currently pending administrator approval. We will notify you once verified.</p>
                 </>
               ) : accessStatus === "rejected" ? (
                 <>
-                  <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-full text-red-500 mb-4 shadow-inner">
-                    <XCircle size={32} />
+                  {/* Floating Fluid Mesh Blobs */}
+                  <div className="absolute top-0 left-0 w-28 h-28 bg-[#ff453a]/15 blur-2xl rounded-full animate-blob-1 pointer-events-none" />
+                  <div className="absolute bottom-0 right-0 w-28 h-28 bg-[#ff2d55]/10 blur-2xl rounded-full animate-blob-2 pointer-events-none" />
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-[#bf5af2]/5 blur-2xl rounded-full animate-blob-3 pointer-events-none" />
+
+                  {/* Frosted Glass Emblem */}
+                  <div className="w-12 h-12 rounded-2xl bg-white/[0.04] border border-white/[0.12] shadow-inner backdrop-blur-xl flex items-center justify-center text-[#ff453a] mb-5 relative overflow-hidden shrink-0">
+                    <div className="absolute inset-0 bg-linear-to-tr from-transparent via-[#ff453a]/5 to-[#ff453a]/15 pointer-events-none" />
+                    <XCircle size={18} />
                   </div>
-                  <h3 className="text-lg font-bold text-white mb-1">Access Denied</h3>
-                  <p className="text-xs text-white/60 leading-relaxed">Your request to access this course has been declined by an administrator. Please reach out to support for help.</p>
+
+                  <h3 className="text-sm font-extrabold text-white mb-1.5 tracking-tight">Access Denied</h3>
+                  <p className="text-xs text-white/55 max-w-[260px] leading-relaxed relative z-10">Your request to access this course has been declined by an administrator. Please reach out to support for help.</p>
                 </>
               ) : (
                 <>
-                  <div className="p-4 bg-[#ff453a]/10 border border-[#ff453a]/20 rounded-full text-[#ff453a] mb-4 shadow-inner animate-bounce">
-                    <Lock size={32} />
+                  {/* Floating Fluid Mesh Blobs */}
+                  <div className="absolute top-0 left-0 w-28 h-28 bg-[#ff453a]/15 blur-2xl rounded-full animate-blob-1 pointer-events-none" />
+                  <div className="absolute bottom-0 right-0 w-28 h-28 bg-[#5e5ce6]/10 blur-2xl rounded-full animate-blob-2 pointer-events-none" />
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-[#ff2d55]/5 blur-2xl rounded-full animate-blob-3 pointer-events-none" />
+
+                  {/* Frosted Glass Emblem */}
+                  <div className="w-12 h-12 rounded-2xl bg-white/[0.04] border border-white/[0.12] shadow-inner backdrop-blur-xl flex items-center justify-center text-[#ff453a] mb-5 relative overflow-hidden shrink-0">
+                    <div className="absolute inset-0 bg-linear-to-tr from-transparent via-[#ff453a]/5 to-[#ff453a]/15 pointer-events-none" />
+                    <Lock size={16} />
                   </div>
-                  <h3 className="text-lg font-bold text-white mb-1">Private Course</h3>
-                  <p className="text-xs text-white/60 mb-6 leading-relaxed">This course's modules and chapters are restricted. Click below to submit an access request.</p>
+
+                  <h3 className="text-sm font-extrabold text-white mb-1.5 tracking-tight">Private Course</h3>
+                  <p className="text-xs text-white/55 mb-5 max-w-[260px] leading-relaxed relative z-10">This course's modules and chapters are restricted. Click below to submit an access request.</p>
+                  
                   <button
                     onClick={handleRequestAccess}
                     disabled={requestingAccess}
-                    className="w-full bg-[#ff453a] hover:bg-[#ff453a]/90 text-white font-semibold py-2.5 rounded-xl active:scale-[0.98] transition-all duration-150 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_4px_12px_rgba(255,69,58,0.2)]"
+                    className="w-full bg-[#ff453a]/20 hover:bg-[#ff453a]/30 border border-[#ff453a]/30 text-white font-bold py-2 rounded-xl text-xs active:scale-[0.98] transition-all duration-200 tracking-wider shadow-lg disabled:opacity-50 disabled:cursor-not-allowed relative z-10"
                   >
-                    {requestingAccess ? "Submitting Request..." : "Request Access"}
+                    {requestingAccess ? "Sending Request..." : "Request Access"}
                   </button>
                 </>
               )}
