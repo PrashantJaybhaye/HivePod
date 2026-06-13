@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { collection, getDocs, doc, updateDoc, query, orderBy, serverTimestamp } from "firebase/firestore";
+import { collection, getDocs, doc, getDoc, updateDoc, query, orderBy, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { CheckCircle, XCircle, Clock, Loader2, Search } from "lucide-react";
+import { CheckCircle, XCircle, Clock, Loader2, Search, Calendar, ShieldAlert, Award, Zap, User } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { useRouter } from "next/navigation";
+import { safeConvertToDate, safeGetMillis } from "@/lib/utils";
 
 type RequestStatus = "pending" | "approved" | "rejected";
 
@@ -18,6 +19,98 @@ interface CourseRequest {
   status: RequestStatus;
   requestedAt: any;
   updatedAt: any;
+  restrictions?: {
+    expiresAt?: any;
+    blockXp?: boolean;
+  };
+}
+
+const profileCache: Record<string, any> = {};
+
+function UserCell({ userId, fallbackEmail, courseTitle }: { userId: string; fallbackEmail: string; courseTitle?: string }) {
+  const [profile, setProfile] = useState<any>(profileCache[userId] || null);
+  const [loading, setLoading] = useState(!profile);
+
+  useEffect(() => {
+    if (profile) return;
+
+    let active = true;
+    const fetchProfile = async () => {
+      try {
+        const userSnap = await getDoc(doc(db, "users", userId));
+        if (userSnap.exists() && active) {
+          const data = userSnap.data();
+          profileCache[userId] = data;
+          setProfile(data);
+        }
+      } catch (err) {
+        console.error("Error fetching user profile:", userId, err);
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+
+    fetchProfile();
+    return () => {
+      active = false;
+    };
+  }, [userId, profile]);
+
+  const displayName = profile?.displayName || "No Name Provided";
+  const photoURL = profile?.photoURL;
+  const authProvider = profile?.provider || "unknown";
+  const email = fallbackEmail || profile?.email || "No Email";
+  const isPublic = email ? ["gmail.com", "yahoo.com", "hotmail.com", "outlook.com", "aol.com", "icloud.com", "mail.com", "yandex.com", "proton.me", "protonmail.com"].includes(email.split("@")[1]?.toLowerCase()) : false;
+  const userInitial = (displayName?.[0] || email?.[0] || "U").toUpperCase();
+
+  if (loading) {
+    return (
+      <div className="flex items-center gap-3 animate-pulse">
+        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/5 border border-white/10 shrink-0" />
+        <div className="flex flex-col gap-1">
+          <div className="h-3 w-24 bg-white/10 rounded" />
+          <div className="h-2.5 w-32 bg-white/5 rounded" />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-2 sm:gap-3">
+      {photoURL ? (
+        <img
+          src={photoURL}
+          alt={displayName}
+          className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover border border-white/10 shrink-0"
+        />
+      ) : (
+        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-linear-to-tr from-white/5 to-white/15 border border-white/10 flex items-center justify-center text-[10px] sm:text-xs font-bold text-white/70 shrink-0 select-none uppercase">
+          {userInitial}
+        </div>
+      )}
+      <div className="min-w-0 flex flex-col gap-0.5">
+        <span className="text-xs font-bold text-white leading-normal truncate">{displayName}</span>
+        <span className="text-[11px] text-white/40 leading-normal truncate">{email}</span>
+
+        {courseTitle && (
+          <span className="text-[10px] text-white/50 font-medium md:hidden mt-0.5 truncate max-w-[120px] xs:max-w-[160px] sm:max-w-[250px]">
+            Course: {courseTitle}
+          </span>
+        )}
+
+        <div className="flex flex-wrap items-center gap-1.5 mt-1">
+          {isPublic && (
+            <span className="bg-[#ff9f0a]/10 text-[#ff9f0a] border border-[#ff9f0a]/15 text-[9px] font-bold px-1.5 py-0.5 rounded-md flex items-center gap-1 shrink-0">
+              <ShieldAlert size={10} /> Public
+            </span>
+          )}
+          <span className="bg-white/5 text-white/50 border border-white/5 text-[9px] font-bold px-1.5 py-0.5 rounded-md capitalize shrink-0">
+            {authProvider === "google.com" ? "Google" : authProvider === "password" ? "Password" : authProvider}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function AdminRequestsPage() {
@@ -25,7 +118,14 @@ export default function AdminRequestsPage() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<RequestStatus>("pending");
   const [searchTerm, setSearchTerm] = useState("");
-  
+
+  // Restriction Modal States
+  const [selectedRequest, setSelectedRequest] = useState<CourseRequest | null>(null);
+  const [showRestrictionModal, setShowRestrictionModal] = useState(false);
+  const [expiryOption, setExpiryOption] = useState<"none" | "24h" | "7d" | "30d" | "custom">("none");
+  const [customExpiryDate, setCustomExpiryDate] = useState("");
+  const [blockXp, setBlockXp] = useState(false);
+
   const { user, isAdmin, loading: authLoading } = useAuth();
   const router = useRouter();
 
@@ -39,18 +139,16 @@ export default function AdminRequestsPage() {
     if (!isAdmin) return;
     setLoading(true);
     try {
-      // Note: A composite index might be needed if we orderBy("requestedAt", "desc"), 
-      // but without it, we can just fetch and sort in memory for now.
       const q = query(collection(db, "course_requests"));
       const snapshot = await getDocs(q);
       const reqsData = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       })) as CourseRequest[];
-      
+
       // Sort newest first
-      reqsData.sort((a, b) => (b.requestedAt?.toMillis() || 0) - (a.requestedAt?.toMillis() || 0));
-      
+      reqsData.sort((a, b) => safeGetMillis(b.requestedAt, 0) - safeGetMillis(a.requestedAt, 0));
+
       setRequests(reqsData);
     } catch (error) {
       console.error("Error fetching requests:", error);
@@ -72,7 +170,7 @@ export default function AdminRequestsPage() {
         updatedAt: serverTimestamp()
       });
       // Optimistic update
-      setRequests(prev => prev.map(req => 
+      setRequests(prev => prev.map(req =>
         req.id === requestId ? { ...req, status: newStatus } : req
       ));
     } catch (error) {
@@ -81,10 +179,58 @@ export default function AdminRequestsPage() {
     }
   };
 
+  const handleApproveWithRestrictions = async () => {
+    if (!selectedRequest) return;
+
+    if (expiryOption === "custom" && !customExpiryDate) {
+      alert("Please select a custom expiration date.");
+      return;
+    }
+
+    let expiresAt: Date | null = null;
+    const now = new Date();
+    if (expiryOption === "24h") {
+      expiresAt = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+    } else if (expiryOption === "7d") {
+      expiresAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    } else if (expiryOption === "30d") {
+      expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+    } else if (expiryOption === "custom" && customExpiryDate) {
+      expiresAt = new Date(customExpiryDate);
+    }
+
+    try {
+      const restrictions = {
+        expiresAt: expiresAt ? expiresAt : null,
+        blockXp
+      };
+
+      await updateDoc(doc(db, "course_requests", selectedRequest.id), {
+        status: "approved",
+        restrictions,
+        updatedAt: serverTimestamp()
+      });
+
+      // Optimistic update
+      setRequests(prev => prev.map(req =>
+        req.id === selectedRequest.id ? { ...req, status: "approved", restrictions } : req
+      ));
+
+      setShowRestrictionModal(false);
+      setSelectedRequest(null);
+      setExpiryOption("none");
+      setCustomExpiryDate("");
+      setBlockXp(false);
+    } catch (error) {
+      console.error("Error approving request with restrictions:", error);
+      alert("Failed to approve request.");
+    }
+  };
+
   const filteredRequests = requests.filter(req => {
     const matchesTab = req.status === activeTab;
-    const matchesSearch = 
-      (req.userEmail || "").toLowerCase().includes(searchTerm.toLowerCase()) || 
+    const matchesSearch =
+      (req.userEmail || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
       (req.courseTitle || "").toLowerCase().includes(searchTerm.toLowerCase());
     return matchesTab && matchesSearch;
   });
@@ -98,121 +244,352 @@ export default function AdminRequestsPage() {
   }
 
   return (
-    <div className="flex flex-col flex-1 bg-background">
-      <main className="flex-1 px-4 sm:px-6 md:px-12 lg:px-20 pt-4 pb-8 lg:pt-6 lg:pb-12 max-w-7xl mx-auto w-full">
-        {/* Premium Header */}
-        <div className="relative mb-8 rounded-2xl bg-[#111111] border border-white/10 overflow-hidden shadow-lg">
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-blue-500/10 opacity-50"></div>
-          
-          <div className="relative px-6 py-5 md:px-8 md:py-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="flex items-center gap-5">
-              <div>
-                <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white mb-1">Course Access Requests</h1>
-                <p className="text-gray-400 text-sm">Manage user access requests for private courses.</p>
-              </div>
-            </div>
-
-            <div className="relative w-full md:w-auto">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
-              <input 
-                type="text" 
-                placeholder="Search email or course..." 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9 pr-4 py-2.5 bg-black/50 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-primary w-full md:w-72 transition-colors placeholder:text-gray-600"
-              />
-            </div>
+    <div className="flex flex-col flex-1">
+      <main className="flex-1 pt-0 pb-8 w-full">
+        {/* iOS Compact Single-Row Header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-4 border-b border-white/4">
+          {/* Left: Title + Pending Badge */}
+          <div className="flex items-center gap-2.5">
+            <h2 className="text-xl md:text-2xl font-bold tracking-tight text-white">
+              Access Requests
+            </h2>
+            {!loading && requests.filter(r => r.status === "pending").length > 0 && (
+              <span className="bg-[#ff453a]/15 text-[#ff453a] px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider animate-pulse">
+                {requests.filter(r => r.status === "pending").length} PENDING
+              </span>
+            )}
           </div>
-        </div>
 
-        {/* Tabs */}
-        <div className="flex space-x-2 border-b border-white/10 mb-6">
-          {(["pending", "approved", "rejected"] as RequestStatus[]).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-5 py-3 text-sm font-semibold capitalize transition-all relative rounded-t-lg ${
-                activeTab === tab 
-                  ? "text-primary bg-white/5" 
-                  : "text-gray-400 hover:text-white hover:bg-white/5"
-              }`}
-            >
-              {tab}
-              {activeTab === tab && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary shadow-[0_0_8px_rgba(var(--primary),0.5)]" />
-              )}
-              {/* Show badge for pending */}
-              {tab === "pending" && requests.filter(r => r.status === "pending").length > 0 && (
-                <span className={`ml-2 text-xs px-2 py-0.5 rounded-full ${activeTab === tab ? "bg-primary/20 text-primary" : "bg-white/10 text-gray-300"}`}>
-                  {requests.filter(r => r.status === "pending").length}
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
+          {/* Right: Search & Segmented Control */}
+          {!loading && (
+            <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+              {/* Search Bar */}
+              <div className="relative w-full sm:w-56">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={13} />
+                <input
+                  type="text"
+                  placeholder="Search email or course..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full bg-white/3 border border-white/8 hover:border-white/15 focus:border-white/20 focus:bg-white/5 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder-white/35 transition-all outline-none"
+                />
+              </div>
 
-        {/* Table Area */}
-        <div className="bg-[#111111] border border-white/10 rounded-2xl overflow-hidden shadow-lg">
-          {filteredRequests.length === 0 ? (
-            <div className="p-12 text-center text-gray-400">
-              No {activeTab} requests found matching your search.
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-white/5 border-b border-white/10 text-gray-400 uppercase text-[10px] font-bold tracking-wider">
-                  <tr>
-                    <th className="px-6 py-4">User</th>
-                    <th className="px-6 py-4">Course</th>
-                    <th className="px-6 py-4">Requested Date</th>
-                    <th className="px-6 py-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/5">
-                  {filteredRequests.map((req) => (
-                    <tr key={req.id} className="hover:bg-white/5 transition-colors group">
-                      <td className="px-6 py-4 whitespace-nowrap text-white font-medium">
-                        {req.userEmail}
-                      </td>
-                      <td className="px-6 py-4 text-gray-300">
-                        {req.courseTitle}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-gray-400 text-xs font-mono">
-                        {req.requestedAt?.toDate().toLocaleDateString() || "Unknown"}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right">
-                        {req.status === "pending" ? (
-                          <div className="flex items-center justify-end gap-2 opacity-80 group-hover:opacity-100 transition-opacity">
-                            <button 
-                              onClick={() => handleUpdateStatus(req.id, "approved")}
-                              className="flex items-center gap-1.5 px-3 py-1.5 bg-green-500/10 text-green-400 hover:bg-green-500/20 hover:text-green-300 border border-green-500/20 rounded-lg transition-all text-xs font-bold tracking-wide"
-                            >
-                              <CheckCircle size={14} /> Approve
-                            </button>
-                            <button 
-                              onClick={() => handleUpdateStatus(req.id, "rejected")}
-                              className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 border border-red-500/20 rounded-lg transition-all text-xs font-bold tracking-wide"
-                            >
-                              <XCircle size={14} /> Reject
-                            </button>
-                          </div>
-                        ) : (
-                          <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold capitalize tracking-wide
-                            ${req.status === "approved" ? "bg-green-500/10 text-green-400 border border-green-500/20" : "bg-red-500/10 text-red-400 border border-red-500/20"}
-                          `}>
-                            {req.status === "approved" ? <CheckCircle size={14} /> : <XCircle size={14} />}
-                            {req.status}
-                          </span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              {/* Segmented Control Tabs */}
+              <div className="flex bg-white/2 border border-white/6 rounded-xl p-0.5 w-full sm:w-auto justify-between overflow-x-auto">
+                {(["pending", "approved", "rejected"] as const).map((tab) => {
+                  const count = requests.filter(r => r.status === tab).length;
+                  return (
+                    <button
+                      key={tab}
+                      onClick={() => setActiveTab(tab)}
+                      className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 capitalize flex-1 sm:flex-initial text-center cursor-pointer flex items-center justify-center gap-1.5 ${activeTab === tab
+                        ? "bg-white/8 text-white shadow-xs"
+                        : "text-white/45 hover:text-white/70"
+                        }`}
+                    >
+                      <span>{tab}</span>
+                      {count > 0 && (
+                        <span className={`text-[9px] px-1.5 py-0.2 rounded-full font-bold ${activeTab === tab
+                          ? tab === "pending" ? "bg-[#ff453a]/20 text-[#ff453a]" : "bg-white/10 text-white/70"
+                          : "bg-white/5 text-white/30"
+                          }`}>
+                          {count}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>
+
+        {/* iOS-Style Glassmorphic Table Container */}
+        {filteredRequests.length === 0 ? (
+          <div className="bg-white/1 border border-white/8 rounded-2xl py-12 text-center text-white/40 text-sm">
+            No {activeTab} requests found matching your query.
+          </div>
+        ) : (
+          <div className="border border-white/8 bg-white/1.5 backdrop-blur-md rounded-2xl overflow-hidden shadow-2xl relative">
+            {/* Top subtle sheen line */}
+            <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
+            
+            <div className="overflow-x-auto w-full">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-white/8 bg-white/2">
+                    <th className="px-3 sm:px-5 py-2.5 text-[10px] font-bold uppercase tracking-wider text-white/50 font-mono">User Details</th>
+                    <th className="hidden md:table-cell px-5 py-2.5 text-[10px] font-bold uppercase tracking-wider text-white/50 font-mono">Target Course</th>
+                    <th className="hidden sm:table-cell px-5 py-2.5 text-[10px] font-bold uppercase tracking-wider text-white/50 font-mono">Requested Date</th>
+                    <th className="px-3 sm:px-5 py-2.5 text-[10px] font-bold uppercase tracking-wider text-white/50 font-mono">Status & Restrictions</th>
+                    <th className="px-3 sm:px-5 py-2.5 text-[10px] font-bold uppercase tracking-wider text-white/50 font-mono text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/4">
+                  {filteredRequests.map((req) => {
+                    return (
+                      <tr key={req.id} className="hover:bg-white/2 transition-colors duration-150 group">
+                        {/* User Column */}
+                        <td className="px-3 sm:px-5 py-2 align-middle">
+                          <UserCell userId={req.userId} fallbackEmail={req.userEmail} courseTitle={req.courseTitle} />
+                        </td>
+
+                        {/* Course Title (Large Screens) */}
+                        <td className="hidden md:table-cell px-5 py-2 align-middle">
+                          <span className="text-xs font-semibold text-white/80 line-clamp-2">{req.courseTitle}</span>
+                        </td>
+
+                        {/* Requested Date */}
+                        <td className="hidden sm:table-cell px-5 py-2 align-middle font-mono text-xs text-white/40">
+                          {safeConvertToDate(req.requestedAt) 
+                            ? safeConvertToDate(req.requestedAt)!.toLocaleDateString(undefined, {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric'
+                              })
+                            : "Unknown"}
+                        </td>
+
+                        {/* Restrictions Status */}
+                        <td className="px-3 sm:px-5 py-2 align-middle">
+                          {req.status === "approved" ? (
+                            <div className="flex flex-col gap-1">
+                              <span className="inline-flex items-center gap-1 w-fit px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#30d158]/10 text-[#30d158] border border-[#30d158]/15 capitalize">
+                                <CheckCircle size={10} className="stroke-[2.5]" />
+                                Approved
+                              </span>
+                              
+                              {/* Expiry detail */}
+                              {safeConvertToDate(req.restrictions?.expiresAt) ? (
+                                <span className={`text-[10px] font-mono flex items-center gap-1 ${
+                                  safeConvertToDate(req.restrictions?.expiresAt)!.getTime() < Date.now()
+                                    ? "text-[#ff453a]"
+                                    : "text-white/40"
+                                }`}>
+                                  <Clock size={10} />
+                                  {safeConvertToDate(req.restrictions?.expiresAt)!.getTime() < Date.now() ? "Expired" : "Expires: " + safeConvertToDate(req.restrictions?.expiresAt)!.toLocaleDateString()}
+                                </span>
+                              ) : (
+                                <span className="text-[10px] text-white/30 font-mono flex items-center gap-1">
+                                  <Clock size={10} /> Lifetime
+                                </span>
+                              )}
+                              
+                              {/* Restrictions detail */}
+                              {req.restrictions?.blockXp && (
+                                <div className="flex flex-wrap gap-1 mt-0.5">
+                                  <span className="bg-[#ff9f0a]/10 text-[#ff9f0a] border border-[#ff9f0a]/15 text-[8px] font-extrabold px-1 rounded uppercase tracking-wider">
+                                    No XP
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          ) : req.status === "rejected" ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#ff453a]/10 text-[#ff453a] border border-[#ff453a]/15 capitalize">
+                              <XCircle size={10} className="stroke-[2.5]" />
+                              Rejected
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-white/5 text-white/40 border border-white/5 capitalize">
+                              <Clock size={10} />
+                              Pending
+                            </span>
+                          )}
+                        </td>
+
+                        {/* Actions */}
+                        <td className="px-3 sm:px-5 py-2 align-middle text-right">
+                          {req.status === "pending" ? (
+                            <div className="flex items-center justify-end gap-1.5 sm:gap-2">
+                              <button
+                                onClick={() => handleUpdateStatus(req.id, "rejected")}
+                                className="px-2.5 py-1.5 bg-[#ff453a]/10 hover:bg-[#ff453a]/20 text-[#ff453a] border border-[#ff453a]/15 rounded-xl transition-all text-xs font-bold cursor-pointer"
+                                title="Reject request"
+                              >
+                                Reject
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setSelectedRequest(req);
+                                  setExpiryOption("none");
+                                  setBlockXp(false);
+                                  setCustomExpiryDate("");
+                                  setShowRestrictionModal(true);
+                                }}
+                                className="px-2.5 py-1.5 bg-[#30d158]/10 hover:bg-[#30d158]/20 text-[#30d158] border border-[#30d158]/15 rounded-xl transition-all text-xs font-bold cursor-pointer shadow-[0_2px_8px_rgba(48,209,88,0.1)]"
+                                title="Configure access parameters & approve"
+                              >
+                                Approve
+                              </button>
+                            </div>
+                          ) : req.status === "approved" ? (
+                            <button
+                              onClick={() => handleUpdateStatus(req.id, "rejected")}
+                              className="px-2.5 py-1.5 bg-[#ff453a]/10 hover:bg-[#ff453a]/20 text-[#ff453a] border border-[#ff453a]/15 rounded-xl transition-all text-xs font-bold cursor-pointer"
+                              title="Reject approved request"
+                            >
+                              Reject
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => {
+                                setSelectedRequest(req);
+                                setExpiryOption("none");
+                                setBlockXp(false);
+                                setCustomExpiryDate("");
+                                setShowRestrictionModal(true);
+                              }}
+                              className="px-2.5 py-1.5 bg-[#30d158]/10 hover:bg-[#30d158]/20 text-[#30d158] border border-[#30d158]/15 rounded-xl transition-all text-xs font-bold cursor-pointer shadow-[0_2px_8px_rgba(48,209,88,0.1)]"
+                              title="Approve rejected request"
+                            >
+                              Approve
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </main>
+
+      {/* iOS-Style Modal Overlay */}
+      {showRestrictionModal && selectedRequest && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 overflow-y-auto">
+          {/* Modal Container */}
+          <div className="bg-[#1c1c1e] border border-white/10 w-full max-w-md rounded-2xl overflow-hidden shadow-2xl relative my-8 animate-in fade-in zoom-in-95 duration-200">
+            {/* Header */}
+            <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between">
+              <h3 className="text-base font-bold text-white tracking-tight flex items-center gap-2">
+                Configure Restrictions
+              </h3>
+              <button
+                onClick={() => {
+                  setShowRestrictionModal(false);
+                  setSelectedRequest(null);
+                }}
+                className="text-white/40 hover:text-white/80 text-sm font-semibold transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
+              {/* User Context */}
+              <div className="bg-white/3 border border-white/5 rounded-xl p-4 flex items-start gap-3">
+                {profileCache[selectedRequest.userId]?.photoURL ? (
+                  <img
+                    src={profileCache[selectedRequest.userId].photoURL}
+                    alt={profileCache[selectedRequest.userId].displayName}
+                    className="w-10 h-10 rounded-full object-cover border border-white/10 shrink-0"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-linear-to-tr from-white/5 to-white/15 border border-white/10 flex items-center justify-center text-sm font-bold text-white/70 shrink-0 select-none uppercase">
+                    {(profileCache[selectedRequest.userId]?.displayName?.[0] || selectedRequest.userEmail?.[0] || "U").toUpperCase()}
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <div className="text-xs font-bold text-white truncate">
+                    {profileCache[selectedRequest.userId]?.displayName || "No Name Provided"}
+                  </div>
+                  <div className="text-[11px] text-white/50 truncate">
+                    {selectedRequest.userEmail}
+                  </div>
+                  <div className="text-[10px] text-white/40 font-semibold mt-1 bg-white/5 border border-white/5 px-2 py-0.5 rounded w-fit">
+                    Course: {selectedRequest.courseTitle}
+                  </div>
+                </div>
+              </div>
+
+              {/* Expiry Option Group */}
+              <div className="space-y-2.5">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-white/40 font-mono">Access Expiration</label>
+                <div className="grid grid-cols-5 bg-white/2 border border-white/6 rounded-xl p-0.5 gap-0.5">
+                  {(["none", "24h", "7d", "30d", "custom"] as const).map((opt) => (
+                    <button
+                      key={opt}
+                      type="button"
+                      onClick={() => setExpiryOption(opt)}
+                      className={`px-1 py-1.5 rounded-lg text-[10px] font-bold transition-all duration-150 capitalize text-center cursor-pointer ${
+                        expiryOption === opt
+                          ? "bg-white/8 text-white"
+                          : "text-white/40 hover:text-white/70"
+                      }`}
+                    >
+                      {opt === "none" ? "Lifetime" : opt}
+                    </button>
+                  ))}
+                </div>
+                
+                {/* Custom Date Input */}
+                {expiryOption === "custom" && (
+                  <div className="mt-2.5 animate-in slide-in-from-top-1.5 fade-in duration-200">
+                    <input
+                      type="date"
+                      value={customExpiryDate}
+                      onChange={(e) => setCustomExpiryDate(e.target.value)}
+                      min={new Date().toISOString().split("T")[0]}
+                      className="w-full bg-white/3 border border-white/8 hover:border-white/15 focus:border-white/20 rounded-xl px-3.5 py-2 text-xs text-white outline-none font-mono"
+                    />
+                    <p className="text-[10px] text-white/30 mt-1">Select a custom date in the future for access expiration.</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Toggles Group */}
+              <div className="space-y-4">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-white/40 font-mono">Permission Exclusions</label>
+                
+                <div className="space-y-3">
+                  {/* Block XP */}
+                  <label className="flex items-start justify-between gap-4 p-3 bg-white/2 border border-white/5 rounded-xl cursor-pointer hover:bg-white/3 transition-all">
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs font-bold text-white flex items-center gap-1.5">
+                        <Zap size={12} className="text-white/50" /> Block XP Accumulation
+                      </div>
+                      <div className="text-[10px] text-white/40 mt-0.5 leading-normal">
+                        Activities completed by the user in this course will not yield any experience points (XP).
+                      </div>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={blockXp}
+                      onChange={(e) => setBlockXp(e.target.checked)}
+                      className="w-4 h-4 rounded border-white/10 bg-white/5 text-[#ff453a] focus:ring-0 focus:ring-offset-0 shrink-0 cursor-pointer accent-[#ff453a]"
+                    />
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-white/5 bg-white/1 flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowRestrictionModal(false);
+                  setSelectedRequest(null);
+                }}
+                className="px-4 py-2 hover:bg-white/5 text-white/60 hover:text-white rounded-xl text-xs font-bold transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleApproveWithRestrictions}
+                className="px-4 py-2 bg-[#30d158]/90 hover:bg-[#30d158] text-white border border-[#30d158]/15 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-[0_2px_10px_rgba(48,209,88,0.2)]"
+              >
+                Approve Access
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

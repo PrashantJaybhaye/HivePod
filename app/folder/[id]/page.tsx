@@ -7,6 +7,7 @@ import Link from "next/link";
 import { ArrowLeft, FileAudio, FileText, Image as ImageIcon, Download, Lock } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import SmartAudioPlayer from "@/components/SmartAudioPlayer";
+import { safeConvertToDate, safeGetMillis } from "@/lib/utils";
 
 export default function PublicFolderPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -36,13 +37,23 @@ export default function PublicFolderPage({ params }: { params: Promise<{ id: str
         const reqQuery = query(
           collection(db, "course_requests"),
           where("userId", "==", user.uid),
-          where("courseId", "==", folderData.courseId),
-          where("status", "==", "approved"),
-          limit(1)
+          where("courseId", "==", folderData.courseId)
         );
         const reqSnap = await getDocs(reqQuery);
         if (!reqSnap.empty) {
-          approved = true;
+          const reqs = reqSnap.docs.map(d => d.data());
+          // Sort in-memory: newest first using safeGetMillis
+          reqs.sort((a, b) => safeGetMillis(b.requestedAt, Date.now()) - safeGetMillis(a.requestedAt, Date.now()));
+          
+          const latestReq = reqs[0];
+          const expiresAt = safeConvertToDate(latestReq.restrictions?.expiresAt);
+          if (latestReq.status === "approved") {
+            if (expiresAt && expiresAt.getTime() < Date.now()) {
+              approved = false;
+            } else {
+              approved = true;
+            }
+          }
         }
       }
 

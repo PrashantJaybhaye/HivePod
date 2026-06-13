@@ -18,7 +18,6 @@ export default function AdminPage() {
   const [newAudioTracks, setNewAudioTracks] = useState("0");
   const [newResourcesCount, setNewResourcesCount] = useState("0");
   const [newXpReward, setNewXpReward] = useState("100");
-  const [newHasCertificate, setNewHasCertificate] = useState(false);
   const [newLanguage, setNewLanguage] = useState("English");
   const [newUpdatedAtText, setNewUpdatedAtText] = useState("Updated Today");
   const [newAudioDuration, setNewAudioDuration] = useState("2 hrs");
@@ -36,7 +35,6 @@ export default function AdminPage() {
   const [editAudioTracks, setEditAudioTracks] = useState("0");
   const [editResourcesCount, setEditResourcesCount] = useState("0");
   const [editXpReward, setEditXpReward] = useState("100");
-  const [editHasCertificate, setEditHasCertificate] = useState(false);
   const [editLanguage, setEditLanguage] = useState("English");
   const [editUpdatedAtText, setEditUpdatedAtText] = useState("Updated Today");
   const [editAudioDuration, setEditAudioDuration] = useState("2 hrs");
@@ -71,7 +69,6 @@ export default function AdminPage() {
         audioTracks: parseInt(newAudioTracks) || 0,
         resourcesCount: parseInt(newResourcesCount) || 0,
         xpReward: parseInt(newXpReward) || 100,
-        hasCertificate: newHasCertificate,
         language: newLanguage.trim() || "English",
         updatedAtText: newUpdatedAtText.trim() || "Updated Today",
         audioDuration: newAudioDuration.trim() || "2 hrs",
@@ -87,7 +84,6 @@ export default function AdminPage() {
       setNewAudioTracks("0");
       setNewResourcesCount("0");
       setNewXpReward("100");
-      setNewHasCertificate(false);
       setNewLanguage("English");
       setNewUpdatedAtText("Updated Today");
       setNewAudioDuration("2 hrs");
@@ -124,7 +120,6 @@ export default function AdminPage() {
     setEditAudioTracks(course.audioTracks?.toString() || "0");
     setEditResourcesCount(course.resourcesCount?.toString() || "0");
     setEditXpReward(course.xpReward?.toString() || "100");
-    setEditHasCertificate(course.hasCertificate || false);
     setEditLanguage(course.language || "English");
     setEditUpdatedAtText(course.updatedAtText || "Updated Today");
     setEditAudioDuration(course.audioDuration || "2 hrs");
@@ -142,7 +137,6 @@ export default function AdminPage() {
     setEditAudioTracks("0");
     setEditResourcesCount("0");
     setEditXpReward("100");
-    setEditHasCertificate(false);
     setEditLanguage("English");
     setEditUpdatedAtText("Updated Today");
     setEditAudioDuration("2 hrs");
@@ -163,7 +157,6 @@ export default function AdminPage() {
         audioTracks: parseInt(editAudioTracks) || 0,
         resourcesCount: parseInt(editResourcesCount) || 0,
         xpReward: parseInt(editXpReward) || 100,
-        hasCertificate: editHasCertificate,
         language: editLanguage.trim() || "English",
         updatedAtText: editUpdatedAtText.trim() || "Updated Today",
         audioDuration: editAudioDuration.trim() || "2 hrs"
@@ -177,8 +170,8 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="flex flex-col flex-1 bg-background">
-      <main className="flex-1 px-4 sm:px-6 md:px-12 lg:px-20 pt-3 pb-8 lg:pt-6 lg:pb-12 max-w-7xl mx-auto w-full">
+    <div className="flex flex-col flex-1">
+      <main className="flex-1 pt-0 pb-8 w-full">
         {/* Premium Header */}
         <div className="relative mb-8 rounded-2xl bg-[#111111] border border-white/10 overflow-hidden shadow-lg">
           <div className="absolute inset-0 bg-linear-to-r from-primary/10 via-transparent to-blue-500/10 opacity-50"></div>
@@ -285,7 +278,7 @@ export default function AdminPage() {
             </div>
 
             {/* New Metadata Form Fields */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Audio Pods</label>
                 <input
@@ -315,17 +308,6 @@ export default function AdminPage() {
                   value={newXpReward}
                   onChange={(e) => setNewXpReward(e.target.value)}
                 />
-              </div>
-              <div className="flex items-center h-full pt-6">
-                <label className="flex items-center gap-3 cursor-pointer text-xs font-semibold text-gray-400 select-none">
-                  <input
-                    type="checkbox"
-                    className="w-4 h-4 rounded border-white/10 bg-black/50 text-primary focus:ring-0 focus:ring-offset-0 cursor-pointer accent-primary"
-                    checked={newHasCertificate}
-                    onChange={(e) => setNewHasCertificate(e.target.checked)}
-                  />
-                  <span>CERTIFICATE INCLUDED</span>
-                </label>
               </div>
             </div>
 
@@ -486,27 +468,14 @@ export default function AdminPage() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <label className="block text-[10px] text-gray-400 font-bold mb-1 uppercase tracking-wider">XP Reward</label>
-                        <input
-                          type="number"
-                          className="w-full bg-black/50 border border-white/10 rounded-lg px-2 py-1 text-white focus:outline-none focus:border-primary text-xs"
-                          value={editXpReward}
-                          onChange={(e) => setEditXpReward(e.target.value)}
-                        />
-                      </div>
-                      <div className="flex items-center h-full pt-4">
-                        <label className="flex items-center gap-2 cursor-pointer text-[10px] text-gray-400 font-bold select-none">
-                          <input
-                            type="checkbox"
-                            className="w-3.5 h-3.5 rounded border-white/10 bg-black/50 text-primary cursor-pointer accent-primary"
-                            checked={editHasCertificate}
-                            onChange={(e) => setEditHasCertificate(e.target.checked)}
-                          />
-                          <span>CERTIFICATE</span>
-                        </label>
-                      </div>
+                    <div>
+                      <label className="block text-[10px] text-gray-400 font-bold mb-1 uppercase tracking-wider">XP Reward</label>
+                      <input
+                        type="number"
+                        className="w-full bg-black/50 border border-white/10 rounded-lg px-2 py-1 text-white focus:outline-none focus:border-primary text-xs"
+                        value={editXpReward}
+                        onChange={(e) => setEditXpReward(e.target.value)}
+                      />
                     </div>
 
                     <div className="grid grid-cols-3 gap-2">
@@ -582,7 +551,6 @@ export default function AdminPage() {
                         <div><span className="text-gray-600">Pods:</span> {course.audioTracks || 0}</div>
                         <div><span className="text-gray-600">PDFs:</span> {course.resourcesCount || 0}</div>
                         <div><span className="text-gray-600">XP:</span> {course.xpReward || 100}</div>
-                        <div><span className="text-gray-600">Cert:</span> {course.hasCertificate ? "Yes" : "No"}</div>
                         <div><span className="text-gray-600">Lang:</span> {course.language || "English"}</div>
                         <div><span className="text-gray-600">Update:</span> {course.updatedAtText || "Updated Today"}</div>
                         <div><span className="text-gray-600">Listen Time:</span> {course.audioDuration || "2 hrs"}</div>

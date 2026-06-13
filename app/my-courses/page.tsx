@@ -9,6 +9,7 @@ import CourseSkeleton from "@/components/CourseSkeleton";
 import EmptyState from "@/components/EmptyState";
 import { BookOpen, Loader2, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { safeConvertToDate, safeGetMillis } from "@/lib/utils";
 
 export default function MyCourses() {
   const { user, isAdmin, loading: authLoading } = useAuth();
@@ -41,11 +42,39 @@ export default function MyCourses() {
         if (!isAdmin) {
           const reqQuery = query(
             collection(db, "course_requests"),
-            where("userId", "==", user.uid),
-            where("status", "==", "approved")
+            where("userId", "==", user.uid)
           );
           const reqSnap = await getDocs(reqQuery);
-          const approvedCourseIds = new Set(reqSnap.docs.map(d => d.data().courseId));
+          
+          // Map each courseId to its latest request
+          const latestRequestsByCourse: Record<string, any> = {};
+          
+          reqSnap.docs.forEach(doc => {
+            const data = doc.data();
+            const courseId = data.courseId;
+            if (!courseId) return;
+            
+            const existing = latestRequestsByCourse[courseId];
+            const currentReqTime = safeGetMillis(data.requestedAt, Date.now());
+            const existingReqTime = safeGetMillis(existing?.requestedAt, 0);
+            
+            if (!existing || currentReqTime > existingReqTime) {
+              latestRequestsByCourse[courseId] = data;
+            }
+          });
+
+          const approvedCourseIds = new Set(
+            Object.keys(latestRequestsByCourse)
+              .filter(courseId => {
+                const reqData = latestRequestsByCourse[courseId];
+                if (reqData.status !== "approved") return false;
+                const expiresAt = safeConvertToDate(reqData.restrictions?.expiresAt);
+                if (expiresAt && expiresAt.getTime() < Date.now()) {
+                  return false;
+                }
+                return true;
+              })
+          );
           coursesData = coursesData.filter(c => approvedCourseIds.has(c.id));
         }
 
@@ -174,7 +203,7 @@ export default function MyCourses() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
           {isDataLoading ? (
-            Array.from({ length: 8 }).map((_, i) => <CourseSkeleton key={i} />)
+            Array.from({ length: 4 }).map((_, i) => <CourseSkeleton key={i} />)
           ) : courses.length === 0 ? (
             <div className="col-span-full">
               <EmptyState title="No Courses Enrolled" description="You haven't started any courses yet. Check back when your admin assigns you a course." />
@@ -208,7 +237,6 @@ export default function MyCourses() {
                 audioTracks={course.audioTracks}
                 resourcesCount={course.resourcesCount}
                 xpReward={course.xpReward}
-                hasCertificate={course.hasCertificate}
                 language={course.language}
                 updatedAtText={course.updatedAtText}
                 audioDuration={course.audioDuration}

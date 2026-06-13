@@ -180,7 +180,6 @@ export default function Home() {
                   audioTracks={course.audioTracks}
                   resourcesCount={course.resourcesCount}
                   xpReward={course.xpReward}
-                  hasCertificate={course.hasCertificate}
                   language={course.language}
                   updatedAtText={course.updatedAtText}
                   audioDuration={course.audioDuration}

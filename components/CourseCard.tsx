@@ -27,7 +27,6 @@ interface CourseCardProps {
   audioTracks?: number;
   resourcesCount?: number;
   xpReward?: number;
-  hasCertificate?: boolean;
   language?: string;
   updatedAtText?: string;
   audioDuration?: string;
@@ -44,7 +43,6 @@ export default function CourseCard({
   audioTracks = 0,
   resourcesCount = 0,
   xpReward = 100,
-  hasCertificate = false,
   language = "English",
   updatedAtText = "Updated Today",
   audioDuration = ""
@@ -146,7 +144,7 @@ export default function CourseCard({
         </CardDescription>
 
         {/* iOS-Style Translucent Badges */}
-        {(audioTracks > 0 || resourcesCount > 0 || xpReward > 0 || hasCertificate) && (
+        {(audioTracks > 0 || resourcesCount > 0 || xpReward > 0) && (
           <div className="flex flex-wrap gap-1.5 mb-4 mt-1">
             {audioTracks > 0 && (
               <div className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide bg-[#5e5ce6]/10 text-[#7d7aff] border border-[#5e5ce6]/20 shadow-[0_2px_8px_rgba(94,92,230,0.05)]">
@@ -166,13 +164,6 @@ export default function CourseCard({
               <div className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide bg-[#ff9f0a]/10 text-[#ff9f0a] border border-[#ff9f0a]/20 shadow-[0_2px_8px_rgba(255,159,10,0.05)]">
                 <Zap size={11} className="stroke-[2.5]" />
                 <span>+{xpReward} XP</span>
-              </div>
-            )}
-
-            {hasCertificate && (
-              <div className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide bg-[#30d158]/10 text-[#30d158] border border-[#30d158]/20 shadow-[0_2px_8px_rgba(48,209,88,0.05)]">
-                <Award size={11} className="stroke-[2.5]" />
-                <span>Cert. Included</span>
               </div>
             )}
           </div>

@@ -6,6 +6,7 @@ import { db } from "@/lib/firebase";
 import Link from "next/link";
 import { ChevronLeft, Folder, Lock, CheckCircle2, XCircle, ChevronRight, BarChart2, Headphones, FileText, Zap, Award, Globe, RotateCw, Volume2 } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
+import { safeConvertToDate, safeGetMillis } from "@/lib/utils";
 
 export default function PublicCoursePage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -13,7 +14,7 @@ export default function PublicCoursePage({ params }: { params: Promise<{ id: str
 
   const [course, setCourse] = useState<any>(null);
   const [folders, setFolders] = useState<any[]>([]);
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [accessStatus, setAccessStatus] = useState<"pending" | "approved" | "rejected" | null>(null);
   const [requestingAccess, setRequestingAccess] = useState(false);
   const [isLoadingAccess, setIsLoadingAccess] = useState(true);
@@ -29,16 +30,29 @@ export default function PublicCoursePage({ params }: { params: Promise<{ id: str
       }
 
       if (user && courseData) {
-        // Check Access Status
-        const reqQuery = query(
-          collection(db, "course_requests"),
-          where("userId", "==", user.uid),
-          where("courseId", "==", courseId),
-          limit(1)
-        );
-        const reqSnap = await getDocs(reqQuery);
-        if (!reqSnap.empty) {
-          setAccessStatus(reqSnap.docs[0].data().status);
+        if (isAdmin) {
+          setAccessStatus("approved");
+        } else {
+          // Check Access Status
+          const reqQuery = query(
+            collection(db, "course_requests"),
+            where("userId", "==", user.uid),
+            where("courseId", "==", courseId)
+          );
+          const reqSnap = await getDocs(reqQuery);
+          if (!reqSnap.empty) {
+            const reqs = reqSnap.docs.map(d => ({ id: d.id, ...d.data() as any }));
+            // Sort in-memory: newest first using safeGetMillis
+            reqs.sort((a, b) => safeGetMillis(b.requestedAt, Date.now()) - safeGetMillis(a.requestedAt, Date.now()));
+            
+            const latestReq = reqs[0];
+            const expiresAt = safeConvertToDate(latestReq.restrictions?.expiresAt);
+            if (latestReq.status === "approved" && expiresAt && expiresAt.getTime() < Date.now()) {
+              setAccessStatus(null);
+            } else {
+              setAccessStatus(latestReq.status);
+            }
+          }
         }
       }
       setIsLoadingAccess(false);
@@ -50,7 +64,7 @@ export default function PublicCoursePage({ params }: { params: Promise<{ id: str
       setFolders(foldersData);
     };
     fetchCourseAndFolders();
-  }, [courseId, user]);
+  }, [courseId, user, isAdmin]);
 
   const handleRequestAccess = async () => {
     if (!user || !course) return;
@@ -140,11 +154,6 @@ export default function PublicCoursePage({ params }: { params: Promise<{ id: str
             {course.xpReward > 0 && (
               <span className="text-[10px] bg-[#ff9f0a]/10 text-[#ff9f0a] border border-[#ff9f0a]/20 px-2.5 py-0.5 rounded-full font-semibold flex items-center gap-1">
                 <Zap size={10} /> +{course.xpReward} XP
-              </span>
-            )}
-            {course.hasCertificate && (
-              <span className="text-[10px] bg-[#30d158]/10 text-[#30d158] border border-[#30d158]/20 px-2.5 py-0.5 rounded-full font-semibold flex items-center gap-1">
-                <Award size={10} /> Cert. Included
               </span>
             )}
           </div>

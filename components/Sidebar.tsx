@@ -22,7 +22,6 @@ export default function Sidebar({ isOpen = false, setIsOpen }: SidebarProps) {
       { name: "Admin Panel", href: "/admin", icon: Shield },
       { name: "Requests", href: "/admin/requests", icon: Inbox }
     ] : []),
-    { name: "Certificates", href: "/certificates", icon: Award },
     { name: "Settings", href: "/settings", icon: Settings },
   ];
 
