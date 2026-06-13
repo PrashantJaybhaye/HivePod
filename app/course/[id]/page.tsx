@@ -106,25 +106,25 @@ export default function PublicCoursePage({ params }: { params: Promise<{ id: str
   return (
     <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto w-full space-y-8">
       {/* iOS-style Back Chevron Button */}
-      <Link href="/my-courses" className="inline-flex items-center gap-1.5 text-xs font-semibold text-white/60 hover:text-white transition-colors bg-white/[0.04] border border-white/[0.08] px-3.5 py-2 rounded-full cursor-pointer w-fit">
+      <Link href="/my-courses" className="inline-flex items-center gap-1.5 text-xs font-semibold text-white/60 hover:text-white transition-colors bg-white/4 border border-white/8 px-3.5 py-2 rounded-full cursor-pointer w-fit">
         <ChevronLeft size={14} /> Back to Courses
       </Link>
 
       {/* Glassmorphic Hero Banner */}
-      <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.015] bg-gradient-to-b from-white/[0.04] to-transparent backdrop-blur-[32px] p-6 md:p-8 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)]">
+      <div className="relative overflow-hidden rounded-2xl border border-white/8 bg-white/1.5 bg-linear-to-b from-white/4 to-transparent backdrop-blur-[32px] p-6 md:p-8 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)]">
         {/* Liquid sheen light reflection */}
-        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.01] to-white/[0.04] pointer-events-none" />
-        <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/[0.12] to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-linear-to-tr from-transparent via-white/1 to-white/4 pointer-events-none" />
+        <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-white/12 to-transparent pointer-events-none" />
 
         <div className="relative z-10 space-y-4">
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide bg-[#ff453a]/10 border border-[#ff453a]/20 text-[#ff453a] uppercase">
               Course
             </span>
-            <span className="text-[10px] text-white/50 bg-white/[0.04] border border-white/[0.08] px-2.5 py-0.5 rounded-full font-medium">
+            <span className="text-[10px] text-white/50 bg-white/4 border border-white/8 px-2.5 py-0.5 rounded-full font-medium">
               {derivedCategory}
             </span>
-            <span className="text-[10px] text-white/50 bg-white/[0.04] border border-white/[0.08] px-2.5 py-0.5 rounded-full font-medium flex items-center gap-1">
+            <span className="text-[10px] text-white/50 bg-white/4 border border-white/8 px-2.5 py-0.5 rounded-full font-medium flex items-center gap-1">
               <BarChart2 size={10} /> {derivedDifficulty}
             </span>
             {course.audioTracks > 0 && (
@@ -203,7 +203,7 @@ export default function PublicCoursePage({ params }: { params: Promise<{ id: str
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {folders.map((folder) => (
                   <Link href={`/folder/${folder.id}`} key={folder.id}>
-                    <div className="bg-white/[0.02] border border-white/[0.08] backdrop-blur-md rounded-xl p-4 flex items-center justify-between hover:border-white/20 active:scale-[0.98] transition-all duration-200 cursor-pointer shadow-md group">
+                    <div className="bg-white/2 border border-white/8 backdrop-blur-md rounded-xl p-4 flex items-center justify-between hover:border-white/20 active:scale-[0.98] transition-all duration-200 cursor-pointer shadow-md group">
                       <div className="flex items-center gap-3 min-w-0">
                         <div className="p-2 bg-[#ff453a]/10 rounded-lg text-[#ff453a] border border-[#ff453a]/20">
                           <Folder size={18} />
@@ -216,7 +216,7 @@ export default function PublicCoursePage({ params }: { params: Promise<{ id: str
                 ))}
 
                 {folders.length === 0 && (
-                  <div className="col-span-full py-10 text-center border border-dashed border-white/10 rounded-xl bg-white/[0.01]">
+                  <div className="col-span-full py-10 text-center border border-dashed border-white/10 rounded-xl bg-white/1">
                     <p className="text-white/45 text-sm">This course doesn't have any folders yet.</p>
                   </div>
                 )}
@@ -224,12 +224,12 @@ export default function PublicCoursePage({ params }: { params: Promise<{ id: str
             </div>
           ) : (
             /* iOS Style macOS Security Lock Panel */
-            <div className="bg-white/[0.015] border border-white/[0.08] rounded-2xl p-8 flex flex-col items-center justify-center text-center max-w-md mx-auto shadow-xl relative overflow-hidden backdrop-blur-md">
-              <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/[0.1] to-transparent pointer-events-none" />
+            <div className="bg-white/1.5 border border-white/8 rounded-2xl p-8 flex flex-col items-center justify-center text-center max-w-md mx-auto shadow-xl relative overflow-hidden backdrop-blur-md">
+              <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
 
               {!user ? (
                 <>
-                  <div className="p-4 bg-white/[0.03] border border-white/[0.08] rounded-full text-white/50 mb-4 shadow-inner">
+                  <div className="p-4 bg-white/3 border border-white/8 rounded-full text-white/50 mb-4 shadow-inner">
                     <Lock size={32} />
                   </div>
                   <h3 className="text-lg font-bold text-white mb-1">Login Required</h3>

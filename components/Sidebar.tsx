@@ -27,7 +27,7 @@ export default function Sidebar({ isOpen = false, setIsOpen }: SidebarProps) {
   ];
 
   return (
-    <aside className={`w-[260px] shrink-0 bg-[#060606]/80 border-r border-white/[0.04] backdrop-blur-2xl h-screen flex flex-col fixed left-0 top-0 z-20 transition-transform duration-300
+    <aside className={`w-[260px] shrink-0 bg-[#060606]/80 border-r border-white/4 backdrop-blur-2xl h-screen flex flex-col fixed left-0 top-0 z-20 transition-transform duration-300
       ${isOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0
     `}>
       {/* Brand Header */}
@@ -36,7 +36,7 @@ export default function Sidebar({ isOpen = false, setIsOpen }: SidebarProps) {
           href="/"
           className="flex items-center gap-2 group cursor-pointer"
         >
-          <span className="text-white font-black tracking-tight text-lg bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent group-hover:to-white transition-all duration-300">
+          <span className="font-black tracking-tight text-lg bg-linear-to-r from-white to-white/70 bg-clip-text text-transparent group-hover:to-white transition-all duration-300">
             HivePod
           </span>
         </Link>
@@ -55,8 +55,8 @@ export default function Sidebar({ isOpen = false, setIsOpen }: SidebarProps) {
                   transition={{ type: "spring", stiffness: 400, damping: 25 }}
                   className={`flex items-center gap-3 px-3.5 py-2 rounded-xl transition-all duration-200 text-xs font-semibold tracking-wide cursor-pointer relative
                     ${isActive
-                      ? "bg-white/[0.06] text-white border border-white/[0.06] shadow-sm"
-                      : "text-white/50 hover:text-white hover:bg-white/[0.02]"
+                      ? "bg-white/6 text-white border border-white/6 shadow-sm"
+                      : "text-white/50 hover:text-white hover:bg-white/2"
                     }
                   `}
                 >

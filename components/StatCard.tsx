@@ -15,14 +15,14 @@ export default function StatCard({ title, value, subtext, icon: Icon, index = 0 
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay: index * 0.05 }}
-      className="bg-white/[0.015] backdrop-blur-md rounded-2xl p-4 sm:p-5 flex flex-col justify-between transition-all duration-300 hover:bg-white/[0.03] active:scale-[0.99] cursor-pointer shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12),_inset_0_0_0_1px_rgba(255,255,255,0.06),_0_8px_32px_rgba(0,0,0,0.25)] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.2),_inset_0_0_0_1px_rgba(255,255,255,0.15),_0_12px_38px_rgba(0,0,0,0.35)]"
+      className="bg-white/1.5 backdrop-blur-md rounded-2xl p-4 sm:p-5 flex flex-col justify-between transition-all duration-300 hover:bg-white/3 active:scale-[0.99] cursor-pointer shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12),inset_0_0_0_1px_rgba(255,255,255,0.06),0_8px_32px_rgba(0,0,0,0.25)] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.2),inset_0_0_0_1px_rgba(255,255,255,0.15),0_12px_38px_rgba(0,0,0,0.35)]"
     >
       <div className="flex justify-between items-center mb-4">
         <span className="text-[10px] md:text-xs font-semibold tracking-wider text-white/40 uppercase">
           {title}
         </span>
-        <div className="p-1.5 rounded-lg bg-white/[0.03] border border-white/[0.06] text-white/50">
-          <Icon size={14} className="stroke-[2]" />
+        <div className="p-1.5 rounded-lg bg-white/3 border border-white/6 text-white/50">
+          <Icon size={14} className="stroke-2" />
         </div>
       </div>
       <div>

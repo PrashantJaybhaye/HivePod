@@ -119,19 +119,19 @@ export default function CourseCard({
   const BtnIcon = btnConfig.icon;
 
   return (
-    <Card className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.015] bg-gradient-to-b from-white/[0.04] to-transparent backdrop-blur-[32px] flex flex-col h-full transition-all duration-300 active:scale-[0.98] active:bg-white/[0.08] shadow-[0_8px_32px_0_rgba(0,0,0,0.5)]">
+    <Card className="relative overflow-hidden rounded-2xl border border-white/8 bg-white/1.5 bg-linear-to-b from-white/4 to-transparent backdrop-blur-[32px] flex flex-col h-full transition-all duration-300 active:scale-[0.98] active:bg-white/8 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)]">
       {/* Liquid glass light reflection sheen */}
-      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.01] to-white/[0.04] pointer-events-none" />
+      <div className="absolute inset-0 bg-linear-to-tr from-transparent via-white/1 to-white/4 pointer-events-none" />
 
       {/* Top border catch-light effect */}
-      <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/[0.12] to-transparent pointer-events-none" />
+      <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-white/12 to-transparent pointer-events-none" />
 
       <CardHeader className="flex flex-row justify-between items-center space-y-0 pb-3 relative z-10">
         <div className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide flex items-center gap-1.5 w-fit ${statusColor}`}>
           <span className={`w-1.5 h-1.5 rounded-full ${statusDot} ${statusDotPulse}`}></span>
           {statusLabel.toUpperCase()}
         </div>
-        <span className="text-[10px] text-white/50 bg-white/[0.04] border border-white/[0.08] px-2.5 py-0.5 rounded-full font-medium tracking-wide">
+        <span className="text-[10px] text-white/50 bg-white/4 border border-white/8 px-2.5 py-0.5 rounded-full font-medium tracking-wide">
           {derivedCategory}
         </span>
       </CardHeader>
@@ -179,7 +179,7 @@ export default function CourseCard({
         )}
 
         {/* iOS-Style Product Sheet Spec Row */}
-        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[10px] font-bold tracking-wider text-white/55 uppercase mb-4 mt-auto pt-3.5 border-t border-white/[0.06]">
+        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[10px] font-bold tracking-wider text-white/55 uppercase mb-4 mt-auto pt-3.5 border-t border-white/6">
           <span>{totalItems} {totalItems === 1 ? "MODULE" : "MODULES"}</span>
           <div className="w-px h-2.5 bg-white/15" />
           <span>{(audioDuration || durationText).toUpperCase()}</span>
@@ -205,9 +205,9 @@ export default function CourseCard({
             <span className="text-[10px] text-white/50 uppercase font-semibold tracking-wider">Progress</span>
             <span className="text-[11px] text-white/70 font-semibold">{progressPercentage}%</span>
           </div>
-          <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+          <div className="h-1.5 bg-white/6 rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-[#ff453a] to-[#ff9f0a] rounded-full transition-all duration-500"
+              className="h-full bg-linear-to-r from-[#ff453a] to-[#ff9f0a] rounded-full transition-all duration-500"
               style={{ width: `${progressPercentage}%` }}
             ></div>
           </div>

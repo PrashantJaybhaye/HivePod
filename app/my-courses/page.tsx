@@ -7,7 +7,7 @@ import { db } from "@/lib/firebase";
 import CourseCard from "@/components/CourseCard";
 import CourseSkeleton from "@/components/CourseSkeleton";
 import EmptyState from "@/components/EmptyState";
-import { BookOpen, Loader2 } from "lucide-react";
+import { BookOpen, Loader2, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function MyCourses() {
@@ -18,6 +18,8 @@ export default function MyCourses() {
   const [completedItemsByCourse, setCompletedItemsByCourse] = useState<Record<string, number>>({});
   const [courseItemCounts, setCourseItemCounts] = useState<Record<string, number>>({});
   const [isDataLoading, setIsDataLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<"all" | "active" | "completed">("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -106,50 +108,68 @@ export default function MyCourses() {
     return { ...course, totalItems, completedItems, progressPercentage };
   });
 
+  const filteredCourses = coursesWithCalculations.filter(course => {
+    const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      course.description.toLowerCase().includes(searchQuery.toLowerCase());
+
+    if (activeTab === "active") {
+      return matchesSearch && course.progressPercentage > 0 && course.progressPercentage < 100;
+    }
+    if (activeTab === "completed") {
+      return matchesSearch && course.progressPercentage === 100;
+    }
+    return matchesSearch;
+  });
+
   return (
     <div className="flex flex-col flex-1 bg-background">
-      <main className="flex-1 px-4 sm:px-6 md:px-12 lg:px-20 pt-3 pb-8 lg:pt-6 lg:pb-12 max-w-7xl mx-auto w-full">
-        {/* Compact & Premium Header */}
-        <div className="relative mb-8 rounded-2xl bg-[#111111] border border-white/10 overflow-hidden shadow-lg">
-          {/* Subtle background glow */}
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-blue-500/10 opacity-50"></div>
-
-          <div className="relative px-6 py-5 md:px-8 md:py-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-            <div className="flex items-center gap-5">
-              <div>
-                <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white mb-1">
-                  My Courses
-                </h2>
-                <p className="text-sm text-gray-400">
-                  Pick up exactly where you left off.
-                </p>
-              </div>
-            </div>
-
-            {/* Quick Stats (Compact) */}
+      <main className="flex-1 px-4 sm:px-6 md:px-12 lg:px-20 pt-4 pb-8 lg:pt-8 lg:pb-12 max-w-7xl mx-auto w-full">
+        {/* iOS Ultra-Compact Single-Row Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-4 border-b border-white/4">
+          {/* Left: Title + Count Badge */}
+          <div className="flex items-center gap-2.5">
+            <h2 className="text-xl md:text-2xl font-bold tracking-tight text-white">
+              My Courses
+            </h2>
             {!isDataLoading && courses.length > 0 && (
-              <div className="flex items-center gap-5 bg-black/30 backdrop-blur-sm rounded-xl px-5 py-2.5 border border-white/5">
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-bold text-white">{courses.length}</span>
-                  <span className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Enrolled</span>
-                </div>
-                <div className="w-px h-6 bg-white/10"></div>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-bold text-white">
-                    {coursesWithCalculations.filter(c => c.progressPercentage === 100).length}
-                  </span>
-                  <span className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Completed</span>
-                </div>
-              </div>
+              <span className="bg-white/10 px-2 py-0.5 rounded-full text-xs font-semibold text-white/60">
+                {courses.length}
+              </span>
             )}
           </div>
-        </div>
 
-        {/* Section Title */}
-        <div className="mb-6 flex items-center justify-between">
-          <h3 className="text-xl md:text-2xl font-bold text-neutral-200">
-            {courses.length > 0 ? "Continue Learning" : "Your Learning Path"}
-          </h3>
+          {/* Right: Search & Segmented Control */}
+          {!isDataLoading && courses.length > 0 && (
+            <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+              {/* Search Bar */}
+              <div className="relative w-full sm:w-48">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={13} />
+                <input
+                  type="text"
+                  placeholder="Search courses..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-white/3 border border-white/8 hover:border-white/15 focus:border-white/20 focus:bg-white/5 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder-white/35 transition-all outline-none"
+                />
+              </div>
+
+              {/* Segmented Control Pills */}
+              <div className="flex bg-white/2 border border-white/6 rounded-xl p-0.5 w-full sm:w-auto justify-between">
+                {(["all", "active", "completed"] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all duration-200 capitalize flex-1 sm:flex-initial text-center cursor-pointer ${activeTab === tab
+                      ? "bg-white/8 text-white shadow-xs"
+                      : "text-white/45 hover:text-white/70"
+                      }`}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
@@ -159,8 +179,18 @@ export default function MyCourses() {
             <div className="col-span-full">
               <EmptyState title="No Courses Enrolled" description="You haven't started any courses yet. Check back when your admin assigns you a course." />
             </div>
+          ) : filteredCourses.length === 0 ? (
+            <div className="col-span-full py-12 flex flex-col items-center justify-center text-center">
+              <p className="text-sm text-white/40 mb-1.5">No courses match your criteria.</p>
+              <button
+                onClick={() => { setSearchQuery(""); setActiveTab("all"); }}
+                className="text-xs font-semibold text-white/60 hover:text-white underline cursor-pointer"
+              >
+                Clear filters
+              </button>
+            </div>
           ) : (
-            coursesWithCalculations.map((course, index) => (
+            filteredCourses.map((course, index) => (
               <CourseCard
                 key={course.id}
                 id={course.id}

@@ -37,7 +37,7 @@ export default function Header({ toggleSidebar }: { toggleSidebar?: () => void }
   if (pathname.includes("/admin")) title = "Admin Portal";
 
   return (
-    <header className="h-14 shrink-0 border-b border-white/[0.04] bg-[#060606]/60 backdrop-blur-2xl flex items-center justify-between px-6 sticky top-0 z-10 w-full">
+    <header className="h-14 shrink-0 border-b border-white/4 bg-[#060606]/60 backdrop-blur-2xl flex items-center justify-between px-6 sticky top-0 z-10 w-full">
       <div className="flex items-center gap-4">
         {toggleSidebar && (
           <button 
@@ -53,22 +53,22 @@ export default function Header({ toggleSidebar }: { toggleSidebar?: () => void }
       </div>
 
       {/* Center Links - iOS style pill nav */}
-      <nav className="absolute left-1/2 -translate-x-1/2 hidden lg:flex items-center gap-1 bg-white/[0.03] border border-white/[0.05] p-1 rounded-full text-xs font-bold">
+      <nav className="absolute left-1/2 -translate-x-1/2 hidden lg:flex items-center gap-1 bg-white/3 border border-white/5 p-1 rounded-full text-xs font-bold">
         <Link 
           href="/" 
-          className="text-white px-3.5 py-1.5 rounded-full hover:bg-white/[0.04] transition-all cursor-pointer"
+          className="text-white px-3.5 py-1.5 rounded-full hover:bg-white/4 transition-all cursor-pointer"
         >
           Catalog
         </Link>
         <Link 
           href="/" 
-          className="text-white/50 px-3.5 py-1.5 rounded-full hover:text-white hover:bg-white/[0.04] transition-all cursor-pointer"
+          className="text-white/50 px-3.5 py-1.5 rounded-full hover:text-white hover:bg-white/4 transition-all cursor-pointer"
         >
           Community
         </Link>
         <Link 
           href="/" 
-          className="text-white/50 px-3.5 py-1.5 rounded-full hover:text-white hover:bg-white/[0.04] transition-all cursor-pointer"
+          className="text-white/50 px-3.5 py-1.5 rounded-full hover:text-white hover:bg-white/4 transition-all cursor-pointer"
         >
           Support
         </Link>
@@ -85,7 +85,7 @@ export default function Header({ toggleSidebar }: { toggleSidebar?: () => void }
         </button>
 
         {/* Separator */}
-        <div className="border-l border-white/[0.06] h-4 mx-0.5 hidden sm:block"></div>
+        <div className="border-l border-white/6 h-4 mx-0.5 hidden sm:block"></div>
 
         {/* User Profile Info */}
         <div className="flex items-center gap-2.5">
@@ -107,13 +107,13 @@ export default function Header({ toggleSidebar }: { toggleSidebar?: () => void }
         </div>
 
         {/* Separator */}
-        <div className="border-l border-white/[0.06] h-4 mx-0.5 hidden sm:block"></div>
+        <div className="border-l border-white/6 h-4 mx-0.5 hidden sm:block"></div>
 
         {/* Logout Button */}
         <button 
           onClick={handleLogout}
           disabled={isLoggingOut}
-          className="text-[11px] font-bold text-white/70 hover:text-white border border-white/[0.08] hover:bg-white/[0.04] px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          className="text-[11px] font-bold text-white/70 hover:text-white border border-white/8 hover:bg-white/4 px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <span className="hidden sm:inline">{isLoggingOut ? "Signing out..." : "Sign Out"}</span>
           {isLoggingOut ? <Loader2 size={12} className="animate-spin" /> : <LogOut size={12} />}

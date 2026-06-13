@@ -1,6 +1,6 @@
 export default function CourseSkeleton() {
   return (
-    <div className="relative flex flex-col h-full rounded-2xl border border-white/[0.06] bg-neutral-900/40 p-5 overflow-hidden min-h-[360px]">
+    <div className="relative flex flex-col h-full rounded-2xl border border-white/6 bg-neutral-900/40 p-5 overflow-hidden min-h-[360px]">
       {/* Card Header Shimmer */}
       <div className="flex flex-row justify-between items-center pb-3.5 relative z-10">
         <div className="h-5 w-24 rounded-full shimmer-bg"></div>
@@ -25,7 +25,7 @@ export default function CourseSkeleton() {
         </div>
 
         {/* Spec Sheet Row Shimmer */}
-        <div className="flex items-center gap-2.5 mb-4 pt-3.5 border-t border-white/[0.05] mt-auto">
+        <div className="flex items-center gap-2.5 mb-4 pt-3.5 border-t border-white/5 mt-auto">
           <div className="h-3 w-14 rounded shimmer-bg"></div>
           <div className="w-1 h-1 rounded-full bg-white/10"></div>
           <div className="h-3 w-10 rounded shimmer-bg"></div>
