@@ -38,7 +38,7 @@ export default function Header({ toggleSidebar }: { toggleSidebar?: () => void }
 
   return (
     <header className="h-14 shrink-0 border-b border-white/4 bg-[#060606]/60 backdrop-blur-2xl flex items-center justify-between px-6 sticky top-0 z-10 w-full">
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         {toggleSidebar && (
           <button 
             onClick={toggleSidebar} 
@@ -47,6 +47,13 @@ export default function Header({ toggleSidebar }: { toggleSidebar?: () => void }
             <Menu size={18} />
           </button>
         )}
+        
+        {/* Mobile Logo & Brand */}
+        <div className="flex items-center gap-2 md:hidden">
+          <img src="/logo.png" alt="HivePod Logo" className="w-5.5 h-5.5 object-contain" />
+          <span className="font-black text-sm tracking-tight text-white bg-linear-to-r from-white to-white/80 bg-clip-text text-transparent">HivePod</span>
+        </div>
+
         <h1 className="text-xs font-bold tracking-wider text-white/50 uppercase hidden md:block">
           {title}
         </h1>

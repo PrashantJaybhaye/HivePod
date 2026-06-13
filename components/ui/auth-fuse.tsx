@@ -225,6 +225,11 @@ function SignInForm({ onError, onLoading }: { onError: (msg: string) => void; on
   return (
     <form onSubmit={handleSignIn} autoComplete="on" className="flex flex-col gap-8">
       <div className="flex flex-col items-center gap-2 text-center">
+        <img 
+          src="/logo.png" 
+          alt="HivePod Logo" 
+          className="w-12 h-12 object-contain mb-2" 
+        />
         <h1 className="text-2xl font-bold">Sign in to your account</h1>
         <p className="text-balance text-sm text-muted-foreground">Enter your email below to sign in</p>
       </div>
@@ -283,6 +288,11 @@ function SignUpForm({ onError, onLoading }: { onError: (msg: string) => void; on
   return (
     <form onSubmit={handleSignUp} autoComplete="on" className="flex flex-col gap-8">
       <div className="flex flex-col items-center gap-2 text-center">
+        <img 
+          src="/logo.png" 
+          alt="HivePod Logo" 
+          className="w-12 h-12 object-contain mb-2" 
+        />
         <h1 className="text-2xl font-bold">Create an account</h1>
         <p className="text-balance text-sm text-muted-foreground">Enter your details below to sign up</p>
       </div>

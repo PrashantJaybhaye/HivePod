@@ -33,8 +33,13 @@ export default function Sidebar({ isOpen = false, setIsOpen }: SidebarProps) {
       <div className="h-16 flex items-center justify-between px-6 shrink-0 relative">
         <Link
           href="/"
-          className="flex items-center gap-2 group cursor-pointer"
+          className="flex items-center gap-2.5 group cursor-pointer"
         >
+          <img 
+            src="/logo.png" 
+            alt="HivePod Logo" 
+            className="w-6 h-6 object-contain shrink-0" 
+          />
           <span className="font-black tracking-tight text-lg bg-linear-to-r from-white to-white/70 bg-clip-text text-transparent group-hover:to-white transition-all duration-300">
             HivePod
           </span>

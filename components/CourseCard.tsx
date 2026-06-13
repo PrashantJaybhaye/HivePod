@@ -79,6 +79,17 @@ export default function CourseCard({
 
   const derivedDifficulty = difficulty || "Beginner";
 
+  const derivedInstructor = instructor || (() => {
+    const lower = title.toLowerCase();
+    if (lower.includes("ccna") || lower.includes("cisco")) return "Cisco Expert";
+    if (lower.includes("security") || lower.includes("comptia")) return "Security Expert";
+    if (lower.includes("aws")) return "Cloud Architect";
+    return "HivePod Faculty Team";
+  })();
+
+  const derivedRating = rating || 4.8;
+  const derivedReviewsCount = reviewsCount || 12;
+
   // Format total duration nicely
   const formatDuration = (lessonsCount: number) => {
     const minutes = lessonsCount * 15; // Assume average 15 mins per lesson/audio pod
@@ -106,7 +117,7 @@ export default function CourseCard({
       };
     } else {
       return {
-        className: "w-full bg-white/[0.08] hover:bg-white/[0.12] border border-white/[0.08] text-white text-xs font-semibold py-2.5 rounded-xl active:scale-[0.97] transition-all duration-150 flex justify-center items-center gap-1.5 cursor-pointer",
+        className: "w-full bg-white/8 hover:bg-white/[0.12] border border-white/[0.08] text-white text-xs font-semibold py-2.5 rounded-xl active:scale-[0.97] transition-all duration-150 flex justify-center items-center gap-1.5 cursor-pointer",
         icon: Play,
         text: "Continue Learning"
       };
@@ -139,9 +150,16 @@ export default function CourseCard({
           {title}
         </CardTitle>
 
-        <CardDescription className="text-xs text-white/60 mb-4 line-clamp-2 flex-1 leading-relaxed font-normal">
+        <CardDescription className="text-xs text-white/60 mb-3 line-clamp-3 leading-relaxed font-normal">
           {description || "No description available for this course. Start learning today!"}
         </CardDescription>
+
+        {/* Instructor & Active Students Row */}
+        <div className="flex items-center justify-between gap-2 text-[10px] text-white/45 mb-4 flex-wrap">
+          <div className="flex items-center gap-1">
+            by <span className="text-white/75 font-semibold">{derivedInstructor}</span>
+          </div>
+        </div>
 
         {/* iOS-Style Translucent Badges */}
         {(audioTracks > 0 || resourcesCount > 0 || xpReward > 0) && (
@@ -170,23 +188,23 @@ export default function CourseCard({
         )}
 
         {/* iOS-Style Product Sheet Spec Row */}
-        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[10px] font-bold tracking-wider text-white/55 uppercase mb-4 mt-auto pt-3.5 border-t border-white/6">
-          <span>{totalItems} {totalItems === 1 ? "MODULE" : "MODULES"}</span>
-          <div className="w-px h-2.5 bg-white/15" />
-          <span>{(audioDuration || durationText).toUpperCase()}</span>
-          <div className="w-px h-2.5 bg-white/15" />
-          <span>{derivedDifficulty.toUpperCase()}</span>
-          {language && (
-            <>
-              <div className="w-px h-2.5 bg-white/15" />
-              <span>{language.toUpperCase()}</span>
-            </>
-          )}
+        <div className="flex flex-col gap-1.5 mb-4 mt-auto pt-3.5 border-t border-white/6">
+          <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[10px] font-bold tracking-wider text-white/55 uppercase">
+            <span>{totalItems} {totalItems === 1 ? "MODULE" : "MODULES"}</span>
+            <div className="w-px h-2.5 bg-white/15 shrink-0" />
+            <span>{(audioDuration || durationText).toUpperCase()}</span>
+            <div className="w-px h-2.5 bg-white/15 shrink-0" />
+            <span>{derivedDifficulty.toUpperCase()}</span>
+            <div className="w-px h-2.5 bg-white/15 shrink-0" />
+            {language && (
+              <>
+                <span>{language.toUpperCase()}</span>
+                <div className="w-px h-2.5 bg-white/15 shrink-0" />
+              </>
+            )}
+          </div>
           {updatedAtText && (
-            <>
-              <div className="w-px h-2.5 bg-white/15" />
-              <span className="text-white/35 font-normal tracking-normal normal-case">{updatedAtText}</span>
-            </>
+            <span className="text-[10px] text-white/35 font-normal tracking-normal normal-case">{updatedAtText}</span>
           )}
         </div>
 
@@ -194,7 +212,9 @@ export default function CourseCard({
         <div className="mb-4">
           <div className="flex justify-between items-center mb-1.5">
             <span className="text-[10px] text-white/50 uppercase font-semibold tracking-wider">Progress</span>
-            <span className="text-[11px] text-white/70 font-semibold">{progressPercentage}%</span>
+            <span className="text-[11px] text-white/70 font-semibold">
+              {completedItems} of {totalItems} {totalItems === 1 ? "module" : "modules"} ({progressPercentage}%)
+            </span>
           </div>
           <div className="h-1.5 bg-white/6 rounded-full overflow-hidden">
             <div

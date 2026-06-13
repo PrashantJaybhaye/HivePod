@@ -44,7 +44,7 @@ export default function PublicCoursePage({ params }: { params: Promise<{ id: str
             const reqs = reqSnap.docs.map(d => ({ id: d.id, ...d.data() as any }));
             // Sort in-memory: newest first using safeGetMillis
             reqs.sort((a, b) => safeGetMillis(b.requestedAt, Date.now()) - safeGetMillis(a.requestedAt, Date.now()));
-            
+
             const latestReq = reqs[0];
             const expiresAt = safeConvertToDate(latestReq.restrictions?.expiresAt);
             if (latestReq.status === "approved" && expiresAt && expiresAt.getTime() < Date.now()) {
@@ -234,7 +234,7 @@ export default function PublicCoursePage({ params }: { params: Promise<{ id: str
           ) : (
             /* Premium iOS Glassmorphic Security Status Card */
             /* Aurora Fluid Mesh Lock Screen */
-            <div className="relative w-full max-w-sm mx-auto rounded-3xl border border-white/6 bg-white/[0.02] backdrop-blur-3xl p-6 md:p-8 shadow-[0_24px_50px_rgba(0,0,0,0.5)] text-center flex flex-col items-center overflow-hidden">
+            <div className="relative w-full max-w-sm mx-auto rounded-3xl border border-white/6 bg-white/2 backdrop-blur-3xl p-6 md:p-8 shadow-[0_24px_50px_rgba(0,0,0,0.5)] text-center flex flex-col items-center overflow-hidden">
               <style>{`
                 @keyframes float-blob-1 {
                   0%, 100% { transform: translate(0, 0) scale(1); }
@@ -262,16 +262,16 @@ export default function PublicCoursePage({ params }: { params: Promise<{ id: str
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-[#bf5af2]/5 blur-2xl rounded-full animate-blob-3 pointer-events-none" />
 
                   {/* Frosted Glass Emblem */}
-                  <div className="w-12 h-12 rounded-2xl bg-white/[0.04] border border-white/[0.12] shadow-inner backdrop-blur-xl flex items-center justify-center text-white/90 mb-5 relative overflow-hidden shrink-0">
+                  <div className="w-12 h-12 rounded-2xl bg-white/4 border border-white/12 shadow-inner backdrop-blur-xl flex items-center justify-center text-white/90 mb-5 relative overflow-hidden shrink-0">
                     <div className="absolute inset-0 bg-linear-to-tr from-transparent via-white/5 to-white/10 pointer-events-none" />
                     <Lock size={18} />
                   </div>
 
                   <h3 className="text-sm font-extrabold text-white mb-1.5 tracking-tight">Login Required</h3>
                   <p className="text-xs text-white/55 mb-5 max-w-[260px] leading-relaxed relative z-10">You must be logged in to request access and view files in this course.</p>
-                  
+
                   <Link href="/" className="w-full relative z-10">
-                    <button className="w-full bg-white/[0.08] hover:bg-white/[0.15] border border-white/[0.12] text-white font-bold py-2 rounded-xl text-xs active:scale-[0.98] transition-all duration-200 tracking-wider shadow-lg">
+                    <button className="w-full bg-white/8 hover:bg-white/15 border border-white/12 text-white font-bold py-2 rounded-xl text-xs active:scale-[0.98] transition-all duration-200 tracking-wider shadow-lg">
                       Go to Login
                     </button>
                   </Link>
@@ -284,7 +284,7 @@ export default function PublicCoursePage({ params }: { params: Promise<{ id: str
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-[#ff453a]/5 blur-2xl rounded-full animate-blob-3 pointer-events-none" />
 
                   {/* Frosted Glass Emblem */}
-                  <div className="w-12 h-12 rounded-2xl bg-white/[0.04] border border-white/[0.12] shadow-inner backdrop-blur-xl flex items-center justify-center text-[#ff9f0a] mb-5 relative overflow-hidden shrink-0">
+                  <div className="w-12 h-12 rounded-2xl bg-white/4 border border-white/12 shadow-inner backdrop-blur-xl flex items-center justify-center text-[#ff9f0a] mb-5 relative overflow-hidden shrink-0">
                     <div className="absolute inset-0 bg-linear-to-tr from-transparent via-[#ff9f0a]/5 to-[#ff9f0a]/15 pointer-events-none" />
                     <CheckCircle2 size={18} />
                   </div>
@@ -300,7 +300,7 @@ export default function PublicCoursePage({ params }: { params: Promise<{ id: str
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-[#bf5af2]/5 blur-2xl rounded-full animate-blob-3 pointer-events-none" />
 
                   {/* Frosted Glass Emblem */}
-                  <div className="w-12 h-12 rounded-2xl bg-white/[0.04] border border-white/[0.12] shadow-inner backdrop-blur-xl flex items-center justify-center text-[#ff453a] mb-5 relative overflow-hidden shrink-0">
+                  <div className="w-12 h-12 rounded-2xl bg-white/4 border border-white/12 shadow-inner backdrop-blur-xl flex items-center justify-center text-[#ff453a] mb-5 relative overflow-hidden shrink-0">
                     <div className="absolute inset-0 bg-linear-to-tr from-transparent via-[#ff453a]/5 to-[#ff453a]/15 pointer-events-none" />
                     <XCircle size={18} />
                   </div>
@@ -316,14 +316,14 @@ export default function PublicCoursePage({ params }: { params: Promise<{ id: str
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-[#ff2d55]/5 blur-2xl rounded-full animate-blob-3 pointer-events-none" />
 
                   {/* Frosted Glass Emblem */}
-                  <div className="w-12 h-12 rounded-2xl bg-white/[0.04] border border-white/[0.12] shadow-inner backdrop-blur-xl flex items-center justify-center text-[#ff453a] mb-5 relative overflow-hidden shrink-0">
+                  <div className="w-12 h-12 rounded-2xl bg-white/4 border border-white/12 shadow-inner backdrop-blur-xl flex items-center justify-center text-[#ff453a] mb-5 relative overflow-hidden shrink-0">
                     <div className="absolute inset-0 bg-linear-to-tr from-transparent via-[#ff453a]/5 to-[#ff453a]/15 pointer-events-none" />
                     <Lock size={16} />
                   </div>
 
                   <h3 className="text-sm font-extrabold text-white mb-1.5 tracking-tight">Private Course</h3>
                   <p className="text-xs text-white/55 mb-5 max-w-[260px] leading-relaxed relative z-10">This course's modules and chapters are restricted. Click below to submit an access request.</p>
-                  
+
                   <button
                     onClick={handleRequestAccess}
                     disabled={requestingAccess}
