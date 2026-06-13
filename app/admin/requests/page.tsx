@@ -98,109 +98,121 @@ export default function AdminRequestsPage() {
   }
 
   return (
-    <div className="p-4 sm:p-6 md:p-8 space-y-6 md:space-y-8 max-w-7xl mx-auto w-full">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-foreground">Course Access Requests</h1>
-          <p className="text-gray-400 text-sm mt-1">Manage user access requests for private courses.</p>
-        </div>
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-          <input 
-            type="text" 
-            placeholder="Search email or course..." 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-9 pr-4 py-2 bg-card border border-border rounded-lg text-sm focus:outline-none focus:border-primary w-full md:w-64"
-          />
-        </div>
-      </div>
+    <div className="flex flex-col flex-1 bg-background">
+      <main className="flex-1 px-4 sm:px-6 md:px-12 lg:px-20 pt-4 pb-8 lg:pt-6 lg:pb-12 max-w-7xl mx-auto w-full">
+        {/* Premium Header */}
+        <div className="relative mb-8 rounded-2xl bg-[#111111] border border-white/10 overflow-hidden shadow-lg">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-blue-500/10 opacity-50"></div>
+          
+          <div className="relative px-6 py-5 md:px-8 md:py-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="flex items-center gap-5">
+              <div>
+                <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white mb-1">Course Access Requests</h1>
+                <p className="text-gray-400 text-sm">Manage user access requests for private courses.</p>
+              </div>
+            </div>
 
-      <div className="flex space-x-1 border-b border-border">
-        {(["pending", "approved", "rejected"] as RequestStatus[]).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 text-sm font-medium capitalize transition-colors relative ${
-              activeTab === tab 
-                ? "text-primary" 
-                : "text-gray-400 hover:text-foreground"
-            }`}
-          >
-            {tab}
-            {activeTab === tab && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-t-md" />
-            )}
-            {/* Show badge for pending */}
-            {tab === "pending" && requests.filter(r => r.status === "pending").length > 0 && (
-              <span className="ml-2 bg-primary/20 text-primary text-xs px-1.5 py-0.5 rounded-full">
-                {requests.filter(r => r.status === "pending").length}
-              </span>
-            )}
-          </button>
-        ))}
-      </div>
-
-      <div className="bg-card border border-border rounded-xl overflow-hidden">
-        {filteredRequests.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">
-            No {activeTab} requests found.
+            <div className="relative w-full md:w-auto">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
+              <input 
+                type="text" 
+                placeholder="Search email or course..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-9 pr-4 py-2.5 bg-black/50 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-primary w-full md:w-72 transition-colors placeholder:text-gray-600"
+              />
+            </div>
           </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-background/50 border-b border-border text-gray-400 uppercase text-xs tracking-wider">
-                <tr>
-                  <th className="px-6 py-3 font-semibold">User</th>
-                  <th className="px-6 py-3 font-semibold">Course</th>
-                  <th className="px-6 py-3 font-semibold">Requested</th>
-                  <th className="px-6 py-3 font-semibold text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {filteredRequests.map((req) => (
-                  <tr key={req.id} className="hover:bg-white/2 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap text-foreground font-medium">
-                      {req.userEmail}
-                    </td>
-                    <td className="px-6 py-4 text-foreground">
-                      {req.courseTitle}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-gray-400 text-xs">
-                      {req.requestedAt?.toDate().toLocaleDateString() || "Unknown"}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right">
-                      {req.status === "pending" ? (
-                        <div className="flex items-center justify-end gap-2">
-                          <button 
-                            onClick={() => handleUpdateStatus(req.id, "approved")}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-green-500/10 text-green-500 hover:bg-green-500/20 rounded-md transition-colors text-xs font-semibold"
-                          >
-                            <CheckCircle size={14} /> Approve
-                          </button>
-                          <button 
-                            onClick={() => handleUpdateStatus(req.id, "rejected")}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500/10 text-red-500 hover:bg-red-500/20 rounded-md transition-colors text-xs font-semibold"
-                          >
-                            <XCircle size={14} /> Reject
-                          </button>
-                        </div>
-                      ) : (
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold capitalize
-                          ${req.status === "approved" ? "bg-green-500/10 text-green-500" : "bg-red-500/10 text-red-500"}
-                        `}>
-                          {req.status === "approved" ? <CheckCircle size={12} /> : <XCircle size={12} />}
-                          {req.status}
-                        </span>
-                      )}
-                    </td>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex space-x-2 border-b border-white/10 mb-6">
+          {(["pending", "approved", "rejected"] as RequestStatus[]).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-5 py-3 text-sm font-semibold capitalize transition-all relative rounded-t-lg ${
+                activeTab === tab 
+                  ? "text-primary bg-white/5" 
+                  : "text-gray-400 hover:text-white hover:bg-white/5"
+              }`}
+            >
+              {tab}
+              {activeTab === tab && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary shadow-[0_0_8px_rgba(var(--primary),0.5)]" />
+              )}
+              {/* Show badge for pending */}
+              {tab === "pending" && requests.filter(r => r.status === "pending").length > 0 && (
+                <span className={`ml-2 text-xs px-2 py-0.5 rounded-full ${activeTab === tab ? "bg-primary/20 text-primary" : "bg-white/10 text-gray-300"}`}>
+                  {requests.filter(r => r.status === "pending").length}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* Table Area */}
+        <div className="bg-[#111111] border border-white/10 rounded-2xl overflow-hidden shadow-lg">
+          {filteredRequests.length === 0 ? (
+            <div className="p-12 text-center text-gray-400">
+              No {activeTab} requests found matching your search.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-white/5 border-b border-white/10 text-gray-400 uppercase text-[10px] font-bold tracking-wider">
+                  <tr>
+                    <th className="px-6 py-4">User</th>
+                    <th className="px-6 py-4">Course</th>
+                    <th className="px-6 py-4">Requested Date</th>
+                    <th className="px-6 py-4 text-right">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {filteredRequests.map((req) => (
+                    <tr key={req.id} className="hover:bg-white/5 transition-colors group">
+                      <td className="px-6 py-4 whitespace-nowrap text-white font-medium">
+                        {req.userEmail}
+                      </td>
+                      <td className="px-6 py-4 text-gray-300">
+                        {req.courseTitle}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-gray-400 text-xs font-mono">
+                        {req.requestedAt?.toDate().toLocaleDateString() || "Unknown"}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                        {req.status === "pending" ? (
+                          <div className="flex items-center justify-end gap-2 opacity-80 group-hover:opacity-100 transition-opacity">
+                            <button 
+                              onClick={() => handleUpdateStatus(req.id, "approved")}
+                              className="flex items-center gap-1.5 px-3 py-1.5 bg-green-500/10 text-green-400 hover:bg-green-500/20 hover:text-green-300 border border-green-500/20 rounded-lg transition-all text-xs font-bold tracking-wide"
+                            >
+                              <CheckCircle size={14} /> Approve
+                            </button>
+                            <button 
+                              onClick={() => handleUpdateStatus(req.id, "rejected")}
+                              className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 border border-red-500/20 rounded-lg transition-all text-xs font-bold tracking-wide"
+                            >
+                              <XCircle size={14} /> Reject
+                            </button>
+                          </div>
+                        ) : (
+                          <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold capitalize tracking-wide
+                            ${req.status === "approved" ? "bg-green-500/10 text-green-400 border border-green-500/20" : "bg-red-500/10 text-red-400 border border-red-500/20"}
+                          `}>
+                            {req.status === "approved" ? <CheckCircle size={14} /> : <XCircle size={14} />}
+                            {req.status}
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </main>
     </div>
   );
 }

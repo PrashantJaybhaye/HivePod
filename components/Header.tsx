@@ -7,6 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "./AuthProvider";
 import { auth } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
+import { motion } from "framer-motion";
 
 export default function Header({ toggleSidebar }: { toggleSidebar?: () => void }) {
   const pathname = usePathname();
@@ -36,35 +37,55 @@ export default function Header({ toggleSidebar }: { toggleSidebar?: () => void }
   if (pathname.includes("/admin")) title = "Admin Portal";
 
   return (
-    <header className="h-13 shrink-0 border-b border-white/5 bg-[#111111] flex items-center justify-between px-5 sticky top-0 z-10 w-full">
+    <header className="h-14 shrink-0 border-b border-white/[0.04] bg-[#0f0f11]/60 backdrop-blur-2xl flex items-center justify-between px-6 sticky top-0 z-10 w-full">
       <div className="flex items-center gap-4">
         {toggleSidebar && (
-          <button onClick={toggleSidebar} className="md:hidden text-gray-400 hover:text-white cursor-pointer">
+          <button 
+            onClick={toggleSidebar} 
+            className="md:hidden text-white/50 hover:text-white transition-colors cursor-pointer"
+          >
             <Menu size={18} />
           </button>
         )}
-        <h1 className="text-sm font-medium text-neutral-200 hidden md:block">{title}</h1>
+        <h1 className="text-xs font-bold tracking-wider text-white/50 uppercase hidden md:block">
+          {title}
+        </h1>
       </div>
 
-      {/* Center Links (Optional, maybe hide on small screens) */}
-      <nav className="absolute left-1/2 -translate-x-1/2 hidden lg:flex items-center gap-6 text-sm font-medium">
-        <Link href="/" className="text-gray-300 hover:text-white transition-colors">Catalog</Link>
-        <Link href="/" className="text-gray-400 hover:text-white transition-colors">Community</Link>
-        <Link href="/" className="text-gray-400 hover:text-white transition-colors">Support</Link>
+      {/* Center Links - iOS style pill nav */}
+      <nav className="absolute left-1/2 -translate-x-1/2 hidden lg:flex items-center gap-1 bg-white/[0.03] border border-white/[0.05] p-1 rounded-full text-xs font-bold">
+        <Link 
+          href="/" 
+          className="text-white px-3.5 py-1.5 rounded-full hover:bg-white/[0.04] transition-all cursor-pointer"
+        >
+          Catalog
+        </Link>
+        <Link 
+          href="/" 
+          className="text-white/50 px-3.5 py-1.5 rounded-full hover:text-white hover:bg-white/[0.04] transition-all cursor-pointer"
+        >
+          Community
+        </Link>
+        <Link 
+          href="/" 
+          className="text-white/50 px-3.5 py-1.5 rounded-full hover:text-white hover:bg-white/[0.04] transition-all cursor-pointer"
+        >
+          Support
+        </Link>
       </nav>
 
       {/* Right Controls */}
-      <div className="flex items-center gap-4 text-gray-400">
-        <button className="hover:text-white transition-colors cursor-pointer">
-          <Search size={16} />
+      <div className="flex items-center gap-3.5 text-white/50">
+        <button className="hover:text-white transition-colors cursor-pointer p-1.5 rounded-lg hover:bg-white/5">
+          <Search size={15} />
         </button>
-        <button className="hover:text-white transition-colors relative cursor-pointer">
-          <Bell size={16} />
-          <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full"></span>
+        <button className="hover:text-white transition-colors relative cursor-pointer p-1.5 rounded-lg hover:bg-white/5">
+          <Bell size={15} />
+          <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-[#ff453a] rounded-full shadow-[0_0_6px_#ff453a]"></span>
         </button>
 
         {/* Separator */}
-        <div className="border-l border-white/5 h-4 mx-1 hidden sm:block"></div>
+        <div className="border-l border-white/[0.06] h-4 mx-0.5 hidden sm:block"></div>
 
         {/* User Profile Info */}
         <div className="flex items-center gap-2.5">
@@ -76,25 +97,25 @@ export default function Header({ toggleSidebar }: { toggleSidebar?: () => void }
               referrerPolicy="no-referrer"
             />
           ) : (
-            <div className="w-7 h-7 rounded-full bg-primary-hover/20 text-[#ef4444] border border-primary-hover/30 flex items-center justify-center text-xs font-bold shrink-0">
+            <div className="w-7 h-7 rounded-full bg-[#ff453a]/10 text-[#ff453a] border border-[#ff453a]/25 flex items-center justify-center text-[10px] font-black shrink-0">
               {displayInitial}
             </div>
           )}
-          <span className="text-[13px] font-medium text-neutral-200 truncate hidden sm:inline max-w-[100px]">
+          <span className="text-xs font-bold text-white/80 truncate hidden sm:inline max-w-[100px]">
             {displayName}
           </span>
         </div>
 
         {/* Separator */}
-        <div className="border-l border-white/5 h-4 mx-1 hidden sm:block"></div>
+        <div className="border-l border-white/[0.06] h-4 mx-0.5 hidden sm:block"></div>
 
         {/* Logout Button */}
         <button 
           onClick={handleLogout}
           disabled={isLoggingOut}
-          className="text-xs text-gray-400 hover:text-white border border-white/10 hover:border-white/20 px-2 sm:px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          className="text-[11px] font-bold text-white/70 hover:text-white border border-white/[0.08] hover:bg-white/[0.04] px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <span className="hidden sm:inline">{isLoggingOut ? "Logging out..." : "Log Out"}</span>
+          <span className="hidden sm:inline">{isLoggingOut ? "Signing out..." : "Sign Out"}</span>
           {isLoggingOut ? <Loader2 size={12} className="animate-spin" /> : <LogOut size={12} />}
         </button>
       </div>

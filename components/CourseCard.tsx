@@ -1,5 +1,15 @@
+"use client";
+
 import Link from "next/link";
-import { BookOpen, Clock, BarChart } from "lucide-react";
+import { BookOpen, Clock, BarChart2, ArrowRight, Play, CheckCircle2, Headphones, FileText, Zap, Award, Globe, RotateCw, Volume2 } from "lucide-react";
+import {
+  Card,
+  CardHeader,
+  CardFooter,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
 
 interface CourseCardProps {
   id: string;
@@ -9,78 +19,209 @@ interface CourseCardProps {
   progressPercentage?: number;
   completedItems?: number;
   totalItems?: number;
+  category?: string;
+  instructor?: string;
+  difficulty?: string;
+  rating?: number;
+  reviewsCount?: number;
+  audioTracks?: number;
+  resourcesCount?: number;
+  xpReward?: number;
+  hasCertificate?: boolean;
+  language?: string;
+  updatedAtText?: string;
+  audioDuration?: string;
 }
 
 export default function CourseCard({
   id, title, description, index = 0,
-  progressPercentage = 0, completedItems = 0, totalItems = 0
+  progressPercentage = 0, completedItems = 0, totalItems = 0,
+  category,
+  instructor,
+  difficulty,
+  rating,
+  reviewsCount,
+  audioTracks = 0,
+  resourcesCount = 0,
+  xpReward = 100,
+  hasCertificate = false,
+  language = "English",
+  updatedAtText = "Updated Today",
+  audioDuration = ""
 }: CourseCardProps) {
 
-  const statusLabel = progressPercentage === 0 ? "Not started" : progressPercentage === 100 ? "Completed" : "In progress";
-  const statusColor = progressPercentage === 0 ? "text-blue-500 bg-blue-500/10" : progressPercentage === 100 ? "text-green-500 bg-green-500/10" : "text-yellow-500 bg-yellow-500/10";
-  const statusDot = progressPercentage === 0 ? "bg-blue-500" : progressPercentage === 100 ? "bg-green-500" : "bg-yellow-500";
+  const isCompleted = progressPercentage === 100;
+  const isNotStarted = progressPercentage === 0;
+
+  const statusLabel = isNotStarted ? "Not started" : isCompleted ? "Completed" : "In progress";
+
+  // iOS Widget style status colors
+  const statusColor = isNotStarted
+    ? "text-[#0a84ff] border border-[#0a84ff]/20 bg-[#0a84ff]/10"
+    : isCompleted
+      ? "text-[#30d158] border border-[#30d158]/20 bg-[#30d158]/10"
+      : "text-[#ff9f0a] border border-[#ff9f0a]/20 bg-[#ff9f0a]/10";
+
+  const statusDot = isNotStarted
+    ? "bg-[#0a84ff]"
+    : isCompleted
+      ? "bg-[#30d158]"
+      : "bg-[#ff9f0a]";
+
+  const statusDotPulse = !isNotStarted && !isCompleted ? "animate-pulse" : "";
+
+  // Dynamic fallbacks for missing db fields
+  const derivedCategory = category || (() => {
+    const lower = title.toLowerCase();
+    if (lower.includes("ccna") || lower.includes("cisco") || lower.includes("network")) return "Networking";
+    if (lower.includes("security") || lower.includes("comptia") || lower.includes("cyber")) return "Security";
+    if (lower.includes("aws") || lower.includes("cloud") || lower.includes("azure")) return "Cloud Computing";
+    return "IT & Tech";
+  })();
+
+  const derivedDifficulty = difficulty || "Beginner";
+
+  // Format total duration nicely
+  const formatDuration = (lessonsCount: number) => {
+    const minutes = lessonsCount * 15; // Assume average 15 mins per lesson/audio pod
+    if (minutes < 60) return `${minutes} mins`;
+    const hours = Math.floor(minutes / 60);
+    const remainingMins = minutes % 60;
+    return remainingMins > 0 ? `${hours}h ${remainingMins}m` : `${hours} hrs`;
+  };
+
+  const durationText = formatDuration(totalItems);
+
+  // iOS-style buttons
+  const getButtonConfig = () => {
+    if (isNotStarted) {
+      return {
+        className: "w-full bg-[#ff453a] hover:bg-[#ff453a]/90 text-white text-xs font-semibold py-2.5 rounded-xl active:scale-[0.97] transition-all duration-150 flex justify-center items-center gap-1.5 cursor-pointer shadow-[0_4px_12px_rgba(255,69,58,0.2)]",
+        icon: ArrowRight,
+        text: "Start Course"
+      };
+    } else if (isCompleted) {
+      return {
+        className: "w-full bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.08] text-white text-xs font-semibold py-2.5 rounded-xl active:scale-[0.97] transition-all duration-150 flex justify-center items-center gap-1.5 cursor-pointer",
+        icon: CheckCircle2,
+        text: "Review Course"
+      };
+    } else {
+      return {
+        className: "w-full bg-white/[0.08] hover:bg-white/[0.12] border border-white/[0.08] text-white text-xs font-semibold py-2.5 rounded-xl active:scale-[0.97] transition-all duration-150 flex justify-center items-center gap-1.5 cursor-pointer",
+        icon: Play,
+        text: "Continue Learning"
+      };
+    }
+  };
+
+  const btnConfig = getButtonConfig();
+  const BtnIcon = btnConfig.icon;
 
   return (
-    <div className="bg-background rounded-xl p-4 sm:p-5 border border-white/10 flex flex-col h-full group">
-      
-      {/* Header */}
-      <div className="flex items-center justify-between mb-3">
-        <span className={`px-2 py-1 rounded-md text-xs font-medium flex items-center gap-2 w-fit ${statusColor}`}>
-          <span className={`w-1.5 h-1.5 rounded-full ${statusDot}`}></span>
-          {statusLabel}
-        </span>
-        
-        {/* Level Indicator Placeholder */}
-        <span className="text-xs text-gray-500 flex items-center gap-1 bg-white/5 px-2 py-1 rounded-md">
-          <BarChart size={12} /> Beginner
-        </span>
-      </div>
+    <Card className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.015] bg-gradient-to-b from-white/[0.04] to-transparent backdrop-blur-[32px] flex flex-col h-full transition-all duration-300 active:scale-[0.98] active:bg-white/[0.08] shadow-[0_8px_32px_0_rgba(0,0,0,0.5)]">
+      {/* Liquid glass light reflection sheen */}
+      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.01] to-white/[0.04] pointer-events-none" />
 
-      <h3 className="text-base sm:text-lg font-semibold text-neutral-200 mb-1.5 sm:mb-2 line-clamp-2">
-        {title}
-      </h3>
-      
-      <p className="text-xs sm:text-sm text-gray-400 mb-4 line-clamp-2 flex-1 leading-relaxed">
-        {description || "No description available for this course. Start learning today!"}
-      </p>
+      {/* Top border catch-light effect */}
+      <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/[0.12] to-transparent pointer-events-none" />
 
-      {/* Meta info row */}
-      <div className="flex items-center gap-3 sm:gap-4 text-[11px] sm:text-xs text-gray-400 mb-4 sm:mb-5 pb-4 sm:pb-5 border-b border-white/5">
-        <div className="flex items-center gap-1.5">
-          <BookOpen size={14} className="text-gray-500" />
-          <span>{totalItems} Lessons</span>
+      <CardHeader className="flex flex-row justify-between items-center space-y-0 pb-3 relative z-10">
+        <div className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide flex items-center gap-1.5 w-fit ${statusColor}`}>
+          <span className={`w-1.5 h-1.5 rounded-full ${statusDot} ${statusDotPulse}`}></span>
+          {statusLabel.toUpperCase()}
         </div>
-        <div className="flex items-center gap-1.5">
-          <Clock size={14} className="text-gray-500" />
-          <span>~{totalItems * 10} mins</span>
-        </div>
-      </div>
+        <span className="text-[10px] text-white/50 bg-white/[0.04] border border-white/[0.08] px-2.5 py-0.5 rounded-full font-medium tracking-wide">
+          {derivedCategory}
+        </span>
+      </CardHeader>
 
-      {/* Progress */}
-      <div className="mb-5">
-        <div className="flex items-end justify-between mb-2">
-          <div className="flex items-end gap-1">
-            <span className="text-lg font-bold text-neutral-200 leading-none">{progressPercentage}%</span>
+      <CardContent className="flex-1 flex flex-col pt-1 pb-0 relative z-10">
+        <CardTitle className="text-base font-bold text-white mb-2 tracking-tight line-clamp-2">
+          {title}
+        </CardTitle>
+
+        <CardDescription className="text-xs text-white/60 mb-4 line-clamp-2 flex-1 leading-relaxed font-normal">
+          {description || "No description available for this course. Start learning today!"}
+        </CardDescription>
+
+        {/* iOS-Style Translucent Badges */}
+        {(audioTracks > 0 || resourcesCount > 0 || xpReward > 0 || hasCertificate) && (
+          <div className="flex flex-wrap gap-1.5 mb-4 mt-1">
+            {audioTracks > 0 && (
+              <div className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide bg-[#5e5ce6]/10 text-[#7d7aff] border border-[#5e5ce6]/20 shadow-[0_2px_8px_rgba(94,92,230,0.05)]">
+                <Headphones size={11} className="stroke-[2.5]" />
+                <span>{audioTracks} Pods</span>
+              </div>
+            )}
+
+            {resourcesCount > 0 && (
+              <div className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide bg-[#64d2ff]/10 text-[#64d2ff] border border-[#64d2ff]/20 shadow-[0_2px_8px_rgba(100,210,255,0.05)]">
+                <FileText size={11} className="stroke-[2.5]" />
+                <span>{resourcesCount} PDFs</span>
+              </div>
+            )}
+
+            {xpReward > 0 && (
+              <div className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide bg-[#ff9f0a]/10 text-[#ff9f0a] border border-[#ff9f0a]/20 shadow-[0_2px_8px_rgba(255,159,10,0.05)]">
+                <Zap size={11} className="stroke-[2.5]" />
+                <span>+{xpReward} XP</span>
+              </div>
+            )}
+
+            {hasCertificate && (
+              <div className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide bg-[#30d158]/10 text-[#30d158] border border-[#30d158]/20 shadow-[0_2px_8px_rgba(48,209,88,0.05)]">
+                <Award size={11} className="stroke-[2.5]" />
+                <span>Cert. Included</span>
+              </div>
+            )}
           </div>
-          <span className="text-xs text-gray-500 font-medium">{completedItems} / {totalItems || 0} items</span>
-        </div>
-        
-        <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden">
-          <div 
-            className="bg-primary h-full rounded-full transition-all duration-500 group-hover:bg-red-400"
-            style={{ width: `${progressPercentage}%` }}
-          ></div>
-        </div>
-      </div>
+        )}
 
-      {/* Action Buttons */}
-      <div className="flex mt-auto">
+        {/* iOS-Style Product Sheet Spec Row */}
+        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[10px] font-bold tracking-wider text-white/55 uppercase mb-4 mt-auto pt-3.5 border-t border-white/[0.06]">
+          <span>{totalItems} {totalItems === 1 ? "MODULE" : "MODULES"}</span>
+          <div className="w-px h-2.5 bg-white/15" />
+          <span>{(audioDuration || durationText).toUpperCase()}</span>
+          <div className="w-px h-2.5 bg-white/15" />
+          <span>{derivedDifficulty.toUpperCase()}</span>
+          {language && (
+            <>
+              <div className="w-px h-2.5 bg-white/15" />
+              <span>{language.toUpperCase()}</span>
+            </>
+          )}
+          {updatedAtText && (
+            <>
+              <div className="w-px h-2.5 bg-white/15" />
+              <span className="text-white/35 font-normal tracking-normal normal-case">{updatedAtText}</span>
+            </>
+          )}
+        </div>
+
+        {/* Progress tracking */}
+        <div className="mb-4">
+          <div className="flex justify-between items-center mb-1.5">
+            <span className="text-[10px] text-white/50 uppercase font-semibold tracking-wider">Progress</span>
+            <span className="text-[11px] text-white/70 font-semibold">{progressPercentage}%</span>
+          </div>
+          <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-[#ff453a] to-[#ff9f0a] rounded-full transition-all duration-500"
+              style={{ width: `${progressPercentage}%` }}
+            ></div>
+          </div>
+        </div>
+      </CardContent>
+
+      <CardFooter className="pt-2 pb-5 px-6 border-0 bg-transparent mt-auto relative z-10">
         <Link href={`/course/${id}`} className="w-full">
-          <button className="w-full bg-white text-black hover:bg-gray-200 transition-colors py-2.5 px-4 rounded-lg text-sm font-semibold flex items-center justify-center gap-2">
-            {progressPercentage === 0 ? "Start Course" : progressPercentage === 100 ? "Review Course" : "Continue Learning"}
+          <button className={btnConfig.className}>
+            {btnConfig.text}
+            <BtnIcon size={14} />
           </button>
         </Link>
-      </div>
-    </div>
+      </CardFooter>
+    </Card>
   );
 }

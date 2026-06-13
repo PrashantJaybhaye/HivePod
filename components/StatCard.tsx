@@ -12,20 +12,22 @@ interface StatCardProps {
 export default function StatCard({ title, value, subtext, icon: Icon, index = 0 }: StatCardProps) {
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 15 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: index * 0.1 }}
-      className="bg-[#171717] rounded-xl p-4 sm:p-5 border border-white/5 flex flex-col justify-between group transition-all duration-200 hover:opacity-80 cursor-pointer"
+      transition={{ duration: 0.35, delay: index * 0.05 }}
+      className="bg-white/[0.015] backdrop-blur-md rounded-2xl p-4 sm:p-5 flex flex-col justify-between transition-all duration-300 hover:bg-white/[0.03] active:scale-[0.99] cursor-pointer shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12),_inset_0_0_0_1px_rgba(255,255,255,0.06),_0_8px_32px_rgba(0,0,0,0.25)] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.2),_inset_0_0_0_1px_rgba(255,255,255,0.15),_0_12px_38px_rgba(0,0,0,0.35)]"
     >
-      <div className="flex justify-between items-start mb-4">
-        <span className="text-[10px] md:text-xs font-semibold tracking-wider text-[#737373] uppercase">
+      <div className="flex justify-between items-center mb-4">
+        <span className="text-[10px] md:text-xs font-semibold tracking-wider text-white/40 uppercase">
           {title}
         </span>
-        <Icon size={14} className="text-[#737373]" />
+        <div className="p-1.5 rounded-lg bg-white/[0.03] border border-white/[0.06] text-white/50">
+          <Icon size={14} className="stroke-[2]" />
+        </div>
       </div>
       <div>
         <div className="text-xl md:text-2xl font-bold tracking-tight text-white mb-0.5">{value}</div>
-        <div className="text-[11px] md:text-xs text-[#a3a3a3] font-medium">{subtext}</div>
+        <div className="text-[11px] md:text-xs text-white/50 font-normal">{subtext}</div>
       </div>
     </motion.div>
   );

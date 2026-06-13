@@ -172,6 +172,18 @@ export default function Home() {
                   totalItems={course.totalItems}
                   completedItems={course.completedItems}
                   progressPercentage={course.progressPercentage}
+                  category={course.category}
+                  instructor={course.instructor}
+                  difficulty={course.difficulty}
+                  rating={course.rating}
+                  reviewsCount={course.reviewsCount}
+                  audioTracks={course.audioTracks}
+                  resourcesCount={course.resourcesCount}
+                  xpReward={course.xpReward}
+                  hasCertificate={course.hasCertificate}
+                  language={course.language}
+                  updatedAtText={course.updatedAtText}
+                  audioDuration={course.audioDuration}
                 />
               ))
             )}
