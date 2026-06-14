@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/components/AuthProvider";
 import DashboardLayout from "@/components/DashboardLayout";
+import Script from "next/script";
+import { Analytics } from "@vercel/analytics/react";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://hivepod.vercel.app"),
@@ -42,9 +44,11 @@ export default function RootLayout({
       className="h-full antialiased"
     >
       <body suppressHydrationWarning className="min-h-full flex flex-col bg-background text-foreground">
+        <Script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "63eab370ca37427a9924420a960e83e4"}' />
         <AuthProvider>
           <DashboardLayout>
             {children}
+            <Analytics />
           </DashboardLayout>
         </AuthProvider>
       </body>
