@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, use } from "react";
-import { collection, getDocs, query, where, doc, getDoc } from "firebase/firestore";
+import { collection, getDocs, query, where, doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { transcribeAudio } from "@/app/actions/transcribe";
 import Link from "next/link";
 import { ChevronLeft, FileAudio, FileText, Image as ImageIcon, Download, Lock, Video, Folder as FolderIcon, AlignLeft, PlayCircle, CheckCircle2, XCircle, ChevronRight, BarChart2, Headphones, Zap, Award, Globe, RotateCw, Volume2, Loader2 } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
@@ -22,6 +23,7 @@ export default function PublicFolderPage({ params }: { params: Promise<{ id: str
   const [completedItems, setCompletedItems] = useState<Set<string>>(new Set());
   const [isMarkingComplete, setIsMarkingComplete] = useState(false);
   const [isLoadingMaterials, setIsLoadingMaterials] = useState(true);
+  const [isTranscribing, setIsTranscribing] = useState(false);
 
   useEffect(() => {
     const fetchFolderAndMaterials = async () => {
@@ -112,6 +114,23 @@ export default function PublicFolderPage({ params }: { params: Promise<{ id: str
       console.error("Error marking complete:", error);
     } finally {
       setIsMarkingComplete(false);
+    }
+  };
+
+  const handleRetranscribe = async () => {
+    if (!activeMaterial || !isAdmin) return;
+    setIsTranscribing(true);
+    try {
+      const newTranscript = await transcribeAudio(activeMaterial.url);
+      const materialRef = doc(db, "materials", activeMaterial.id);
+      await updateDoc(materialRef, { transcript: newTranscript });
+      setActiveMaterial({ ...activeMaterial, transcript: newTranscript });
+      setMaterials(materials.map(m => m.id === activeMaterial.id ? { ...m, transcript: newTranscript } : m));
+    } catch (error) {
+      console.error("Retranscription failed:", error);
+      alert("Failed to re-transcribe. Please try again.");
+    } finally {
+      setIsTranscribing(false);
     }
   };
 
@@ -359,21 +378,42 @@ export default function PublicFolderPage({ params }: { params: Promise<{ id: str
                       <span>{activeMaterial.createdAt ? new Date(activeMaterial.createdAt.toMillis?.() || Date.now()).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Recently Added'}</span>
                     </p>
 
-                    {activeMaterial.type === "audio" && (
+                    {(activeMaterial.type === "audio" || activeMaterial.type === "video") && (
                       <div className="space-y-6">
-                        <div className="flex items-center gap-2 text-white/50 pb-3 border-b border-white/6">
-                          <AlignLeft size={16} />
-                          <h3 className="text-[11px] font-bold tracking-widest uppercase">Transcript</h3>
+                        <div className="flex items-center justify-between pb-3 border-b border-white/6">
+                          <div className="flex items-center gap-2 text-white/50">
+                            <AlignLeft size={16} />
+                            <h3 className="text-[11px] font-bold tracking-widest uppercase">Transcript</h3>
+                          </div>
+                          {isAdmin && (
+                            <button
+                              onClick={handleRetranscribe}
+                              disabled={isTranscribing}
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-[10px] font-bold uppercase tracking-wider text-white transition-all disabled:opacity-50"
+                            >
+                              {isTranscribing ? (
+                                <>
+                                  <Loader2 size={12} className="animate-spin" />
+                                  Transcribing...
+                                </>
+                              ) : (
+                                <>
+                                  <RotateCw size={12} />
+                                  Re-transcribe
+                                </>
+                              )}
+                            </button>
+                          )}
                         </div>
                         
                         {activeMaterial.transcript ? (
-                          <div className="prose prose-invert prose-zinc max-w-none text-[14px] sm:text-[15px] leading-[1.8] text-white/70 font-sans tracking-wide">
+                          <div className="prose prose-invert prose-zinc max-w-none text-[14px] sm:text-[15px] leading-[1.8] text-white/70 font-sans tracking-wide whitespace-pre-wrap">
                             {activeMaterial.transcript}
                           </div>
                         ) : (
                           <div className="py-16 flex flex-col items-center text-center">
                             <AlignLeft size={32} className="text-white/10 mb-4" strokeWidth={1} />
-                            <p className="text-[13px] text-white/40 font-medium">No transcript available for this audio.</p>
+                            <p className="text-[13px] text-white/40 font-medium">No transcript available for this {activeMaterial.type}.</p>
                           </div>
                         )}
                       </div>

@@ -5,7 +5,7 @@ import { collection, getDocs, query, where, doc, getDoc, addDoc, serverTimestamp
 import { db } from "@/lib/firebase";
 import { createNotification } from "@/lib/notifications";
 import Link from "next/link";
-import { ChevronLeft, Folder, Lock, CheckCircle2, XCircle, ChevronRight, BarChart2, Headphones, FileText, Zap, Award, Globe, RotateCw, Volume2 } from "lucide-react";
+import { ChevronLeft, Folder, Lock, CheckCircle2, XCircle, ChevronRight, BarChart2, Headphones, FileText, Zap, Award, Globe, RotateCw, Volume2, FolderOpen } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { safeConvertToDate, safeGetMillis } from "@/lib/utils";
 
@@ -241,8 +241,12 @@ export default function PublicCoursePage({ params }: { params: Promise<{ id: str
                 ))}
 
                 {folders.length === 0 && (
-                  <div className="col-span-full py-10 text-center border border-dashed border-white/10 rounded-xl bg-white/1">
-                    <p className="text-white/45 text-sm">This course doesn't have any folders yet.</p>
+                  <div className="col-span-full py-20 flex flex-col items-center text-center max-w-sm mx-auto opacity-80 hover:opacity-100 transition-opacity">
+                    <FolderOpen size={48} className="text-white/10 mb-4" strokeWidth={1} />
+                    <h3 className="text-[18px] font-semibold text-white/80 mb-2 tracking-tight">No Folders Yet</h3>
+                    <p className="text-[14px] text-white/40 leading-relaxed">
+                      This course doesn't have any folders or study materials. Check back later.
+                    </p>
                   </div>
                 )}
               </div>
