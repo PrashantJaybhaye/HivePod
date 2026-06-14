@@ -104,7 +104,7 @@ function UserCell({ userId, fallbackEmail, courseTitle }: { userId: string; fall
               <ShieldAlert size={10} /> Public
             </span>
           )}
-          <span className="bg-white/5 text-white/50 border border-white/5 text-[9px] font-bold px-1.5 py-0.5 rounded-md capitalize shrink-0">
+          <span className="bg-white/5 text-white/50 border border-white/5 text-[9px] font-bold px-1.5 py-0.5 rounded-md capitalizeshrink-0">
             {authProvider === "google.com" ? "Google" : authProvider === "password" ? "Password" : authProvider}
           </span>
         </div>
@@ -283,7 +283,7 @@ export default function AdminRequestsPage() {
                     <button
                       key={tab}
                       onClick={() => setActiveTab(tab)}
-                      className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 capitalize flex-1 sm:flex-initial text-center cursor-pointer flex items-center justify-center gap-1.5 ${activeTab === tab
+                      className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 capitalizeflex-1 sm:flex-initial text-center cursor-pointer flex items-center justify-center gap-1.5 ${activeTab === tab
                         ? "bg-white/8 text-white shadow-xs"
                         : "text-white/45 hover:text-white/70"
                         }`}
@@ -305,25 +305,45 @@ export default function AdminRequestsPage() {
           )}
         </div>
 
-        {/* iOS-Style Glassmorphic Table Container */}
+        {/* Minimalist Empty State */}
         {filteredRequests.length === 0 ? (
-          <div className="bg-white/1 border border-white/8 rounded-2xl py-12 text-center text-white/40 text-sm">
-            No {activeTab} requests found matching your query.
+          <div className="py-20 flex flex-col items-center justify-center text-center px-4">
+            <div className="text-white/20 mb-3">
+              {activeTab === "pending" && <Clock size={32} strokeWidth={1} />}
+              {activeTab === "approved" && <CheckCircle size={32} strokeWidth={1} />}
+              {activeTab === "rejected" && <XCircle size={32} strokeWidth={1} />}
+            </div>
+            <h3 className="text-sm font-medium text-white/60 mb-1 uppercase">
+              No {activeTab} requests
+            </h3>
+            <p className="text-xs text-white/30 max-w-[260px]">
+              {searchTerm
+                ? `No results for "${searchTerm}".`
+                : `You don't have any ${activeTab} requests.`}
+            </p>
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm("")}
+                className="mt-4 text-xs font-medium text-white/50 hover:text-white transition-colors underline underline-offset-2 cursor-pointer"
+              >
+                Clear search
+              </button>
+            )}
           </div>
         ) : (
           <div className="border border-white/8 bg-white/1.5 backdrop-blur-md rounded-2xl overflow-hidden shadow-2xl relative">
             {/* Top subtle sheen line */}
             <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
-            
+
             <div className="overflow-x-auto w-full">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-white/8 bg-white/2">
-                    <th className="px-3 sm:px-5 py-2.5 text-[10px] font-bold uppercase tracking-wider text-white/50 font-mono">User Details</th>
-                    <th className="hidden md:table-cell px-5 py-2.5 text-[10px] font-bold uppercase tracking-wider text-white/50 font-mono">Target Course</th>
-                    <th className="hidden sm:table-cell px-5 py-2.5 text-[10px] font-bold uppercase tracking-wider text-white/50 font-mono">Requested Date</th>
-                    <th className="px-3 sm:px-5 py-2.5 text-[10px] font-bold uppercase tracking-wider text-white/50 font-mono">Status & Restrictions</th>
-                    <th className="px-3 sm:px-5 py-2.5 text-[10px] font-bold uppercase tracking-wider text-white/50 font-mono text-right">Actions</th>
+                    <th className="px-3 sm:px-5 py-2.5 text-[10px] font-bold capitalizetracking-wider text-white/50 font-mono">User Details</th>
+                    <th className="hidden md:table-cell px-5 py-2.5 text-[10px] font-bold capitalizetracking-wider text-white/50 font-mono">Target Course</th>
+                    <th className="hidden sm:table-cell px-5 py-2.5 text-[10px] font-bold capitalizetracking-wider text-white/50 font-mono">Requested Date</th>
+                    <th className="px-3 sm:px-5 py-2.5 text-[10px] font-bold capitalizetracking-wider text-white/50 font-mono">Status & Restrictions</th>
+                    <th className="px-3 sm:px-5 py-2.5 text-[10px] font-bold capitalizetracking-wider text-white/50 font-mono text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/4">
@@ -342,12 +362,12 @@ export default function AdminRequestsPage() {
 
                         {/* Requested Date */}
                         <td className="hidden sm:table-cell px-5 py-2 align-middle font-mono text-xs text-white/40">
-                          {safeConvertToDate(req.requestedAt) 
+                          {safeConvertToDate(req.requestedAt)
                             ? safeConvertToDate(req.requestedAt)!.toLocaleDateString(undefined, {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric'
-                              })
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric'
+                            })
                             : "Unknown"}
                         </td>
 
@@ -355,18 +375,17 @@ export default function AdminRequestsPage() {
                         <td className="px-3 sm:px-5 py-2 align-middle">
                           {req.status === "approved" ? (
                             <div className="flex flex-col gap-1">
-                              <span className="inline-flex items-center gap-1 w-fit px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#30d158]/10 text-[#30d158] border border-[#30d158]/15 capitalize">
+                              <span className="inline-flex items-center gap-1 w-fit px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#30d158]/10 text-[#30d158] border border-[#30d158]/15 uppercase">
                                 <CheckCircle size={10} className="stroke-[2.5]" />
                                 Approved
                               </span>
-                              
+
                               {/* Expiry detail */}
                               {safeConvertToDate(req.restrictions?.expiresAt) ? (
-                                <span className={`text-[10px] font-mono flex items-center gap-1 ${
-                                  safeConvertToDate(req.restrictions?.expiresAt)!.getTime() < Date.now()
-                                    ? "text-[#ff453a]"
-                                    : "text-white/40"
-                                }`}>
+                                <span className={`text-[10px] font-mono flex items-center gap-1 ${safeConvertToDate(req.restrictions?.expiresAt)!.getTime() < Date.now()
+                                  ? "text-[#ff453a]"
+                                  : "text-white/40"
+                                  }`}>
                                   <Clock size={10} />
                                   {safeConvertToDate(req.restrictions?.expiresAt)!.getTime() < Date.now() ? "Expired" : "Expires: " + safeConvertToDate(req.restrictions?.expiresAt)!.toLocaleDateString()}
                                 </span>
@@ -375,23 +394,23 @@ export default function AdminRequestsPage() {
                                   <Clock size={10} /> Lifetime
                                 </span>
                               )}
-                              
+
                               {/* Restrictions detail */}
                               {req.restrictions?.blockXp && (
                                 <div className="flex flex-wrap gap-1 mt-0.5">
-                                  <span className="bg-[#ff9f0a]/10 text-[#ff9f0a] border border-[#ff9f0a]/15 text-[8px] font-extrabold px-1 rounded uppercase tracking-wider">
+                                  <span className="bg-[#ff9f0a]/10 text-[#ff9f0a] border border-[#ff9f0a]/15 text-[8px] font-extrabold px-1 rounded capitalizetracking-wider">
                                     No XP
                                   </span>
                                 </div>
                               )}
                             </div>
                           ) : req.status === "rejected" ? (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#ff453a]/10 text-[#ff453a] border border-[#ff453a]/15 capitalize">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#ff453a]/10 text-[#ff453a] border border-[#ff453a]/15 uppercase">
                               <XCircle size={10} className="stroke-[2.5]" />
                               Rejected
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-white/5 text-white/40 border border-white/5 capitalize">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-white/5 text-white/40 border border-white/5 uppercase">
                               <Clock size={10} />
                               Pending
                             </span>
@@ -508,24 +527,23 @@ export default function AdminRequestsPage() {
 
               {/* Expiry Option Group */}
               <div className="space-y-2.5">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-white/40 font-mono">Access Expiration</label>
+                <label className="text-[10px] font-bold capitalizetracking-wider text-white/40 font-mono">Access Expiration</label>
                 <div className="grid grid-cols-5 bg-white/2 border border-white/6 rounded-xl p-0.5 gap-0.5">
                   {(["none", "24h", "7d", "30d", "custom"] as const).map((opt) => (
                     <button
                       key={opt}
                       type="button"
                       onClick={() => setExpiryOption(opt)}
-                      className={`px-1 py-1.5 rounded-lg text-[10px] font-bold transition-all duration-150 capitalize text-center cursor-pointer ${
-                        expiryOption === opt
-                          ? "bg-white/8 text-white"
-                          : "text-white/40 hover:text-white/70"
-                      }`}
+                      className={`px-1 py-1.5 rounded-lg text-[10px] font-bold transition-all duration-150 capitalizetext-center cursor-pointer ${expiryOption === opt
+                        ? "bg-white/8 text-white"
+                        : "text-white/40 hover:text-white/70"
+                        }`}
                     >
                       {opt === "none" ? "Lifetime" : opt}
                     </button>
                   ))}
                 </div>
-                
+
                 {/* Custom Date Input */}
                 {expiryOption === "custom" && (
                   <div className="mt-2.5 animate-in slide-in-from-top-1.5 fade-in duration-200">
@@ -543,8 +561,8 @@ export default function AdminRequestsPage() {
 
               {/* Toggles Group */}
               <div className="space-y-4">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-white/40 font-mono">Permission Exclusions</label>
-                
+                <label className="text-[10px] font-bold capitalizetracking-wider text-white/40 font-mono">Permission Exclusions</label>
+
                 <div className="space-y-3">
                   {/* Block XP */}
                   <label className="flex items-start justify-between gap-4 p-3 bg-white/2 border border-white/5 rounded-xl cursor-pointer hover:bg-white/3 transition-all">

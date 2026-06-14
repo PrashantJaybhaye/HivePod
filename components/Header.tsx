@@ -40,21 +40,21 @@ export default function Header({ toggleSidebar }: { toggleSidebar?: () => void }
     <header className="h-14 shrink-0 border-b border-white/4 bg-[#060606]/60 backdrop-blur-2xl flex items-center justify-between px-6 sticky top-0 z-10 w-full">
       <div className="flex items-center gap-3">
         {toggleSidebar && (
-          <button 
-            onClick={toggleSidebar} 
+          <button
+            onClick={toggleSidebar}
             className="md:hidden text-white/50 hover:text-white transition-colors cursor-pointer"
           >
             <Menu size={18} />
           </button>
         )}
-        
+
         {/* Mobile Logo & Brand */}
         <div className="flex items-center gap-2 md:hidden">
           <img src="/logo.png" alt="HivePod Logo" className="w-5.5 h-5.5 object-contain" />
-          <span className="font-black text-sm tracking-tight text-white bg-linear-to-r from-white to-white/80 bg-clip-text text-transparent">HivePod</span>
+          <span className="font-black text-sm tracking-tight text-white bg-linear-to-r from-white to-white/80 bg-clip-text">HivePod</span>
         </div>
 
-        <h1 className="text-xs font-bold tracking-wider text-white/50 uppercase hidden md:block">
+        <h1 className="text-xs font-bold tracking-wider text-white/50 capitalizehidden md:block">
           {title}
         </h1>
       </div>
@@ -95,7 +95,7 @@ export default function Header({ toggleSidebar }: { toggleSidebar?: () => void }
         <div className="border-l border-white/6 h-4 mx-0.5 hidden sm:block"></div>
 
         {/* Logout Button */}
-        <button 
+        <button
           onClick={handleLogout}
           disabled={isLoggingOut}
           className="text-[11px] font-bold text-white/70 hover:text-white border border-white/8 hover:bg-white/4 px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"

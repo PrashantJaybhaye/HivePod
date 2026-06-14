@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, BookOpen, Award, Settings, Shield, Inbox } from "lucide-react";
+import { LayoutDashboard, BookOpen, Award, Settings, Shield, Inbox, User } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import { motion } from "framer-motion";
 
@@ -22,6 +22,7 @@ export default function Sidebar({ isOpen = false, setIsOpen }: SidebarProps) {
       { name: "Admin Panel", href: "/admin", icon: Shield },
       { name: "Requests", href: "/admin/requests", icon: Inbox }
     ] : []),
+    { name: "Profile", href: "/profile", icon: User },
     { name: "Settings", href: "/settings", icon: Settings },
   ];
 

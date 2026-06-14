@@ -9,7 +9,7 @@ import { ArrowLeft, Pencil, Trash2, X, Plus, ChevronRight, Folder } from "lucide
 export default function AdminCoursePage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const courseId = resolvedParams.id;
-  
+
   const [course, setCourse] = useState<any>(null);
   const [folders, setFolders] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -108,7 +108,7 @@ export default function AdminCoursePage({ params }: { params: Promise<{ id: stri
 
   const handleDeleteFolder = async (folderIdToDel: string) => {
     if (!confirm("Are you sure you want to delete this folder? Associated materials must be deleted separately.")) return;
-    
+
     try {
       await deleteDoc(doc(db, "folders", folderIdToDel));
       fetchCourseAndFolders();
@@ -137,8 +137,8 @@ export default function AdminCoursePage({ params }: { params: Promise<{ id: stri
             {course.description || "Manage course structures and syllabus files."}
           </p>
         </div>
-        
-        <button 
+
+        <button
           onClick={handleOpenCreateModal}
           className="self-start sm:self-center bg-white hover:bg-[#e8e8ed] text-black text-xs font-semibold px-3.5 py-1.5 rounded-lg transition-colors duration-150 flex items-center gap-1.5 cursor-pointer shrink-0"
         >
@@ -150,34 +150,34 @@ export default function AdminCoursePage({ params }: { params: Promise<{ id: stri
       {/* Folders iOS-Widget Grid */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-semibold text-[#86868b] uppercase tracking-wider">Folders</h2>
+          <h2 className="text-sm font-semibold text-[#86868b] capitalizetracking-wider">Folders</h2>
         </div>
-        
+
         {dbLoading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 pt-2">
             {[1, 2, 3].map((n) => (
-              <div key={n} className="bg-white/[0.01] border border-white/5 rounded-2xl h-32 shimmer-bg"></div>
+              <div key={n} className="bg-white/1 border border-white/5 rounded-2xl h-32 shimmer-bg"></div>
             ))}
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 pt-2">
             {folders.map((folder) => (
-              <div 
-                key={folder.id} 
+              <div
+                key={folder.id}
                 className="relative group flex flex-col items-center p-4 rounded-[20px] select-none text-center w-full"
               >
                 {/* Action buttons on hover (absolute top-right) */}
                 <div className="absolute top-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-10">
-                  <button 
-                    onClick={() => handleOpenEditModal(folder)} 
-                    className="p-1.5 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 text-white/70 hover:text-white transition-all cursor-pointer" 
+                  <button
+                    onClick={() => handleOpenEditModal(folder)}
+                    className="p-1.5 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 text-white/70 hover:text-white transition-all cursor-pointer"
                     title="Edit"
                   >
                     <Pencil size={11} />
                   </button>
-                  <button 
-                    onClick={() => handleDeleteFolder(folder.id)} 
-                    className="p-1.5 rounded-lg bg-white/5 border border-white/5 hover:bg-red-500/10 text-white/70 hover:text-red-400 transition-all cursor-pointer" 
+                  <button
+                    onClick={() => handleDeleteFolder(folder.id)}
+                    className="p-1.5 rounded-lg bg-white/5 border border-white/5 hover:bg-red-500/10 text-white/70 hover:text-red-400 transition-all cursor-pointer"
                     title="Delete"
                   >
                     <Trash2 size={11} />
@@ -187,10 +187,10 @@ export default function AdminCoursePage({ params }: { params: Promise<{ id: stri
                 <Link href={`/admin/folder/${folder.id}`} className="flex flex-col items-center w-full">
                   {/* Clean Flat iOS/macOS Folder Icon using folderr.png */}
                   <div className="relative w-20 h-20 mb-2 shrink-0">
-                    <img 
-                      src="/folderr.png" 
-                      alt="Folder Icon" 
-                      className="w-full h-full object-contain" 
+                    <img
+                      src="/folderr.png"
+                      alt="Folder Icon"
+                      className="w-full h-full object-contain"
                     />
                   </div>
 
@@ -201,12 +201,12 @@ export default function AdminCoursePage({ params }: { params: Promise<{ id: stri
                 </Link>
               </div>
             ))}
-            
+
             {folders.length === 0 && (
               <div className="col-span-full py-12 text-center border border-dashed border-white/10 rounded-2xl bg-[#1c1c1e]/10">
                 <Folder size={24} className="mx-auto text-[#86868b]/30 mb-2" />
                 <p className="text-xs text-[#86868b] font-medium">No folders in this course yet</p>
-                <button 
+                <button
                   onClick={handleOpenCreateModal}
                   className="mt-3 text-xs bg-white text-black font-semibold px-3 py-1.5 rounded-lg hover:bg-[#e8e8ed] transition-colors"
                 >
@@ -222,13 +222,13 @@ export default function AdminCoursePage({ params }: { params: Promise<{ id: stri
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
           <div className="bg-[#1c1c1e] border border-white/10 rounded-2xl w-full max-w-md shadow-2xl flex flex-col overflow-hidden">
-            
+
             {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-[#1c1c1e]">
               <h3 className="text-base font-bold text-white">
                 {modalMode === "create" ? "New Folder" : "Rename Folder"}
               </h3>
-              <button 
+              <button
                 onClick={() => setIsModalOpen(false)}
                 className="p-1 rounded-md hover:bg-white/5 text-[#86868b] hover:text-white transition-colors cursor-pointer"
               >
@@ -239,7 +239,7 @@ export default function AdminCoursePage({ params }: { params: Promise<{ id: stri
             {/* Modal Form */}
             <form onSubmit={modalMode === "create" ? handleCreateFolder : handleUpdateFolder} className="p-6 space-y-4">
               <div>
-                <label className="block text-[10px] font-semibold text-[#86868b] mb-1 uppercase tracking-wider">Folder Title</label>
+                <label className="block text-[10px] font-semibold text-[#86868b] mb-1 capitalizetracking-wider">Folder Title</label>
                 <input
                   type="text"
                   className="w-full bg-[#2c2c2e]/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary transition-colors placeholder:text-white/20"

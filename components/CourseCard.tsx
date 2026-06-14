@@ -211,7 +211,7 @@ export default function CourseCard({
         {/* Progress tracking */}
         <div className="mb-4">
           <div className="flex justify-between items-center mb-1.5">
-            <span className="text-[10px] text-white/50 uppercase font-semibold tracking-wider">Progress</span>
+            <span className="text-[10px] text-white/50 capitalizefont-semibold tracking-wider">Progress</span>
             <span className="text-[11px] text-white/70 font-semibold">
               {completedItems} of {totalItems} {totalItems === 1 ? "module" : "modules"} ({progressPercentage}%)
             </span>

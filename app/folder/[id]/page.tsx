@@ -160,7 +160,7 @@ export default function PublicFolderPage({ params }: { params: Promise<{ id: str
                 </div>
                 <div className="flex-1 overflow-hidden">
                   <h3 className="font-semibold text-foreground truncate">{mat.title}</h3>
-                  <p className="text-xs text-gray-400 capitalize">{mat.type}</p>
+                  <p className="text-xs text-gray-400 uppercase">{mat.type}</p>
                 </div>
               </div>
             ))}

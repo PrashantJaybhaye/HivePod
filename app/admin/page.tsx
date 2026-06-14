@@ -5,15 +5,15 @@ import { collection, getDocs, addDoc, serverTimestamp, doc, deleteDoc, updateDoc
 import { db } from "@/lib/firebase";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { 
-  Pencil, 
-  Trash2, 
-  X, 
-  Plus, 
-  BookOpen, 
-  Headphones, 
-  FileText, 
-  Zap, 
+import {
+  Pencil,
+  Trash2,
+  X,
+  Plus,
+  BookOpen,
+  Headphones,
+  FileText,
+  Zap,
   ChevronRight,
   Globe,
   Clock,
@@ -165,7 +165,7 @@ export default function AdminPage() {
 
   const handleDeleteCourse = async (courseId: string) => {
     if (!confirm("Are you sure you want to delete this course? All associated folders and materials must be deleted separately.")) return;
-    
+
     try {
       await deleteDoc(doc(db, "courses", courseId));
       fetchCourses();
@@ -193,8 +193,8 @@ export default function AdminPage() {
             Create and manage course syllabi, files, and metadata settings.
           </p>
         </div>
-        
-        <button 
+
+        <button
           onClick={handleOpenCreateModal}
           className="self-start sm:self-center bg-white hover:bg-[#e8e8ed] text-black text-xs font-semibold px-3.5 py-1.5 rounded-lg transition-colors duration-150 flex items-center gap-1.5 cursor-pointer"
         >
@@ -206,19 +206,19 @@ export default function AdminPage() {
       {/* Analytics Widgets Grid (Apple Style) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <div className="bg-[#1c1c1e]/40 border border-white/5 rounded-2xl p-4 flex flex-col justify-between">
-          <span className="text-[10px] text-[#86868b] font-semibold tracking-wider uppercase mb-2">Total Courses</span>
+          <span className="text-[10px] text-[#86868b] font-semibold tracking-wider capitalizemb-2">Total Courses</span>
           <span className="text-2xl font-semibold text-white tracking-tight">{totalCourses}</span>
         </div>
         <div className="bg-[#1c1c1e]/40 border border-white/5 rounded-2xl p-4 flex flex-col justify-between">
-          <span className="text-[10px] text-[#86868b] font-semibold tracking-wider uppercase mb-2">Audio Tracks</span>
+          <span className="text-[10px] text-[#86868b] font-semibold tracking-wider capitalizemb-2">Audio Tracks</span>
           <span className="text-2xl font-semibold text-white tracking-tight">{totalAudioPods}</span>
         </div>
         <div className="bg-[#1c1c1e]/40 border border-white/5 rounded-2xl p-4 flex flex-col justify-between">
-          <span className="text-[10px] text-[#86868b] font-semibold tracking-wider uppercase mb-2">PDF Resources</span>
+          <span className="text-[10px] text-[#86868b] font-semibold tracking-wider capitalizemb-2">PDF Resources</span>
           <span className="text-2xl font-semibold text-white tracking-tight">{totalPDFs}</span>
         </div>
         <div className="bg-[#1c1c1e]/40 border border-white/5 rounded-2xl p-4 flex flex-col justify-between">
-          <span className="text-[10px] text-[#86868b] font-semibold tracking-wider uppercase mb-2">XP Reward Total</span>
+          <span className="text-[10px] text-[#86868b] font-semibold tracking-wider capitalizemb-2">XP Reward Total</span>
           <span className="text-2xl font-semibold text-white tracking-tight">{totalXP}</span>
         </div>
       </div>
@@ -226,21 +226,21 @@ export default function AdminPage() {
       {/* Courses iOS-Widget Grid */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-semibold text-[#86868b] uppercase tracking-wider">Curriculum Catalog</h2>
+          <h2 className="text-sm font-semibold text-[#86868b] capitalizetracking-wider">Curriculum Catalog</h2>
         </div>
-        
+
         {dbLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {[1, 2, 3, 4].map((n) => (
-              <div key={n} className="bg-white/[0.01] border border-white/5 rounded-2xl h-44 shimmer-bg"></div>
+              <div key={n} className="bg-white/1 border border-white/5 rounded-2xl h-44 shimmer-bg"></div>
             ))}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {courses.map((course) => (
-              <div 
-                key={course.id} 
-                className="bg-[#1c1c1e]/30 border border-white/5 hover:border-white/10 rounded-2xl p-4 flex flex-col justify-between h-full min-h-[220px] transition-all duration-200 group relative hover:bg-white/[0.02] shadow-xs cursor-pointer hover:-translate-y-0.5"
+              <div
+                key={course.id}
+                className="bg-[#1c1c1e]/30 border border-white/5 hover:border-white/10 rounded-2xl p-4 flex flex-col justify-between h-full min-h-[220px] transition-all duration-200 group relative hover:bg-white/2 shadow-xs cursor-pointer hover:-translate-y-0.5"
                 onClick={() => router.push(`/admin/course/${course.id}`)}
               >
                 {/* Header: Category Badge and Pencil/Trash Actions */}
@@ -248,24 +248,24 @@ export default function AdminPage() {
                   <span className="text-[9px] text-[#86868b] bg-white/5 border border-white/5 px-2 py-0.5 rounded-md font-semibold tracking-wider uppercase">
                     {course.category || "IT & Tech"}
                   </span>
-                  
+
                   <div className="flex gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity duration-150 relative z-10">
-                    <button 
+                    <button
                       onClick={(e) => {
                         e.stopPropagation();
                         handleOpenEditModal(course);
-                      }} 
-                      className="p-1 rounded-md bg-white/5 hover:bg-white/10 text-[#86868b] hover:text-white border border-white/5 hover:border-white/10 transition-colors cursor-pointer" 
+                      }}
+                      className="p-1 rounded-md bg-white/5 hover:bg-white/10 text-[#86868b] hover:text-white border border-white/5 hover:border-white/10 transition-colors cursor-pointer"
                       title="Edit"
                     >
                       <Pencil size={11} />
                     </button>
-                    <button 
+                    <button
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDeleteCourse(course.id);
-                      }} 
-                      className="p-1 rounded-md bg-white/5 hover:bg-red-500/10 text-[#86868b] hover:text-red-400 border border-white/5 hover:border-red-500/10 transition-colors cursor-pointer" 
+                      }}
+                      className="p-1 rounded-md bg-white/5 hover:bg-red-500/10 text-[#86868b] hover:text-red-400 border border-white/5 hover:border-red-500/10 transition-colors cursor-pointer"
                       title="Delete"
                     >
                       <Trash2 size={11} />
@@ -283,23 +283,23 @@ export default function AdminPage() {
                   </p>
 
                   {/* iOS-Widget Styled Metrics Box */}
-                  <div className="grid grid-cols-3 gap-2 bg-white/[0.02] border border-white/5 rounded-xl p-2 my-3 text-center">
+                  <div className="grid grid-cols-3 gap-2 bg-white/2 border border-white/5 rounded-xl p-2 my-3 text-center">
                     <div>
-                      <span className="text-[9px] text-[#86868b] block mb-0.5 uppercase tracking-wider font-semibold">Pods</span>
+                      <span className="text-[9px] text-[#86868b] block mb-0.5 capitalizetracking-wider font-semibold">Pods</span>
                       <span className="text-xs font-semibold text-white flex items-center justify-center gap-1">
                         <Headphones size={11} className="text-primary shrink-0" />
                         {course.audioTracks || 0}
                       </span>
                     </div>
                     <div className="border-x border-white/5">
-                      <span className="text-[9px] text-[#86868b] block mb-0.5 uppercase tracking-wider font-semibold">PDFs</span>
+                      <span className="text-[9px] text-[#86868b] block mb-0.5 capitalizetracking-wider font-semibold">PDFs</span>
                       <span className="text-xs font-semibold text-white flex items-center justify-center gap-1">
                         <FileText size={11} className="text-primary shrink-0" />
                         {course.resourcesCount || 0}
                       </span>
                     </div>
                     <div>
-                      <span className="text-[9px] text-[#86868b] block mb-0.5 uppercase tracking-wider font-semibold">XP</span>
+                      <span className="text-[9px] text-[#86868b] block mb-0.5 capitalizetracking-wider font-semibold">XP</span>
                       <span className="text-xs font-semibold text-white flex items-center justify-center gap-1">
                         <Zap size={11} className="text-primary shrink-0" />
                         {course.xpReward || 0}
@@ -331,16 +331,24 @@ export default function AdminPage() {
                 </div>
               </div>
             ))}
-            
+
             {courses.length === 0 && (
-              <div className="col-span-full py-12 text-center border border-dashed border-white/10 rounded-2xl bg-[#1c1c1e]/10">
-                <BookOpen size={24} className="mx-auto text-[#86868b]/30 mb-2" />
-                <p className="text-xs text-[#86868b] font-medium">No courses listed yet</p>
-                <button 
+              <div className="col-span-full py-20 flex flex-col items-center justify-center text-center">
+                <div className="text-white/20 mb-3">
+                  <BookOpen size={32} strokeWidth={1} />
+                </div>
+                <h3 className="text-sm font-medium text-white/60 mb-1">
+                  No courses listed yet
+                </h3>
+                <p className="text-xs text-white/30 max-w-[260px] mb-4">
+                  Get started by adding your first course to the catalog.
+                </p>
+                <button
                   onClick={handleOpenCreateModal}
-                  className="mt-3 text-xs bg-white text-black font-semibold px-3 py-1.5 rounded-lg hover:bg-[#e8e8ed] transition-colors"
+                  className="flex items-center gap-1.5 text-xs font-medium text-white/60 hover:text-white transition-colors group cursor-pointer"
                 >
-                  Add Your First Course
+                  <Plus size={14} className="group-hover:scale-110 transition-transform" />
+                  <span>Add Course</span>
                 </button>
               </div>
             )}
@@ -352,7 +360,7 @@ export default function AdminPage() {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
           <div className="bg-[#1c1c1e] border border-white/10 rounded-2xl w-full max-w-lg shadow-2xl flex flex-col overflow-hidden max-h-[90vh]">
-            
+
             {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-[#1c1c1e]">
               <div>
@@ -360,7 +368,7 @@ export default function AdminPage() {
                   {modalMode === "create" ? "Add Course" : "Edit Course Details"}
                 </h3>
               </div>
-              <button 
+              <button
                 onClick={() => setIsModalOpen(false)}
                 className="p-1 rounded-md hover:bg-white/5 text-[#86868b] hover:text-white transition-colors cursor-pointer"
               >
@@ -370,10 +378,10 @@ export default function AdminPage() {
 
             {/* Modal Form */}
             <form onSubmit={modalMode === "create" ? handleCreateCourse : handleUpdateCourse} className="flex-1 overflow-y-auto p-6 space-y-4">
-              
+
               {/* Field 1: Title */}
               <div>
-                <label className="block text-[10px] font-semibold text-[#86868b] mb-1 uppercase tracking-wider">Title</label>
+                <label className="block text-[10px] font-semibold text-[#86868b] mb-1 capitalizetracking-wider">Title</label>
                 <input
                   type="text"
                   className="w-full bg-[#2c2c2e]/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary transition-colors placeholder:text-white/20"
@@ -386,7 +394,7 @@ export default function AdminPage() {
 
               {/* Field 2: Description */}
               <div>
-                <label className="block text-[10px] font-semibold text-[#86868b] mb-1 uppercase tracking-wider">Description</label>
+                <label className="block text-[10px] font-semibold text-[#86868b] mb-1 capitalizetracking-wider">Description</label>
                 <textarea
                   className="w-full bg-[#2c2c2e]/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary transition-colors placeholder:text-white/20 min-h-[70px] resize-y"
                   value={courseDesc}
@@ -398,7 +406,7 @@ export default function AdminPage() {
               {/* Field 3: Category & Instructor */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] font-semibold text-[#86868b] mb-1 uppercase tracking-wider">Category</label>
+                  <label className="block text-[10px] font-semibold text-[#86868b] mb-1 capitalizetracking-wider">Category</label>
                   <input
                     type="text"
                     className="w-full bg-[#2c2c2e]/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary transition-colors"
@@ -408,7 +416,7 @@ export default function AdminPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-semibold text-[#86868b] mb-1 uppercase tracking-wider">Instructor</label>
+                  <label className="block text-[10px] font-semibold text-[#86868b] mb-1 capitalizetracking-wider">Instructor</label>
                   <input
                     type="text"
                     className="w-full bg-[#2c2c2e]/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary transition-colors"
@@ -422,7 +430,7 @@ export default function AdminPage() {
               {/* Field 4: Difficulty & Language */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] font-semibold text-[#86868b] mb-1 uppercase tracking-wider">Difficulty</label>
+                  <label className="block text-[10px] font-semibold text-[#86868b] mb-1 capitalizetracking-wider">Difficulty</label>
                   <select
                     className="w-full bg-[#2c2c2e] border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary cursor-pointer"
                     value={difficulty}
@@ -434,7 +442,7 @@ export default function AdminPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[10px] font-semibold text-[#86868b] mb-1 uppercase tracking-wider">Language</label>
+                  <label className="block text-[10px] font-semibold text-[#86868b] mb-1 capitalizetracking-wider">Language</label>
                   <input
                     type="text"
                     className="w-full bg-[#2c2c2e]/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary"
@@ -447,7 +455,7 @@ export default function AdminPage() {
               {/* Field 5: Audio Pods & PDF count */}
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-[10px] font-semibold text-[#86868b] mb-1 uppercase tracking-wider">Audio Tracks</label>
+                  <label className="block text-[10px] font-semibold text-[#86868b] mb-1 capitalizetracking-wider">Audio Tracks</label>
                   <input
                     type="number"
                     min="0"
@@ -457,7 +465,7 @@ export default function AdminPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-semibold text-[#86868b] mb-1 uppercase tracking-wider">PDF Resources</label>
+                  <label className="block text-[10px] font-semibold text-[#86868b] mb-1 capitalizetracking-wider">PDF Resources</label>
                   <input
                     type="number"
                     min="0"
@@ -467,7 +475,7 @@ export default function AdminPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-semibold text-[#86868b] mb-1 uppercase tracking-wider">XP Reward</label>
+                  <label className="block text-[10px] font-semibold text-[#86868b] mb-1 capitalizetracking-wider">XP Reward</label>
                   <input
                     type="number"
                     min="0"
@@ -481,7 +489,7 @@ export default function AdminPage() {
               {/* Field 6: Duration & Update Freq */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] font-semibold text-[#86868b] mb-1 uppercase tracking-wider">Listen Time</label>
+                  <label className="block text-[10px] font-semibold text-[#86868b] mb-1 capitalizetracking-wider">Listen Time</label>
                   <input
                     type="text"
                     className="w-full bg-[#2c2c2e]/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary"
@@ -491,7 +499,7 @@ export default function AdminPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-semibold text-[#86868b] mb-1 uppercase tracking-wider">Update Freq</label>
+                  <label className="block text-[10px] font-semibold text-[#86868b] mb-1 capitalizetracking-wider">Update Freq</label>
                   <input
                     type="text"
                     className="w-full bg-[#2c2c2e]/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary"

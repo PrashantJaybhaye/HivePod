@@ -10,7 +10,7 @@ import UploadMaterial from "@/components/UploadMaterial";
 export default function AdminFolderPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const folderId = resolvedParams.id;
-  
+
   const [folder, setFolder] = useState<any>(null);
   const [materials, setMaterials] = useState<any[]>([]);
 
@@ -40,7 +40,7 @@ export default function AdminFolderPage({ params }: { params: Promise<{ id: stri
 
   const handleDeleteMaterial = async (materialIdToDel: string) => {
     if (!confirm("Are you sure you want to delete this material? (Note: This only removes the database record, not the file from Storage)")) return;
-    
+
     try {
       await deleteDoc(doc(db, "materials", materialIdToDel));
       fetchFolderAndMaterials();
@@ -110,14 +110,14 @@ export default function AdminFolderPage({ params }: { params: Promise<{ id: stri
       {/* Materials List Section */}
       <div>
         <div className="mb-4">
-          <h2 className="text-sm font-semibold text-[#86868b] uppercase tracking-wider">Folder Materials</h2>
+          <h2 className="text-sm font-semibold text-[#86868b] capitalizetracking-wider">Folder Materials</h2>
         </div>
-        
+
         <div className="flex flex-col gap-3">
           {materials.map((mat) => (
-            <div 
-              key={mat.id} 
-              className="bg-[#1c1c1e]/30 border border-white/5 rounded-2xl p-4 flex flex-col md:flex-row items-start md:items-center gap-4 hover:bg-white/[0.02] transition-colors duration-150 group shadow-xs"
+            <div
+              key={mat.id}
+              className="bg-[#1c1c1e]/30 border border-white/5 rounded-2xl p-4 flex flex-col md:flex-row items-start md:items-center gap-4 hover:bg-white/2 transition-colors duration-150 group shadow-xs"
             >
               {/* Type Icon */}
               <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center text-primary shrink-0">
@@ -125,45 +125,45 @@ export default function AdminFolderPage({ params }: { params: Promise<{ id: stri
                 {mat.type === "pdf" && <FileText size={16} />}
                 {mat.type === "image" && <ImageIcon size={16} />}
               </div>
-              
+
               {/* Material Info */}
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-sm text-white truncate">{mat.title}</h3>
                 <div className="flex flex-wrap items-center gap-3 mt-1 text-[#86868b] text-[10px]">
-                  <span className="capitalize font-semibold bg-white/5 border border-white/5 px-1.5 py-0.5 rounded text-[9px] uppercase tracking-wide">
+                  <span className="capitalizefont-semibold bg-white/5 border border-white/5 px-1.5 py-0.5 rounded text-[9px] capitalize tracking-wide">
                     {mat.type}
                   </span>
                   {mat.type === "audio" && !mat.transcript && (
-                    <span className="text-orange-500 font-bold uppercase tracking-wider flex items-center gap-1 text-[9px]">
+                    <span className="text-orange-500 font-bold capitalizetracking-wider flex items-center gap-1 text-[9px]">
                       <span className="w-1 h-1 rounded-full bg-orange-500 animate-pulse"></span>
                       Processing Transcript
                     </span>
                   )}
                 </div>
               </div>
-              
+
               {/* Actions & Links */}
               <div className="flex items-center gap-4 mt-2 md:mt-0 w-full md:w-auto justify-between md:justify-end shrink-0">
-                <a 
-                  href={mat.url} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
+                <a
+                  href={mat.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="text-xs font-semibold text-primary hover:text-primary/85 transition-colors flex items-center gap-0.5"
                 >
                   View Asset <ChevronRight size={14} />
                 </a>
-                
+
                 <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150 bg-black/30 p-1 rounded-lg border border-white/5">
-                  <button 
-                    onClick={() => handleOpenEditModal(mat)} 
-                    className="p-1 text-[#86868b] hover:text-white transition-colors cursor-pointer" 
+                  <button
+                    onClick={() => handleOpenEditModal(mat)}
+                    className="p-1 text-[#86868b] hover:text-white transition-colors cursor-pointer"
                     title="Edit Name"
                   >
                     <Pencil size={11} />
                   </button>
-                  <button 
-                    onClick={() => handleDeleteMaterial(mat.id)} 
-                    className="p-1 text-[#86868b] hover:text-red-400 transition-colors cursor-pointer" 
+                  <button
+                    onClick={() => handleDeleteMaterial(mat.id)}
+                    className="p-1 text-[#86868b] hover:text-red-400 transition-colors cursor-pointer"
                     title="Delete"
                   >
                     <Trash2 size={11} />
@@ -172,7 +172,7 @@ export default function AdminFolderPage({ params }: { params: Promise<{ id: stri
               </div>
             </div>
           ))}
-          
+
           {materials.length === 0 && (
             <div className="py-12 text-center border border-dashed border-white/10 rounded-2xl bg-[#1c1c1e]/10">
               <FileText size={24} className="mx-auto text-[#86868b]/30 mb-2" />
@@ -187,13 +187,13 @@ export default function AdminFolderPage({ params }: { params: Promise<{ id: stri
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
           <div className="bg-[#1c1c1e] border border-white/10 rounded-2xl w-full max-w-md shadow-2xl flex flex-col overflow-hidden">
-            
+
             {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-[#1c1c1e]">
               <h3 className="text-base font-bold text-white">
                 Rename Material
               </h3>
-              <button 
+              <button
                 onClick={() => setIsModalOpen(false)}
                 className="p-1 rounded-md hover:bg-white/5 text-[#86868b] hover:text-white transition-colors cursor-pointer"
               >
@@ -204,7 +204,7 @@ export default function AdminFolderPage({ params }: { params: Promise<{ id: stri
             {/* Modal Form */}
             <form onSubmit={handleUpdateMaterial} className="p-6 space-y-4">
               <div>
-                <label className="block text-[10px] font-semibold text-[#86868b] mb-1 uppercase tracking-wider">Material Title</label>
+                <label className="block text-[10px] font-semibold text-[#86868b] mb-1 capitalizetracking-wider">Material Title</label>
                 <input
                   type="text"
                   className="w-full bg-[#2c2c2e]/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary transition-colors placeholder:text-white/20"

@@ -45,19 +45,19 @@ export default function MyCourses() {
             where("userId", "==", user.uid)
           );
           const reqSnap = await getDocs(reqQuery);
-          
+
           // Map each courseId to its latest request
           const latestRequestsByCourse: Record<string, any> = {};
-          
+
           reqSnap.docs.forEach(doc => {
             const data = doc.data();
             const courseId = data.courseId;
             if (!courseId) return;
-            
+
             const existing = latestRequestsByCourse[courseId];
             const currentReqTime = safeGetMillis(data.requestedAt, Date.now());
             const existingReqTime = safeGetMillis(existing?.requestedAt, 0);
-            
+
             if (!existing || currentReqTime > existingReqTime) {
               latestRequestsByCourse[courseId] = data;
             }
@@ -188,7 +188,7 @@ export default function MyCourses() {
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all duration-200 capitalize flex-1 sm:flex-initial text-center cursor-pointer ${activeTab === tab
+                    className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all duration-200 capitalizeflex-1 sm:flex-initial text-center cursor-pointer ${activeTab === tab
                       ? "bg-white/8 text-white shadow-xs"
                       : "text-white/45 hover:text-white/70"
                       }`}
