@@ -54,7 +54,7 @@ export default function Header({ toggleSidebar }: { toggleSidebar?: () => void }
           <span className="font-black text-sm tracking-tight text-white bg-linear-to-r from-white to-white/80 bg-clip-text">HivePod</span>
         </div>
 
-        <h1 className="text-xs font-bold tracking-wider text-white/50 capitalizehidden md:block">
+        <h1 className="text-xs font-bold tracking-wider text-white/50 capitalize hidden md:block">
           {title}
         </h1>
       </div>

@@ -27,7 +27,7 @@ export default function Sidebar({ isOpen = false, setIsOpen }: SidebarProps) {
   ];
 
   return (
-    <aside className={`w-[260px] shrink-0 bg-[#060606]/80 border-r border-white/4 backdrop-blur-2xl h-screen flex flex-col fixed left-0 top-0 z-20 transition-transform duration-300
+    <aside className={`w-[85vw] max-w-[320px] md:max-w-none md:w-[260px] shrink-0 bg-[#060606]/95 md:bg-[#060606]/80 border-r border-white/4 backdrop-blur-2xl h-screen flex flex-col fixed left-0 top-0 z-30 transition-transform duration-300
       ${isOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0
     `}>
       {/* Brand Header */}
@@ -53,7 +53,12 @@ export default function Sidebar({ isOpen = false, setIsOpen }: SidebarProps) {
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             return (
-              <Link key={item.name} href={item.href} className="block w-full">
+              <Link 
+                key={item.name} 
+                href={item.href} 
+                className="block w-full"
+                onClick={() => setIsOpen?.(false)}
+              >
                 <motion.div
                   whileHover={{ x: 2 }}
                   whileTap={{ scale: 0.98 }}

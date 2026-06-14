@@ -110,13 +110,6 @@ export default function Home() {
               Your journey of a thousand miles begins with a single click.
             </p>
           </div>
-          {isAdmin && (
-            <Link href="/admin">
-              <button className="bg-card border border-border px-4 py-2 rounded-lg text-sm hover:border-primary transition-colors">
-                Admin Panel
-              </button>
-            </Link>
-          )}
         </div>
 
         {/* Stats Row */}
