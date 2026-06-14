@@ -150,7 +150,7 @@ export default function ProfilePage() {
       <div className="flex items-start sm:items-center justify-between py-5 gap-4 group">
         <div className="space-y-0.5">
           <p className="text-xs font-semibold tracking-wide text-white">{title}</p>
-          <p className="text-xs text-white/60 break-words whitespace-pre-wrap max-w-sm">
+          <p className="text-xs text-white/60 wrap-break-words whitespace-pre-wrap max-w-sm">
             {inputType === "password" ? "••••••••" : value}
           </p>
         </div>
