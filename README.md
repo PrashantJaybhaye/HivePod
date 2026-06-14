@@ -8,7 +8,13 @@
 
 ## 📖 Overview
 
-HivePod is a modern, responsive web application built with **Next.js 14+ (App Router)**. It provides a sleek, glassmorphism-inspired UI tailored for modern educational and podcasting experiences. Creators can manage courses, host audio content, and build thriving communities all in one place.
+HivePod is a state-of-the-art, responsive web application meticulously crafted for the modern creator economy. Built on the robust foundation of **Next.js 14+ (App Router)** and **React 18**, it serves as a comprehensive platform where education meets community and entertainment. 
+
+Designed with both creators and learners in mind, HivePod transcends traditional course platforms by seamlessly blending high-quality educational content with immersive podcasting and audio lectures. Our mission is to empower creators to monetize their knowledge and build thriving, highly-engaged communities without having to stitch together multiple disparate tools. 
+
+The platform boasts a premium, glassmorphism-inspired user interface built with Tailwind CSS. It focuses heavily on delivering a sleek, intuitive, and distraction-free user experience. From the beautiful iOS-style profile management to the dynamic course browsing and interactive community spaces, every element is designed to feel native, fluid, and responsive across all devices—desktop, tablet, and mobile.
+
+Whether you are an educator looking to host your flagship course, a podcaster aiming to share exclusive audio lectures, or a community builder wanting to foster deeper connections among your audience, HivePod provides the elegant infrastructure needed to scale your digital presence.
 
 ## ✨ Key Features
 
@@ -17,6 +23,8 @@ HivePod is a modern, responsive web application built with **Next.js 14+ (App Ro
 - **Premium User Interface:** Built using Tailwind CSS, featuring glassmorphism elements, dynamic blur effects, and smooth animations.
 - **Admin Dashboard & Analytics:** Comprehensive admin panel with stat cards, recent sales tracking, and course oversight.
 - **Authentication:** Secure user login, signup, and profile management workflows.
+- **Community:** Built-in community platform to engage users.
+- **User Profile:** Minimalist, iOS-inspired profile and settings management.
 - **Responsive Design:** Fully optimized for desktop, tablet, and mobile viewing.
 
 ## 🛠 Tech Stack
@@ -33,8 +41,12 @@ HivePod is a modern, responsive web application built with **Next.js 14+ (App Ro
 hivepod/
 ├── app/                  # Next.js App Router pages, layouts, and API routes
 │   ├── admin/            # Admin dashboard and management pages
+│   ├── community/        # Community and social features
 │   ├── course/           # Course viewing and interaction pages
 │   ├── login/            # Authentication workflows
+│   ├── my-courses/       # Enrolled courses and learning progress
+│   ├── profile/          # iOS-style profile and settings management
+│   ├── support/          # Help center and support workflows
 │   └── globals.css       # Global stylesheet with custom variables
 ├── components/           # Reusable React components (UI, layouts, forms)
 ├── public/               # Static assets like images and fonts (e.g., logo.png)

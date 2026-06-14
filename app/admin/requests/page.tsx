@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { collection, getDocs, doc, getDoc, updateDoc, query, orderBy, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { createNotification } from "@/lib/notifications";
 import { CheckCircle, XCircle, Clock, Loader2, Search, Calendar, ShieldAlert, Award, Zap, User } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { useRouter } from "next/navigation";
@@ -173,6 +174,17 @@ export default function AdminRequestsPage() {
       setRequests(prev => prev.map(req =>
         req.id === requestId ? { ...req, status: newStatus } : req
       ));
+      
+      const req = requests.find(r => r.id === requestId);
+      if (req) {
+        await createNotification(
+          req.userId,
+          newStatus === "approved" ? "COURSE_INVITE" : "SYSTEM_ALERT",
+          newStatus === "approved" ? "Access Approved!" : "Access Request Update",
+          `Your request to access "${req.courseTitle}" was ${newStatus}.`,
+          { courseId: req.courseId, url: `/course/${req.courseId}` }
+        );
+      }
     } catch (error) {
       console.error(`Error updating request status to ${newStatus}:`, error);
       alert(`Failed to ${newStatus} request.`);
@@ -215,6 +227,14 @@ export default function AdminRequestsPage() {
       setRequests(prev => prev.map(req =>
         req.id === selectedRequest.id ? { ...req, status: "approved", restrictions } : req
       ));
+
+      await createNotification(
+        selectedRequest.userId,
+        "COURSE_INVITE",
+        "Access Approved!",
+        `You have been granted access to "${selectedRequest.courseTitle}".`,
+        { courseId: selectedRequest.courseId, url: `/course/${selectedRequest.courseId}` }
+      );
 
       setShowRestrictionModal(false);
       setSelectedRequest(null);

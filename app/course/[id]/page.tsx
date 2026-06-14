@@ -3,6 +3,7 @@
 import { useState, useEffect, use } from "react";
 import { collection, getDocs, query, where, doc, getDoc, addDoc, serverTimestamp, limit } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { createNotification } from "@/lib/notifications";
 import Link from "next/link";
 import { ChevronLeft, Folder, Lock, CheckCircle2, XCircle, ChevronRight, BarChart2, Headphones, FileText, Zap, Award, Globe, RotateCw, Volume2 } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
@@ -80,6 +81,15 @@ export default function PublicCoursePage({ params }: { params: Promise<{ id: str
         updatedAt: serverTimestamp()
       });
       setAccessStatus("pending");
+
+      // Notify the user that their request was sent successfully
+      await createNotification(
+        user.uid,
+        "ACTIVITY_COMPLETED",
+        "Request Sent",
+        `Your request to access "${course.title}" has been sent for review.`,
+        { courseId: course.id, url: `/course/${course.id}` }
+      );
     } catch (error) {
       console.error("Error requesting access:", error);
       alert("Failed to request access. Please try again.");

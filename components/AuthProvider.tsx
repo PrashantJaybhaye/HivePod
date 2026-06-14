@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { User, onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
+import { createNotification } from "@/lib/notifications";
 
 interface AuthContextType {
   user: User | null;
@@ -55,6 +56,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               createdAt: serverTimestamp(),
             });
             setIsAdmin(false);
+
+            // Welcome Notification
+            await createNotification(
+              currentUser.uid,
+              "ACHIEVEMENT",
+              "Welcome to HivePod!",
+              "Your account has been successfully created. Explore our courses and start learning!",
+              {}
+            );
           }
         } catch (error) {
           console.error("Error syncing user data:", error);

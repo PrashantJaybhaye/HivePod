@@ -209,9 +209,9 @@ export default function CourseCard({
         </div>
 
         {/* Progress tracking */}
-        <div className="mb-4">
+        <div className="mb-1">
           <div className="flex justify-between items-center mb-1.5">
-            <span className="text-[10px] text-white/50 capitalizefont-semibold tracking-wider">Progress</span>
+            <span className="text-[10px] text-white/50 uppercase font-semibold tracking-wider">Progress</span>
             <span className="text-[11px] text-white/70 font-semibold">
               {completedItems} of {totalItems} {totalItems === 1 ? "module" : "modules"} ({progressPercentage}%)
             </span>
@@ -225,7 +225,7 @@ export default function CourseCard({
         </div>
       </CardContent>
 
-      <CardFooter className="pt-2 pb-5 px-6 border-0 bg-transparent mt-auto relative z-10">
+      <CardFooter className="pt-1 pb-5 px-6 border-0 bg-transparent mt-auto relative z-10">
         <Link href={`/course/${id}`} className="w-full">
           <button className={btnConfig.className}>
             {btnConfig.text}
