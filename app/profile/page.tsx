@@ -116,13 +116,13 @@ export default function ProfilePage() {
       return (
         <div className="flex flex-col sm:flex-row sm:items-center justify-between py-5 gap-4">
           <div className="space-y-1.5 w-full">
-            <p className="text-[14px] font-bold text-white">{title}</p>
+            <p className="text-xs font-semibold tracking-wide text-white">{title}</p>
             {inputType === "textarea" ? (
               <textarea
                 value={stateValue}
                 onChange={(e) => setStateValue(e.target.value)}
                 placeholder="Tell us about yourself..."
-                className="w-full max-w-[320px] bg-white/10 text-white text-[14px] px-3 py-2 rounded-md outline-none focus:ring-1 focus:ring-white/30 resize-none min-h-[80px]"
+                className="w-full max-w-[320px] bg-white/10 text-white text-xs px-3 py-2 rounded-md outline-none focus:ring-1 focus:ring-white/30 resize-none min-h-[80px]"
                 autoFocus
               />
             ) : (
@@ -131,14 +131,14 @@ export default function ProfilePage() {
                 value={stateValue}
                 onChange={(e) => setStateValue(e.target.value)}
                 placeholder={`Enter new ${title.toLowerCase()}`}
-                className="w-full max-w-[260px] bg-white/10 text-white text-[14px] px-3 py-1.5 rounded-md outline-none focus:ring-1 focus:ring-white/30"
+                className="w-full max-w-[260px] bg-white/10 text-white text-xs px-3 py-1.5 rounded-md outline-none focus:ring-1 focus:ring-white/30"
                 autoFocus
               />
             )}
           </div>
           <div className="flex gap-4 mt-2 sm:mt-6 shrink-0">
-            <button onClick={() => setEditingField(null)} className="text-[13px] font-bold text-white/60 hover:text-white">Cancel</button>
-            <button onClick={() => handleUpdate(fieldId)} disabled={isUpdating} className="text-[13px] font-bold text-[#ff453a] hover:underline">
+            <button onClick={() => setEditingField(null)} className="text-xs font-bold text-white/60 hover:text-white">Cancel</button>
+            <button onClick={() => handleUpdate(fieldId)} disabled={isUpdating} className="text-xs font-bold text-[#ff453a] hover:underline">
               {isUpdating ? "Saving..." : "Save"}
             </button>
           </div>
@@ -149,15 +149,15 @@ export default function ProfilePage() {
     return (
       <div className="flex items-start sm:items-center justify-between py-5 gap-4 group">
         <div className="space-y-0.5">
-          <p className="text-[14px] font-bold text-white">{title}</p>
-          <p className="text-[14px] text-white/60 wrap-break-word whitespace-pre-wrap max-w-sm">
+          <p className="text-xs font-semibold tracking-wide text-white">{title}</p>
+          <p className="text-xs text-white/60 break-words whitespace-pre-wrap max-w-sm">
             {inputType === "password" ? "••••••••" : value}
           </p>
         </div>
         {actionText && (
           <button
             onClick={() => setEditingField(fieldId)}
-            className="text-[13px] font-bold text-white hover:underline whitespace-nowrap mt-0.5 sm:mt-0 opacity-80 group-hover:opacity-100 transition-opacity"
+            className="text-xs font-bold text-white hover:underline whitespace-nowrap mt-0.5 sm:mt-0 opacity-80 group-hover:opacity-100 transition-opacity"
           >
             {actionText}
           </button>
@@ -178,7 +178,7 @@ export default function ProfilePage() {
         <div>
           <button
             onClick={() => router.back()}
-            className="flex items-center gap-2 text-[14px] font-medium text-white/60 hover:text-white transition-colors group w-fit"
+            className="flex items-center gap-2 text-xs font-medium text-white/60 hover:text-white transition-colors group w-fit"
           >
             <svg className="w-4 h-4 text-white/40 group-hover:text-white transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="m15 18-6-6 6-6" />
@@ -205,8 +205,8 @@ export default function ProfilePage() {
         {/* Personal details */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-16 pt-2">
           <div className="md:col-span-1">
-            <h2 className="text-xl font-bold tracking-tight text-white">Personal details</h2>
-            <p className="text-[14px] text-white/60 mt-2 leading-relaxed">Update your public profile information and how we can reach you.</p>
+            <h2 className="text-sm font-bold tracking-tight text-white uppercase">Personal details</h2>
+            <p className="text-xs text-white/60 mt-1.5 leading-relaxed">Update your public profile information and how we can reach you.</p>
           </div>
           <div className="md:col-span-2 flex flex-col">
             <div className="h-px w-full bg-white/10 hidden md:block" />
@@ -224,8 +224,8 @@ export default function ProfilePage() {
         {/* Account Details */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-16 pt-2">
           <div className="md:col-span-1">
-            <h2 className="text-xl font-bold tracking-tight text-white">Account details</h2>
-            <p className="text-[14px] text-white/60 mt-2 leading-relaxed">Manage your login methods, password, and view your account history.</p>
+            <h2 className="text-sm font-bold tracking-tight text-white uppercase">Account details</h2>
+            <p className="text-xs text-white/60 mt-1.5 leading-relaxed">Manage your login methods, password, and view your account history.</p>
           </div>
           <div className="md:col-span-2 flex flex-col">
             <div className="h-px w-full bg-white/10 hidden md:block" />
@@ -247,19 +247,19 @@ export default function ProfilePage() {
         {/* Manage account */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-16 pt-2">
           <div className="md:col-span-1">
-            <h2 className="text-xl font-bold tracking-tight text-white">Manage account</h2>
-            <p className="text-[14px] text-white/60 mt-2 leading-relaxed">Permanently remove your account and all associated data.</p>
+            <h2 className="text-sm font-bold tracking-tight text-white uppercase">Manage account</h2>
+            <p className="text-xs text-white/60 mt-1.5 leading-relaxed">Permanently remove your account and all associated data.</p>
           </div>
           <div className="md:col-span-2 flex flex-col">
             <div className="h-px w-full bg-white/10 hidden md:block" />
             <div className="flex items-center justify-between py-5">
               <div className="space-y-0.5">
-                <p className="text-[14px] font-bold text-white">Delete account</p>
-                <p className="text-[14px] text-white/60">Permanently delete your account.</p>
+                <p className="text-xs font-semibold tracking-wide text-white">Delete account</p>
+                <p className="text-xs text-white/60">Permanently delete your account.</p>
               </div>
               <button
                 onClick={() => setIsDeleteModalOpen(true)}
-                className="text-[13px] font-bold text-[#ff453a] hover:underline"
+                className="text-xs font-bold text-[#ff453a] hover:underline"
               >
                 Delete
               </button>
