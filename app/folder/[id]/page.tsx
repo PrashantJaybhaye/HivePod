@@ -191,7 +191,7 @@ export default function PublicFolderPage({ params }: { params: Promise<{ id: str
           <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-white/12 to-transparent pointer-events-none" />
 
           {/* Left Sidebar: File List */}
-          <aside className={`relative z-10 w-full md:w-[280px] lg:w-[320px] flex-shrink-0 border-r border-white/6 flex flex-col h-full bg-white/2 transition-all duration-300 ${activeMaterial ? 'hidden md:flex' : 'flex'}`}>
+          <aside className={`relative z-10 w-full md:w-[280px] lg:w-[320px] shrink-0 border-r border-white/6 flex flex-col h-full bg-white/2 transition-all duration-300 ${activeMaterial ? 'hidden md:flex' : 'flex'}`}>
             <div className="p-4 border-b border-white/6 shrink-0 flex items-center justify-between">
                <h2 className="text-[10px] font-bold tracking-widest text-white/40 uppercase">Materials</h2>
                <span className="text-[10px] font-bold tracking-widest text-white/30 uppercase bg-white/5 px-2 py-0.5 rounded-full">{materials.length}</span>
@@ -272,7 +272,7 @@ export default function PublicFolderPage({ params }: { params: Promise<{ id: str
                 </div>
 
                 {/* Preview Area (Top) */}
-                <div className={`w-full flex-shrink-0 bg-black/60 border-b border-white/6 relative flex flex-col items-center justify-center ${activeMaterial.type === 'audio' ? 'py-8 sm:py-12' : 'min-h-[300px]'}`}>
+                <div className={`w-full shrink-0 bg-black/60 border-b border-white/6 relative flex flex-col items-center justify-center ${activeMaterial.type === 'audio' ? 'py-8 sm:py-12' : 'min-h-[300px]'}`}>
                   
                   {activeMaterial.type === "audio" && (
                     <div className="absolute inset-0 bg-linear-to-b from-[#ff453a]/10 to-transparent pointer-events-none" />

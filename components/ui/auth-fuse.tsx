@@ -8,6 +8,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { Turnstile } from "@marsidev/react-turnstile";
 import { auth } from "@/lib/firebase";
 import {
   signInWithEmailAndPassword,
@@ -190,10 +191,16 @@ PasswordInput.displayName = "PasswordInput";
 
 function SignInForm({ onError, onLoading }: { onError: (msg: string) => void; onLoading: (loading: boolean) => void }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const router = useRouter();
 
   const handleSignIn = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (!turnstileToken && process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY) {
+      onError("Please complete the security check.");
+      return;
+    }
+    
     const formData = new FormData(event.currentTarget);
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
@@ -236,7 +243,12 @@ function SignInForm({ onError, onLoading }: { onError: (msg: string) => void; on
       <div className="grid gap-4">
         <div className="grid gap-2"><Label htmlFor="email">Email</Label><Input id="email" name="email" type="email" placeholder="m@example.com" required autoComplete="email" disabled={isSubmitting} /></div>
         <PasswordInput name="password" label="Password" required autoComplete="current-password" placeholder="Password" disabled={isSubmitting} />
-        <Button type="submit" variant="outline" className="mt-2" disabled={isSubmitting}>
+        {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
+          <div className="flex justify-center mt-2">
+            <Turnstile siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY} onSuccess={setTurnstileToken} onError={() => onError("Security check failed.")} />
+          </div>
+        )}
+        <Button type="submit" variant="outline" className="mt-2" disabled={isSubmitting || (!turnstileToken && !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY)}>
           {isSubmitting ? <><Loader2 className="size-4 animate-spin" /> Signing in...</> : "Sign In"}
         </Button>
       </div>
@@ -246,10 +258,16 @@ function SignInForm({ onError, onLoading }: { onError: (msg: string) => void; on
 
 function SignUpForm({ onError, onLoading }: { onError: (msg: string) => void; onLoading: (loading: boolean) => void }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const router = useRouter();
 
   const handleSignUp = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (!turnstileToken && process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY) {
+      onError("Please complete the security check.");
+      return;
+    }
+
     const formData = new FormData(event.currentTarget);
     const name = formData.get("name") as string;
     const email = formData.get("email") as string;
@@ -300,7 +318,12 @@ function SignUpForm({ onError, onLoading }: { onError: (msg: string) => void; on
         <div className="grid gap-1"><Label htmlFor="name">Full Name</Label><Input id="name" name="name" type="text" placeholder="John Doe" required autoComplete="name" disabled={isSubmitting} /></div>
         <div className="grid gap-2"><Label htmlFor="email">Email</Label><Input id="email" name="email" type="email" placeholder="m@example.com" required autoComplete="email" disabled={isSubmitting} /></div>
         <PasswordInput name="password" label="Password" required autoComplete="new-password" placeholder="Password" disabled={isSubmitting} />
-        <Button type="submit" variant="outline" className="mt-2" disabled={isSubmitting}>
+        {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
+          <div className="flex justify-center mt-2">
+            <Turnstile siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY} onSuccess={setTurnstileToken} onError={() => onError("Security check failed.")} />
+          </div>
+        )}
+        <Button type="submit" variant="outline" className="mt-2" disabled={isSubmitting || (!turnstileToken && !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY)}>
           {isSubmitting ? <><Loader2 className="size-4 animate-spin" /> Creating account...</> : "Sign Up"}
         </Button>
       </div>
