@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { markMaterialCompleted, addTimeInvested } from "@/lib/tracking";
+import { useAuth } from "@/components/AuthProvider";
 
 interface SmartAudioPlayerProps {
   url: string;
@@ -15,6 +16,7 @@ export default function SmartAudioPlayer({ url, userId, materialId, courseId }: 
   const [isPlaying, setIsPlaying] = useState(false);
   const playStartTimeRef = useRef<number | null>(null);
   const accumulatedSecondsRef = useRef(0);
+  const { isAdmin } = useAuth();
 
   // Function to commit tracked time to Firebase
   const commitTimeInvested = async () => {
@@ -62,6 +64,8 @@ export default function SmartAudioPlayer({ url, userId, materialId, courseId }: 
     <audio 
       ref={audioRef}
       controls 
+      controlsList={isAdmin ? undefined : "nodownload"}
+      onContextMenu={(e) => !isAdmin && e.preventDefault()}
       src={url} 
       className="w-full outline-none" 
       autoPlay={false}
