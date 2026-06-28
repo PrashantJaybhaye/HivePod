@@ -5,6 +5,9 @@ import { usePathname } from "next/navigation";
 import { LayoutDashboard, BookOpen, Award, Settings, Shield, Inbox, User } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 interface SidebarProps {
   isOpen?: boolean;
@@ -14,13 +17,25 @@ interface SidebarProps {
 export default function Sidebar({ isOpen = false, setIsOpen }: SidebarProps) {
   const pathname = usePathname();
   const { isAdmin } = useAuth();
+  const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    
+    const q = query(collection(db, "course_requests"), where("status", "==", "pending"));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      setPendingRequestsCount(snapshot.size);
+    });
+
+    return () => unsubscribe();
+  }, [isAdmin]);
 
   const navItems = [
     { name: "Dashboard", href: "/", icon: LayoutDashboard },
     { name: "My Courses", href: "/my-courses", icon: BookOpen },
     ...(isAdmin ? [
       { name: "Admin Panel", href: "/admin", icon: Shield },
-      { name: "Requests", href: "/admin/requests", icon: Inbox }
+      { name: "Requests", href: "/admin/requests", icon: Inbox, hasNotification: pendingRequestsCount > 0 }
     ] : []),
     { name: "Profile", href: "/profile", icon: User },
     { name: "Settings", href: "/settings", icon: Settings },
@@ -63,30 +78,41 @@ export default function Sidebar({ isOpen = false, setIsOpen }: SidebarProps) {
                   whileHover={{ x: 2 }}
                   whileTap={{ scale: 0.98 }}
                   transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                  className={`flex items-center gap-3 px-3.5 py-2 rounded-xl transition-all duration-200 text-xs font-semibold tracking-wide cursor-pointer relative
+                  className={`flex items-center justify-between px-3.5 py-2 rounded-xl transition-all duration-200 text-xs font-semibold tracking-wide cursor-pointer relative
                     ${isActive
                       ? "bg-white/6 text-white border border-white/6 shadow-sm"
                       : "text-white/50 hover:text-white hover:bg-white/2"
                     }
                   `}
                 >
-                  {/* Left indicator line for active item */}
-                  {isActive && (
-                    <motion.div
-                      layoutId="activeIndicator"
-                      className="absolute left-1.5 w-[3px] h-3.5 rounded-full bg-[#ff453a]"
-                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                  <div className="flex items-center gap-3">
+                    {/* Left indicator line for active item */}
+                    {isActive && (
+                      <motion.div
+                        layoutId="activeIndicator"
+                        className="absolute left-1.5 w-[3px] h-3.5 rounded-full bg-[#ff453a]"
+                        transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                      />
+                    )}
+
+                    <item.icon
+                      size={15}
+                      strokeWidth={isActive ? 2.5 : 2}
+                      className={`transition-colors duration-200
+                        ${isActive ? "text-[#ff453a]" : "text-white/40 group-hover:text-white/60"}
+                      `}
+                    />
+                    {item.name}
+                  </div>
+                  
+                  {/* Notification Dot */}
+                  {item.hasNotification && (
+                    <motion.div 
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="w-1.5 h-1.5 rounded-full bg-[#ff453a] shadow-[0_0_8px_rgba(255,69,58,0.6)]"
                     />
                   )}
-
-                  <item.icon
-                    size={15}
-                    strokeWidth={isActive ? 2.5 : 2}
-                    className={`transition-colors duration-200
-                      ${isActive ? "text-[#ff453a]" : "text-white/40 group-hover:text-white/60"}
-                    `}
-                  />
-                  {item.name}
                 </motion.div>
               </Link>
             );
