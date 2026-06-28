@@ -9,6 +9,7 @@ import { ChevronLeft, Folder, Lock, CheckCircle2, XCircle, ChevronRight, BarChar
 import { useAuth } from "@/components/AuthProvider";
 import { safeConvertToDate, safeGetMillis } from "@/lib/utils";
 import { sendAdminNotificationEmail, sendUserConfirmationEmail } from "@/app/actions/email";
+import { motion } from "framer-motion";
 
 export default function PublicCoursePage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -229,11 +230,52 @@ export default function PublicCoursePage({ params }: { params: Promise<{ id: str
               </h2>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 pt-2">
-                {folders.map((folder) => (
+                {folders.map((folder) => {
+                  const playClickSound = () => {
+                    try {
+                      // Haptic feedback (15ms light tap for supported devices)
+                      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                        navigator.vibrate(15);
+                      }
+                      
+                      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+                      if (!AudioContextClass) return;
+                      // Use a shared context to avoid hitting browser limits
+                      if (!(window as any).uiAudioContext) {
+                        (window as any).uiAudioContext = new AudioContextClass();
+                      }
+                      const ctx = (window as any).uiAudioContext;
+                      if (ctx.state === 'suspended') ctx.resume();
+                      
+                      const osc = ctx.createOscillator();
+                      const gainNode = ctx.createGain();
+                      osc.connect(gainNode);
+                      gainNode.connect(ctx.destination);
+                      
+                      // Crisp mechanical tick sound
+                      osc.type = 'triangle';
+                      osc.frequency.setValueAtTime(1000, ctx.currentTime);
+                      osc.frequency.exponentialRampToValueAtTime(50, ctx.currentTime + 0.02);
+                      
+                      gainNode.gain.setValueAtTime(0.4, ctx.currentTime);
+                      gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.02);
+                      
+                      osc.start(ctx.currentTime);
+                      osc.stop(ctx.currentTime + 0.02);
+                    } catch (e) {}
+                  };
+
+                  return (
                   <Link href={`/folder/${folder.id}`} key={folder.id} className="block w-full">
-                    <div className="flex flex-col items-center p-4 rounded-[20px] cursor-pointer text-center select-none w-full">
+                    <motion.div 
+                      onPointerDown={playClickSound}
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.94, opacity: 0.7 }}
+                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                      className="flex flex-col items-center p-2 rounded-[20px] cursor-pointer text-center select-none w-full"
+                    >
                       {/* Clean Flat iOS/macOS Folder Icon using folderr.png */}
-                      <div className="relative w-20 h-20 mb-2 shrink-0">
+                      <div className="relative w-20 h-20 mb-2 shrink-0 drop-shadow-[0_4px_12px_rgba(0,0,0,0.3)] hover:drop-shadow-[0_8px_16px_rgba(0,0,0,0.4)] transition-all duration-300">
                         <img 
                           src="/folderr.png" 
                           alt="Folder Icon" 
@@ -245,9 +287,10 @@ export default function PublicCoursePage({ params }: { params: Promise<{ id: str
                       <span className="text-[11px] font-medium text-white/90 tracking-normal leading-snug line-clamp-2 px-1.5 w-full drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">
                         {folder.title}
                       </span>
-                    </div>
+                    </motion.div>
                   </Link>
-                ))}
+                  );
+                })}
 
                 {folders.length === 0 && (
                   <div className="col-span-full py-20 flex flex-col items-center text-center max-w-sm mx-auto opacity-80 hover:opacity-100 transition-opacity">
