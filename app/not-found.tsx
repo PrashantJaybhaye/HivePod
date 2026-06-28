@@ -5,7 +5,7 @@ import Link from "next/link";
 
 export default function GlobalNotFound() {
   return (
-    <div className="flex-1 h-full min-h-[calc(100vh-80px)] w-full bg-background flex flex-col items-center justify-center font-sans px-6 selection:bg-[#06c] selection:text-white -mt-6">
+    <div className="flex-1 h-full min-h-[calc(100vh-80px)] w-full bg-background flex flex-col items-center justify-center font-sans px-6 -mt-6">
       <div className="max-w-2xl w-full text-center flex flex-col items-center">
 
         {/* Apple never shows "404", they just tell you it's gone */}

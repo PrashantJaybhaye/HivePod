@@ -176,7 +176,7 @@ export default function PublicFolderPage({ params }: { params: Promise<{ id: str
   }
 
   return (
-    <div className="flex flex-col flex-1 bg-background h-full min-h-[calc(100vh-100px)] selection:bg-[#ff453a]/30">
+    <div className="flex flex-col flex-1 bg-background h-full min-h-[calc(100vh-100px)]">
       <main className="flex-1 px-4 sm:px-5 md:px-6 pt-0 pb-6 max-w-7xl mx-auto w-full flex flex-col space-y-4 h-full overflow-hidden">
         
         <div className="flex items-center justify-between shrink-0">

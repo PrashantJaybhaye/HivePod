@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'HivePod - Learning & Podcasting Platform',
     short_name: 'HivePod',
-    description: 'A premium platform for creators to share courses, host audio lectures, and build communities.',
+    description: 'A premium, state-of-the-art platform for creators to share courses, host audio lectures, and build thriving communities.',
     start_url: '/',
     display: 'standalone',
     background_color: '#ffffff',

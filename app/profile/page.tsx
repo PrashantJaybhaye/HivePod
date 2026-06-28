@@ -171,7 +171,7 @@ export default function ProfilePage() {
     : "Recently";
 
   return (
-    <div className="flex flex-col flex-1 bg-background font-sans selection:bg-[#ff453a]/30">
+    <div className="flex flex-col flex-1 bg-background font-sans">
       <main className="flex-1 px-4 sm:px-6 md:px-12 lg:px-20 py-8 lg:py-12 max-w-7xl mx-auto w-full space-y-12 md:space-y-16 pb-20">
 
         {/* Navigation / Back Button */}

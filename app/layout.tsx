@@ -8,18 +8,18 @@ import { Analytics } from "@vercel/analytics/react";
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://hivepod.vercel.app"),
   title: "HivePod - Learning & Podcasting Platform",
-  description: "A premium platform for creators to share courses, host audio lectures, and build communities.",
+  description: "A premium, state-of-the-art platform for creators to share courses, host audio lectures, and build thriving communities.",
   applicationName: "HivePod",
-  keywords: ["Learning", "Courses", "Podcasting", "Audio Lectures", "Community"],
+  keywords: ["Learning", "Courses", "Podcasting", "Audio Lectures", "Community", "Creator Economy", "Education", "HivePod"],
   openGraph: {
     title: "HivePod - Learning & Podcasting Platform",
-    description: "A premium platform for creators to share courses, host audio lectures, and build communities.",
+    description: "A premium, state-of-the-art platform for creators to share courses, host audio lectures, and build thriving communities.",
     siteName: "HivePod",
     images: [
       {
-        url: "/logo.png",
-        width: 800,
-        height: 600,
+        url: "/banner.png",
+        width: 1200,
+        height: 630,
       },
     ],
     locale: "en_US",
@@ -28,8 +28,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "HivePod - Learning & Podcasting Platform",
-    description: "A premium platform for creators to share courses, host audio lectures, and build communities.",
-    images: ["/logo.png"],
+    description: "A premium, state-of-the-art platform for creators to share courses, host audio lectures, and build thriving communities.",
+    images: ["/banner.png"],
   },
 };
 
@@ -44,7 +44,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className="h-full antialiased"
+      className="h-full antialiased selection:bg-[#3f3f46] selection:text-white"
     >
       <body suppressHydrationWarning className="min-h-full flex flex-col bg-background text-foreground">
         <Script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "63eab370ca37427a9924420a960e83e4"}' />
