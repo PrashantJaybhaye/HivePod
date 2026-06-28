@@ -48,7 +48,7 @@ export async function transcribeAudio(audioUrl: string) {
     if (process.env.GEMINI_API_KEY) {
       try {
         const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-        const prompt = `You are a professional proofreader. Fix any spelling or grammatical mistakes in the following transcript. Do NOT summarize, rephrase, or remove any words or sentences. Keep the exact same meaning, paragraph structure, and length, but fix the spelling and grammar. Ensure no 'concealment logic' is applied (do not hide or skip words). Only output the corrected text:\n\n${transcript}`;
+        const prompt = `You are an expert transcriber. Your task is to ensure the text is in Roman/Latin script (like Indian WhatsApp chat language - Hinglish). If the text contains Hindi or Marathi script (Devanagari), transliterate it into English letters. Do NOT translate the meaning into English, just transliterate the sounds (e.g., "क्या कर रहे हो" -> "kya kar rahe ho"). If the text is already in English, just fix any spelling mistakes. Keep the exact same meaning, paragraph structure, and length. Do not hide or skip words. Only output the final text:\n\n${transcript}`;
         
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
@@ -90,7 +90,7 @@ export async function transcribeAudio(audioUrl: string) {
             start += CHUNK_SIZE;
           }
 
-          const prompt = `You are a professional proofreader. Fix any spelling or grammatical mistakes in the following transcript chunk. Do NOT summarize, rephrase, or remove any words or sentences. Keep the exact same meaning, paragraph structure, and length, but fix the spelling and grammar. Ensure no 'concealment logic' is applied (do not hide or skip words). Only output the corrected text:\n\n${chunk}`;
+          const prompt = `You are an expert transcriber. Your task is to ensure the text chunk is in Roman/Latin script (like Indian WhatsApp chat language - Hinglish). If the text contains Hindi or Marathi script (Devanagari), transliterate it into English letters. Do NOT translate the meaning into English, just transliterate the sounds (e.g., "क्या कर रहे हो" -> "kya kar rahe ho"). If the text is already in English, just fix any spelling mistakes. Keep the exact same meaning, paragraph structure, and length. Do not hide or skip words. Only output the final text:\n\n${chunk}`;
           
           let aiText = "";
           let retries = 3;

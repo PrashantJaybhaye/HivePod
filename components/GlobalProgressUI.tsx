@@ -1,0 +1,54 @@
+"use client";
+
+import { useBackgroundTasks } from "./BackgroundTasksProvider";
+import { X, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+
+export default function GlobalProgressUI() {
+  const { tasks, removeTask } = useBackgroundTasks();
+
+  if (tasks.length === 0) return null;
+
+  return (
+    <div className="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 w-80">
+      {tasks.map((task) => (
+        <div key={task.id} className="bg-[#1c1c1e] border border-white/10 shadow-2xl rounded-xl p-4 flex flex-col gap-2 animate-in slide-in-from-bottom-5">
+          <div className="flex justify-between items-start gap-2">
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-white truncate">{task.title}</p>
+              <p className="text-xs text-[#86868b] truncate">{task.statusText}</p>
+            </div>
+            
+            {task.isComplete ? (
+              <button onClick={() => removeTask(task.id)} className="text-[#86868b] hover:text-white shrink-0 transition-colors">
+                <X size={16} />
+              </button>
+            ) : (
+              <Loader2 size={16} className="text-primary animate-spin shrink-0" />
+            )}
+          </div>
+
+          {!task.isComplete && task.progress > 0 && task.progress < 100 && (
+            <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden mt-1">
+              <div
+                className="h-full bg-primary rounded-full transition-all duration-300"
+                style={{ width: `${task.progress}%` }}
+              ></div>
+            </div>
+          )}
+
+          {task.isComplete && !task.isError && (
+            <div className="flex items-center gap-1.5 text-emerald-400 text-xs mt-1">
+              <CheckCircle2 size={14} /> Completed
+            </div>
+          )}
+          
+          {task.isError && (
+            <div className="flex items-center gap-1.5 text-red-400 text-xs mt-1">
+              <AlertCircle size={14} /> Failed
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}

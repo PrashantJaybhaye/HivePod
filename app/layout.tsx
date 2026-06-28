@@ -33,6 +33,9 @@ export const metadata: Metadata = {
   },
 };
 
+import { BackgroundTasksProvider } from "@/components/BackgroundTasksProvider";
+import GlobalProgressUI from "@/components/GlobalProgressUI";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -46,10 +49,13 @@ export default function RootLayout({
       <body suppressHydrationWarning className="min-h-full flex flex-col bg-background text-foreground">
         <Script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "63eab370ca37427a9924420a960e83e4"}' />
         <AuthProvider>
-          <DashboardLayout>
-            {children}
-            <Analytics />
-          </DashboardLayout>
+          <BackgroundTasksProvider>
+            <DashboardLayout>
+              {children}
+              <Analytics />
+            </DashboardLayout>
+            <GlobalProgressUI />
+          </BackgroundTasksProvider>
         </AuthProvider>
       </body>
     </html>

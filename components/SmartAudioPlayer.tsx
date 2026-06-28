@@ -60,13 +60,67 @@ export default function SmartAudioPlayer({ url, userId, materialId, courseId }: 
     };
   }, [isPlaying]);
 
+  // Robust Shaka Player integration for chunked fetching and retry
+  useEffect(() => {
+    let player: any = null;
+    let isMounted = true;
+
+    const initShaka = async () => {
+      // Import shaka dynamically to avoid SSR window errors
+      const shakaModule = await import("shaka-player");
+      const shaka: any = shakaModule.default || shakaModule;
+      
+      shaka.polyfill.installAll();
+
+      if (shaka.Player.isBrowserSupported() && audioRef.current) {
+        // shaka.Player takes the audio element reference
+        player = new shaka.Player(audioRef.current);
+        
+        // Configure extreme robustness similar to YouTube
+        player.configure({
+          streaming: {
+            retryParameters: {
+              maxAttempts: 10,
+              baseDelay: 1000,
+              backoffFactor: 2,
+              fuzzFactor: 0.5,
+              timeout: 0,
+            }
+          }
+        });
+
+        player.addEventListener("error", (event: any) => {
+          console.error("Shaka Player Error:", event.detail);
+        });
+
+        try {
+          // Tell Shaka to fetch and chunk the URL
+          await player.load(url);
+          if (isMounted) {
+            console.log("Shaka Player: Chunked loading active");
+          }
+        } catch (e) {
+          console.error("Failed to load audio via Shaka:", e);
+        }
+      }
+    };
+
+    initShaka();
+
+    return () => {
+      isMounted = false;
+      if (player) {
+        player.destroy();
+      }
+    };
+  }, [url]);
+
   return (
     <audio 
       ref={audioRef}
       controls 
       controlsList={isAdmin ? undefined : "nodownload"}
       onContextMenu={(e) => !isAdmin && e.preventDefault()}
-      src={url} 
       className="w-full outline-none" 
       autoPlay={false}
       onPlay={handlePlay}
