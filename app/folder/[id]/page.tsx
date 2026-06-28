@@ -5,7 +5,7 @@ import { collection, getDocs, query, where, doc, getDoc, updateDoc } from "fireb
 import { db } from "@/lib/firebase";
 import { transcribeAudio } from "@/app/actions/transcribe";
 import Link from "next/link";
-import { ChevronLeft, FileAudio, FileText, Image as ImageIcon, Download, Lock, Video, Folder as FolderIcon, AlignLeft, PlayCircle, CheckCircle2, XCircle, ChevronRight, BarChart2, Headphones, Zap, Award, Globe, RotateCw, Volume2, Loader2 } from "lucide-react";
+import { ChevronLeft, FileAudio, FileText, Image as ImageIcon, Download, Lock, Video, Folder as FolderIcon, AlignLeft, PlayCircle, CheckCircle2, XCircle, ChevronRight, BarChart2, Headphones, Zap, Award, Globe, RotateCw, Volume2, Loader2, Copy } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import SmartAudioPlayer from "@/components/SmartAudioPlayer";
 import { safeConvertToDate, safeGetMillis } from "@/lib/utils";
@@ -24,6 +24,15 @@ export default function PublicFolderPage({ params }: { params: Promise<{ id: str
   const [isMarkingComplete, setIsMarkingComplete] = useState(false);
   const [isLoadingMaterials, setIsLoadingMaterials] = useState(true);
   const [isTranscribing, setIsTranscribing] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
+
+  const handleCopy = () => {
+    if (activeMaterial?.transcript) {
+      navigator.clipboard.writeText(activeMaterial.transcript);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    }
+  };
 
   useEffect(() => {
     const fetchFolderAndMaterials = async () => {
@@ -393,25 +402,36 @@ export default function PublicFolderPage({ params }: { params: Promise<{ id: str
                             <AlignLeft size={16} />
                             <h3 className="text-[11px] font-bold tracking-widest uppercase">Transcript</h3>
                           </div>
-                          {isAdmin && (
-                            <button
-                              onClick={handleRetranscribe}
-                              disabled={isTranscribing}
-                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-[10px] font-bold uppercase tracking-wider text-white transition-all disabled:opacity-50"
-                            >
-                              {isTranscribing ? (
-                                <>
-                                  <Loader2 size={12} className="animate-spin" />
-                                  Transcribing...
-                                </>
-                              ) : (
-                                <>
-                                  <RotateCw size={12} />
-                                  Re-transcribe
-                                </>
-                              )}
-                            </button>
-                          )}
+                          <div className="flex items-center gap-2">
+                            {activeMaterial.transcript && (
+                              <button
+                                onClick={handleCopy}
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-[10px] font-bold uppercase tracking-wider text-white transition-all"
+                              >
+                                {isCopied ? <CheckCircle2 size={12} className="text-[#30d158]" /> : <Copy size={12} />}
+                                {isCopied ? 'Copied' : 'Copy'}
+                              </button>
+                            )}
+                            {isAdmin && (
+                              <button
+                                onClick={handleRetranscribe}
+                                disabled={isTranscribing}
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-[10px] font-bold uppercase tracking-wider text-white transition-all disabled:opacity-50"
+                              >
+                                {isTranscribing ? (
+                                  <>
+                                    <Loader2 size={12} className="animate-spin" />
+                                    Transcribing...
+                                  </>
+                                ) : (
+                                  <>
+                                    <RotateCw size={12} />
+                                    Re-transcribe
+                                  </>
+                                )}
+                              </button>
+                            )}
+                          </div>
                         </div>
                         
                         {activeMaterial.transcript ? (

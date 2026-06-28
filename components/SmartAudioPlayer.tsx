@@ -73,8 +73,9 @@ export default function SmartAudioPlayer({ url, userId, materialId, courseId }: 
       shaka.polyfill.installAll();
 
       if (shaka.Player.isBrowserSupported() && audioRef.current) {
-        // shaka.Player takes the audio element reference
-        player = new shaka.Player(audioRef.current);
+        // Initialize player and attach to audio element
+        player = new shaka.Player();
+        await player.attach(audioRef.current);
         
         // Configure extreme robustness similar to YouTube
         player.configure({
