@@ -12,11 +12,14 @@ export async function sendAdminNotificationEmail(userEmail: string, courseTitle:
       return { success: false, error: "Resend configuration missing" };
     }
 
+    // Allow multiple emails by splitting on commas
+    const toEmails = adminEmail.split(',').map(email => email.trim());
+
     const resend = new Resend(apiKey);
 
     const { data, error } = await resend.emails.send({
       from: "HivePod Alerts <onboarding@resend.dev>",
-      to: adminEmail,
+      to: toEmails,
       subject: `New Course Access Request: ${courseTitle}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
