@@ -41,92 +41,42 @@ export async function transcribeAudio(audioUrl: string) {
       transcript = data?.results?.channels[0]?.alternatives[0]?.transcript || "No transcript generated.";
     }
 
-    // AI Spelling and Grammar Verification
-    let aiVerified = false;
-
-    // 1. Try Gemini first (handles large contexts easily without chunking)
-    if (process.env.GEMINI_API_KEY) {
-      try {
-        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-        const prompt = `You are an expert transcriber. Your task is to ensure the text is in Roman/Latin script (like Indian WhatsApp chat language - Hinglish). If the text contains Hindi or Marathi script (Devanagari), transliterate it into English letters. Do NOT translate the meaning into English, just transliterate the sounds (e.g., "क्या कर रहे हो" -> "kya kar rahe ho"). If the text is already in English, just fix any spelling mistakes. Keep the exact same meaning, paragraph structure, and length. Do not hide or skip words. Only output the final text:\n\n${transcript}`;
-        
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: prompt,
-        });
-        
-        if (response.text) {
-          transcript = response.text;
-          aiVerified = true;
-        }
-      } catch (geminiError) {
-        console.warn("Gemini verification failed, falling back to Groq:", geminiError);
-      }
-    }
-
-    // 2. Fallback to Groq with chunking if Gemini failed or wasn't available
-    if (!aiVerified && process.env.GROQ_API_KEY) {
+    // Ultra-Fast AI Spelling and Grammar Verification
+    // Using Groq LLaMA 3.1 (128k context) allows us to process the entire transcript in a single pass 
+    // at blazing speeds (800+ tokens per second), skipping the slow chunking and Gemini process.
+    if (process.env.GROQ_API_KEY) {
       try {
         const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-        
-        // Chunk transcript to avoid TPM/context limits (approx 12000 chars per chunk ~ 3000 tokens)
-        const CHUNK_SIZE = 12000;
-        let finalTranscript = "";
-        let start = 0;
-        
-        while (start < transcript.length) {
-          const end = Math.min(start + CHUNK_SIZE, transcript.length);
-          let chunk = transcript.slice(start, end);
-          
-          if (end < transcript.length) {
-            const lastSpace = chunk.lastIndexOf(' ');
-            if (lastSpace > 0) {
-              chunk = chunk.slice(0, lastSpace);
-              start += lastSpace + 1;
-            } else {
-              start += CHUNK_SIZE;
-            }
-          } else {
-            start += CHUNK_SIZE;
-          }
+        const prompt = `You are an expert transcriber and linguist. Your ONLY task is to convert the following text entirely into the Latin/Roman alphabet (Hinglish). 
 
-          const prompt = `You are an expert transcriber. Your task is to ensure the text chunk is in Roman/Latin script (like Indian WhatsApp chat language - Hinglish). If the text contains Hindi or Marathi script (Devanagari), transliterate it into English letters. Do NOT translate the meaning into English, just transliterate the sounds (e.g., "क्या कर रहे हो" -> "kya kar rahe ho"). If the text is already in English, just fix any spelling mistakes. Keep the exact same meaning, paragraph structure, and length. Do not hide or skip words. Only output the final text:\n\n${chunk}`;
-          
-          let aiText = "";
-          let retries = 3;
-          while (retries > 0) {
-            try {
-              const completion = await groq.chat.completions.create({
-                  messages: [{ role: "user", content: prompt }],
-                  model: "llama-3.1-8b-instant",
-              });
-              aiText = completion.choices[0]?.message?.content || chunk;
-              break;
-            } catch (err: any) {
-              // Handle Groq rate limit (429) or payload too large (413)
-              if (err.status === 429 || err.status === 413) {
-                 console.warn(`Groq limit hit. Waiting 20 seconds before retrying... (${retries} retries left)`);
-                 await new Promise(resolve => setTimeout(resolve, 20000));
-                 retries--;
-              } else {
-                 throw err;
-              }
-            }
-          }
-          finalTranscript += (finalTranscript ? " " : "") + aiText;
-        }
+CRITICAL RULES:
+1. You MUST NOT output any Devanagari script (Hindi/Marathi characters like क, ख, ग). 
+2. If you see Devanagari, transliterate it into English letters exactly as it sounds (e.g., "क्या कर रहे हो" MUST become "kya kar rahe ho").
+3. DO NOT translate the meaning into English. Keep the exact Hinglish words.
+4. If a word is already in English, keep it as is and fix any spelling mistakes.
+5. Keep the exact same paragraph structure.
+6. Output ONLY the converted text and nothing else.
+
+TEXT TO CONVERT:
+${transcript}`;
         
-        if (finalTranscript) {
-          transcript = finalTranscript;
+        const completion = await groq.chat.completions.create({
+            messages: [{ role: "user", content: prompt }],
+            model: "llama-3.3-70b-versatile",
+            temperature: 0.1, // Low temperature for consistent translation
+        });
+        
+        if (completion.choices[0]?.message?.content) {
+            transcript = completion.choices[0].message.content;
         }
       } catch (aiError) {
-        console.error("Groq fallback failed, keeping original transcript:", aiError);
+        console.error("Fast Groq verification failed, keeping original transcript:", aiError);
       }
     }
 
     return transcript;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Transcription Server Action Error:", error);
-    throw new Error("Transcription failed");
+    throw new Error(`Transcription failed: ${error.message || "Unknown Error"}`);
   }
 }

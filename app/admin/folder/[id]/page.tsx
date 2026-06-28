@@ -4,12 +4,15 @@ import { useState, useEffect, use } from "react";
 import { collection, getDocs, query, where, doc, getDoc, deleteDoc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import Link from "next/link";
-import { ArrowLeft, FileAudio, FileText, Image as ImageIcon, Pencil, Trash2, X, ChevronRight } from "lucide-react";
+import { ArrowLeft, FileAudio, FileText, Image as ImageIcon, Pencil, Trash2, X, ChevronRight, RefreshCw, GripVertical } from "lucide-react";
 import UploadMaterial from "@/components/UploadMaterial";
+import { useBackgroundTasks } from "@/components/BackgroundTasksProvider";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 export default function AdminFolderPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const folderId = resolvedParams.id;
+  const { enqueueTranscription, tasks } = useBackgroundTasks();
 
   const [folder, setFolder] = useState<any>(null);
   const [materials, setMaterials] = useState<any[]>([]);
@@ -30,8 +33,13 @@ export default function AdminFolderPage({ params }: { params: Promise<{ id: stri
       const q = query(collection(db, "materials"), where("folderId", "==", folderId));
       const materialSnap = await getDocs(q);
       const materialsData = materialSnap.docs.map(d => ({ id: d.id, ...(d.data() as any) }));
-      // Sort by creation date
-      materialsData.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
+      // Sort by order first (ascending), then creation date
+      materialsData.sort((a, b) => {
+        const orderA = typeof a.order === 'number' ? a.order : 999999;
+        const orderB = typeof b.order === 'number' ? b.order : 999999;
+        if (orderA !== orderB) return orderA - orderB;
+        return (a.createdAt?.toMillis() || 0) - (b.createdAt?.toMillis() || 0);
+      });
       setMaterials(materialsData);
     } catch (error) {
       console.error("Error fetching folder materials:", error);
@@ -77,6 +85,33 @@ export default function AdminFolderPage({ params }: { params: Promise<{ id: stri
     }
   };
 
+  const handleDragEnd = async (result: any) => {
+    if (!result.destination) return;
+
+    const items = Array.from(materials);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+
+    // Optimistically update UI
+    setMaterials(items);
+
+    // Update Firebase in the background
+    try {
+      const updatePromises = items.map((item, index) => {
+        // Only update if the order actually changed to save DB writes
+        if (item.order !== index) {
+          return updateDoc(doc(db, "materials", item.id), { order: index });
+        }
+        return Promise.resolve();
+      });
+      await Promise.all(updatePromises);
+    } catch (error) {
+      console.error("Error updating order:", error);
+      alert("Failed to save new order");
+      fetchFolderAndMaterials(); // Revert to server state
+    }
+  };
+
   useEffect(() => {
     fetchFolderAndMaterials();
     const interval = setInterval(fetchFolderAndMaterials, 5000);
@@ -113,65 +148,94 @@ export default function AdminFolderPage({ params }: { params: Promise<{ id: stri
           <h2 className="text-sm font-semibold text-[#86868b] capitalizetracking-wider">Folder Materials</h2>
         </div>
 
-        <div className="flex flex-col gap-3">
-          {materials.map((mat) => (
-            <div
-              key={mat.id}
-              className="bg-[#1c1c1e]/30 border border-white/5 rounded-2xl p-4 flex flex-col md:flex-row items-start md:items-center gap-4 hover:bg-white/2 transition-colors duration-150 group shadow-xs"
-            >
-              {/* Type Icon */}
-              <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center text-primary shrink-0">
-                {mat.type === "audio" && <FileAudio size={16} />}
-                {mat.type === "pdf" && <FileText size={16} />}
-                {mat.type === "image" && <ImageIcon size={16} />}
-              </div>
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <Droppable droppableId="materials-list">
+            {(provided) => (
+              <div {...provided.droppableProps} ref={provided.innerRef} className="flex flex-col gap-3">
+                {materials.map((mat, index) => (
+                  <Draggable key={mat.id} draggableId={mat.id} index={index}>
+                    {(provided) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        className="bg-[#1c1c1e]/30 border border-white/5 rounded-2xl p-4 flex flex-col md:flex-row items-start md:items-center gap-4 hover:bg-white/2 transition-colors duration-150 group shadow-xs"
+                      >
+                        {/* Drag Handle */}
+                        <div {...provided.dragHandleProps} className="text-[#86868b] hover:text-white transition-colors cursor-grab active:cursor-grabbing p-1 -ml-2 hidden md:block">
+                          <GripVertical size={16} />
+                        </div>
+                        {/* Type Icon */}
+                        <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center text-primary shrink-0">
+                          {mat.type === "audio" && <FileAudio size={16} />}
+                          {mat.type === "pdf" && <FileText size={16} />}
+                          {mat.type === "image" && <ImageIcon size={16} />}
+                        </div>
 
-              {/* Material Info */}
-              <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-sm text-white truncate">{mat.title}</h3>
-                <div className="flex flex-wrap items-center gap-3 mt-1 text-[#86868b] text-[10px]">
-                  <span className="capitalizefont-semibold bg-white/5 border border-white/5 px-1.5 py-0.5 rounded text-[9px] capitalize tracking-wide">
-                    {mat.type}
-                  </span>
-                  {mat.type === "audio" && !mat.transcript && (
-                    <span className="text-orange-500 font-bold capitalizetracking-wider flex items-center gap-1 text-[9px]">
-                      <span className="w-1 h-1 rounded-full bg-orange-500 animate-pulse"></span>
-                      Processing Transcript
-                    </span>
-                  )}
-                </div>
-              </div>
+                        {/* Material Info */}
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-sm text-white truncate">{mat.title}</h3>
+                          <div className="flex flex-wrap items-center gap-3 mt-1 text-[#86868b] text-[10px]">
+                            <span className="capitalizefont-semibold bg-white/5 border border-white/5 px-1.5 py-0.5 rounded text-[9px] capitalize tracking-wide">
+                              {mat.type}
+                            </span>
+                            {mat.type === "audio" && !mat.transcript && (
+                              <div className="flex items-center gap-2">
+                                <span className="text-orange-500 font-bold capitalizetracking-wider flex items-center gap-1 text-[9px]">
+                                  <span className="w-1 h-1 rounded-full bg-orange-500 animate-pulse"></span>
+                                  Processing Transcript
+                                </span>
+                                {/* Show Retry Button if it's not currently queued/processing in the global background task manager */}
+                                {!tasks.find(t => t.docId === mat.id && (t.transcriptionState === "queued" || t.transcriptionState === "processing")) && (
+                                  <button
+                                    onClick={() => enqueueTranscription(mat.id, mat.url, mat.title)}
+                                    className="flex items-center gap-1 text-[#86868b] hover:text-white transition-colors bg-white/5 hover:bg-white/10 px-1.5 py-0.5 rounded text-[9px] cursor-pointer"
+                                    title="Retry AI Transcription"
+                                  >
+                                    <RefreshCw size={10} /> Retry
+                                  </button>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
 
-              {/* Actions & Links */}
-              <div className="flex items-center gap-4 mt-2 md:mt-0 w-full md:w-auto justify-between md:justify-end shrink-0">
-                <a
-                  href={mat.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs font-semibold text-primary hover:text-primary/85 transition-colors flex items-center gap-0.5"
-                >
-                  View Asset <ChevronRight size={14} />
-                </a>
+                        {/* Actions & Links */}
+                        <div className="flex items-center gap-4 mt-2 md:mt-0 w-full md:w-auto justify-between md:justify-end shrink-0">
+                          <a
+                            href={mat.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs font-semibold text-primary hover:text-primary/85 transition-colors flex items-center gap-0.5"
+                          >
+                            View Asset <ChevronRight size={14} />
+                          </a>
 
-                <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150 bg-black/30 p-1 rounded-lg border border-white/5">
-                  <button
-                    onClick={() => handleOpenEditModal(mat)}
-                    className="p-1 text-[#86868b] hover:text-white transition-colors cursor-pointer"
-                    title="Edit Name"
-                  >
-                    <Pencil size={11} />
-                  </button>
-                  <button
-                    onClick={() => handleDeleteMaterial(mat.id)}
-                    className="p-1 text-[#86868b] hover:text-red-400 transition-colors cursor-pointer"
-                    title="Delete"
-                  >
-                    <Trash2 size={11} />
-                  </button>
-                </div>
+                          <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150 bg-black/30 p-1 rounded-lg border border-white/5">
+                            <button
+                              onClick={() => handleOpenEditModal(mat)}
+                              className="p-1 text-[#86868b] hover:text-white transition-colors cursor-pointer"
+                              title="Edit Name"
+                            >
+                              <Pencil size={11} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteMaterial(mat.id)}
+                              className="p-1 text-[#86868b] hover:text-red-400 transition-colors cursor-pointer"
+                              title="Delete"
+                            >
+                              <Trash2 size={11} />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
               </div>
-            </div>
-          ))}
+            )}
+          </Droppable>
+        </DragDropContext>
 
           {materials.length === 0 && (
             <div className="py-12 text-center border border-dashed border-white/10 rounded-2xl bg-[#1c1c1e]/10">
@@ -181,7 +245,6 @@ export default function AdminFolderPage({ params }: { params: Promise<{ id: stri
             </div>
           )}
         </div>
-      </div>
 
       {/* Apple Settings Sheet-Style Modal Dialog */}
       {isModalOpen && (

@@ -99,8 +99,13 @@ export default function SmartAudioPlayer({ url, userId, materialId, courseId }: 
           if (isMounted) {
             console.log("Shaka Player: Chunked loading active");
           }
-        } catch (e) {
-          console.error("Failed to load audio via Shaka:", e);
+        } catch (e: any) {
+          // If the file is a raw .mp3 or .m4a instead of a DASH manifest (.mpd), Shaka will fail.
+          // Native HTML5 <audio> handles progressive chunking (HTTP 206) perfectly for raw files.
+          console.warn("Shaka Player couldn't parse manifest, falling back to native HTML5 chunking.", e);
+          if (audioRef.current) {
+            audioRef.current.src = url;
+          }
         }
       }
     };

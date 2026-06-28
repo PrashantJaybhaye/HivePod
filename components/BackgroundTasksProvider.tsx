@@ -22,6 +22,7 @@ export interface Task {
 interface BackgroundTasksContextType {
   tasks: Task[];
   enqueueUpload: (file: File, courseId: string, folderId: string, type: "audio" | "pdf" | "image", title: string) => void;
+  enqueueTranscription: (docId: string, publicUrl: string, title: string) => void;
   removeTask: (id: string) => void;
 }
 
@@ -172,8 +173,25 @@ export function BackgroundTasksProvider({ children }: { children: ReactNode }) {
     }
   }, [updateTask, removeTask]);
 
+  const enqueueTranscription = useCallback((docId: string, publicUrl: string, title: string) => {
+    const taskId = crypto.randomUUID();
+    
+    setTasks(prev => [...prev, {
+      id: taskId,
+      title: title,
+      progress: 100,
+      statusText: "Waiting in transcription queue...",
+      isComplete: false,
+      isError: false,
+      transcriptionState: "queued",
+      docId,
+      publicUrl,
+      type: "audio"
+    }]);
+  }, []);
+
   return (
-    <BackgroundTasksContext.Provider value={{ tasks, enqueueUpload, removeTask }}>
+    <BackgroundTasksContext.Provider value={{ tasks, enqueueUpload, enqueueTranscription, removeTask }}>
       {children}
     </BackgroundTasksContext.Provider>
   );

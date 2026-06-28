@@ -70,7 +70,15 @@ export default function PublicFolderPage({ params }: { params: Promise<{ id: str
         const q = query(collection(db, "materials"), where("folderId", "==", folderId));
         const materialSnap = await getDocs(q);
         const materialsData = materialSnap.docs.map(d => ({ id: d.id, ...(d.data() as any) }));
-        materialsData.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
+        
+        // Sort by order first (ascending), then creation date
+        materialsData.sort((a, b) => {
+          const orderA = typeof a.order === 'number' ? a.order : 999999;
+          const orderB = typeof b.order === 'number' ? b.order : 999999;
+          if (orderA !== orderB) return orderA - orderB;
+          return (a.createdAt?.toMillis() || 0) - (b.createdAt?.toMillis() || 0);
+        });
+
         setMaterials(materialsData);
 
         // Fetch User Progress for this course
