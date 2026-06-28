@@ -53,3 +53,45 @@ export async function sendAdminNotificationEmail(userEmail: string, courseTitle:
     return { success: false, error: error.message };
   }
 }
+
+export async function sendUserConfirmationEmail(userEmail: string, courseTitle: string) {
+  try {
+    const apiKey = process.env.RESEND_API_KEY;
+
+    if (!apiKey || !userEmail) {
+      console.warn("RESEND_API_KEY or userEmail is missing. Email notification skipped.");
+      return { success: false, error: "Configuration missing" };
+    }
+
+    const resend = new Resend(apiKey);
+
+    const { data, error } = await resend.emails.send({
+      from: "HivePod Support <onboarding@resend.dev>",
+      to: userEmail,
+      subject: `Your access request for ${courseTitle} is pending`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+          <h2 style="color: #ff453a;">Access Request Received</h2>
+          <p>Hello,</p>
+          <p>We've successfully received your request to access the course: <strong>${courseTitle}</strong>.</p>
+          <p>Your request is currently pending administrator approval. We will notify you once your access has been granted.</p>
+          <p>Thank you for using HivePod!</p>
+          
+          <div style="margin-top: 30px; text-align: center;">
+            <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/course" style="background-color: #5e5ce6; color: white; padding: 10px 20px; text-decoration: none; font-weight: bold; border-radius: 5px;">Browse More Courses</a>
+          </div>
+        </div>
+      `,
+    });
+
+    if (error) {
+      console.error("Resend API error:", error);
+      return { success: false, error };
+    }
+
+    return { success: true, data };
+  } catch (error: any) {
+    console.error("Error sending user confirmation email via Resend:", error);
+    return { success: false, error: error.message };
+  }
+}

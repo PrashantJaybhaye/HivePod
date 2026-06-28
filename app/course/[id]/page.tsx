@@ -8,7 +8,7 @@ import Link from "next/link";
 import { ChevronLeft, Folder, Lock, CheckCircle2, XCircle, ChevronRight, BarChart2, Headphones, FileText, Zap, Award, Globe, RotateCw, Volume2, FolderOpen } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { safeConvertToDate, safeGetMillis } from "@/lib/utils";
-import { sendAdminNotificationEmail } from "@/app/actions/email";
+import { sendAdminNotificationEmail, sendUserConfirmationEmail } from "@/app/actions/email";
 
 export default function PublicCoursePage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -85,6 +85,11 @@ export default function PublicCoursePage({ params }: { params: Promise<{ id: str
 
       // Send the email to the admin using the server action
       await sendAdminNotificationEmail(user.email || "Unknown User", course.title, docRef.id);
+
+      // Send a confirmation email to the user
+      if (user.email) {
+        await sendUserConfirmationEmail(user.email, course.title);
+      }
 
       // Notify the user that their request was sent successfully
       await createNotification(
