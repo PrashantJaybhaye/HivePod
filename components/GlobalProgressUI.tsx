@@ -12,7 +12,7 @@ export default function GlobalProgressUI() {
   const hiddenCount = Math.max(0, tasks.length - MAX_VISIBLE);
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:bottom-6 sm:right-6 flex flex-col gap-3 z-[100] sm:max-w-sm w-auto sm:w-full pointer-events-none">
+    <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:bottom-6 sm:right-6 flex flex-col gap-3 z-100 sm:max-w-sm w-auto sm:w-full pointer-events-none">
       {hiddenCount > 0 && (
         <div className="bg-[#1c1c1e]/90 backdrop-blur-md border border-white/10 shadow-2xl rounded-xl p-2.5 flex justify-center items-center pointer-events-auto animate-in fade-in slide-in-from-bottom-2">
           <p className="text-[11px] font-bold text-white/50 tracking-wide uppercase">+ {hiddenCount} more task{hiddenCount > 1 ? 's' : ''} in background</p>

@@ -33,12 +33,12 @@ export default function AdminFolderPage({ params }: { params: Promise<{ id: stri
       const q = query(collection(db, "materials"), where("folderId", "==", folderId));
       const materialSnap = await getDocs(q);
       const materialsData = materialSnap.docs.map(d => ({ id: d.id, ...(d.data() as any) }));
-      // Sort by order first (ascending), then creation date
+      // Sort by order first (ascending), then creation date descending for new items
       materialsData.sort((a, b) => {
-        const orderA = typeof a.order === 'number' ? a.order : 999999;
-        const orderB = typeof b.order === 'number' ? b.order : 999999;
+        const orderA = typeof a.order === 'number' ? a.order : -1;
+        const orderB = typeof b.order === 'number' ? b.order : -1;
         if (orderA !== orderB) return orderA - orderB;
-        return (a.createdAt?.toMillis() || 0) - (b.createdAt?.toMillis() || 0);
+        return (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0);
       });
       setMaterials(materialsData);
     } catch (error) {
@@ -158,72 +158,98 @@ export default function AdminFolderPage({ params }: { params: Promise<{ id: stri
                       <div
                         ref={provided.innerRef}
                         {...provided.draggableProps}
-                        className="bg-[#1c1c1e]/30 border border-white/5 rounded-2xl p-4 flex flex-col md:flex-row items-start md:items-center gap-4 hover:bg-white/2 transition-colors duration-150 group shadow-xs"
+                        className="group relative flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 bg-[#1a1a1c]/80 hover:bg-[#232325]/90 backdrop-blur-2xl border border-white/4 hover:border-white/8 rounded-[24px] p-4 sm:p-5 transition-colors duration-300 shadow-xl overflow-hidden"
                       >
-                        {/* Drag Handle */}
-                        <div {...provided.dragHandleProps} className="text-[#86868b] hover:text-white transition-colors cursor-grab active:cursor-grabbing p-1 -ml-2 hidden md:block">
-                          <GripVertical size={16} />
-                        </div>
-                        {/* Type Icon */}
-                        <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center text-primary shrink-0">
-                          {mat.type === "audio" && <FileAudio size={16} />}
-                          {mat.type === "pdf" && <FileText size={16} />}
-                          {mat.type === "image" && <ImageIcon size={16} />}
-                        </div>
+                        {/* Subtle background glow on hover */}
+                        <div className="absolute inset-0 bg-linear-to-r from-primary/0 via-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
 
-                        {/* Material Info */}
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-sm text-white truncate">{mat.title}</h3>
-                          <div className="flex flex-wrap items-center gap-3 mt-1 text-[#86868b] text-[10px]">
-                            <span className="capitalizefont-semibold bg-white/5 border border-white/5 px-1.5 py-0.5 rounded text-[9px] capitalize tracking-wide">
-                              {mat.type}
-                            </span>
-                            {mat.type === "audio" && !mat.transcript && (
-                              <div className="flex items-center gap-2">
-                                <span className="text-orange-500 font-bold capitalizetracking-wider flex items-center gap-1 text-[9px]">
-                                  <span className="w-1 h-1 rounded-full bg-orange-500 animate-pulse"></span>
-                                  Processing Transcript
-                                </span>
-                                {/* Show Retry Button if it's not currently queued/processing in the global background task manager */}
-                                {!tasks.find(t => t.docId === mat.id && (t.transcriptionState === "queued" || t.transcriptionState === "processing")) && (
-                                  <button
-                                    onClick={() => enqueueTranscription(mat.id, mat.url, mat.title)}
-                                    className="flex items-center gap-1 text-[#86868b] hover:text-white transition-colors bg-white/5 hover:bg-white/10 px-1.5 py-0.5 rounded text-[9px] cursor-pointer"
-                                    title="Retry AI Transcription"
-                                  >
-                                    <RefreshCw size={10} /> Retry
-                                  </button>
-                                )}
-                              </div>
-                            )}
+                        <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto flex-1 min-w-0 z-10">
+                          {/* Drag Handle */}
+                          <div {...provided.dragHandleProps} className="text-[#86868b]/30 hover:text-white/80 transition-colors cursor-grab active:cursor-grabbing p-2 -ml-2 -my-2 shrink-0">
+                            <GripVertical size={18} />
+                          </div>
+
+                          {/* Type Icon - Premium squircle */}
+                          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-[18px] bg-linear-to-b from-white/10 to-white/5 border border-white/10 flex items-center justify-center text-white shrink-0 shadow-inner relative overflow-hidden">
+                            <div className="absolute inset-0 bg-primary/20 blur-2xl"></div>
+                            {mat.type === "audio" && <FileAudio size={22} className="relative z-10 text-primary drop-shadow-[0_0_12px_rgba(var(--primary),0.6)]" />}
+                            {mat.type === "pdf" && <FileText size={22} className="relative z-10 text-primary drop-shadow-[0_0_12px_rgba(var(--primary),0.6)]" />}
+                            {mat.type === "image" && <ImageIcon size={22} className="relative z-10 text-primary drop-shadow-[0_0_12px_rgba(var(--primary),0.6)]" />}
+                          </div>
+
+                          {/* Material Info */}
+                          <div className="flex-1 min-w-0 flex flex-col justify-center">
+                            <h3 className="font-semibold text-base sm:text-[17px] text-white/90 group-hover:text-white truncate tracking-tight transition-colors duration-300">
+                              {mat.title}
+                            </h3>
+                            <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                              <span className="bg-[#2c2c2e]/60 border border-white/5 px-2.5 py-0.5 rounded-full text-[10px] font-medium text-[#a1a1a6] uppercase tracking-widest backdrop-blur-md">
+                                {mat.type}
+                              </span>
+                              {mat.type === "audio" && !mat.transcript && (
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-orange-400 font-bold uppercase tracking-widest flex items-center gap-1.5 text-[9px] bg-orange-500/10 border border-orange-500/20 px-2 py-0.5 rounded-full">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse shadow-[0_0_8px_rgba(251,146,60,0.8)]"></span>
+                                    Processing
+                                  </span>
+                                  {!tasks.find(t => t.docId === mat.id && (t.transcriptionState === "queued" || t.transcriptionState === "processing")) && (
+                                    <button
+                                      onClick={() => enqueueTranscription(mat.id, mat.url, mat.title)}
+                                      className="flex items-center gap-1 text-orange-400/70 hover:text-orange-400 transition-colors bg-orange-500/5 hover:bg-orange-500/10 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase cursor-pointer tracking-widest border border-orange-500/10"
+                                      title="Retry AI Transcription"
+                                    >
+                                      <RefreshCw size={10} /> Retry
+                                    </button>
+                                  )}
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
 
-                        {/* Actions & Links */}
-                        <div className="flex items-center gap-4 mt-2 md:mt-0 w-full md:w-auto justify-between md:justify-end shrink-0">
+                        {/* Actions & Links - Responsive placement */}
+                        <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3 w-full sm:w-auto mt-2 sm:mt-0 pl-11 sm:pl-0 z-10 shrink-0">
+                          {/* Desktop View Button */}
                           <a
                             href={mat.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-xs font-semibold text-primary hover:text-primary/85 transition-colors flex items-center gap-0.5"
+                            className="hidden sm:flex text-[12px] font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/5 transition-all duration-300 items-center gap-1.5 px-4 py-2.5 rounded-[14px] backdrop-blur-md shadow-sm"
                           >
-                            View Asset <ChevronRight size={14} />
+                            Open Asset <ChevronRight size={14} className="text-white/50" />
                           </a>
 
-                          <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150 bg-black/30 p-1 rounded-lg border border-white/5">
+                          {/* Mobile View Button */}
+                          <a
+                            href={mat.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="sm:hidden text-[12px] font-semibold text-primary hover:text-primary/80 transition-colors flex items-center gap-1 uppercase tracking-widest"
+                          >
+                            Open <ChevronRight size={14} strokeWidth={2.5} />
+                          </a>
+
+                          {/* Edit & Delete Actions */}
+                          <div className="flex items-center gap-0.5 sm:gap-1.5 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 bg-white/5 sm:bg-transparent p-0.5 sm:p-0 rounded-lg">
                             <button
-                              onClick={() => handleOpenEditModal(mat)}
-                              className="p-1 text-[#86868b] hover:text-white transition-colors cursor-pointer"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                handleOpenEditModal(mat);
+                              }}
+                              className="p-2 sm:p-2.5 flex items-center justify-center text-[#86868b] hover:text-white transition-colors cursor-pointer rounded-md sm:rounded-xl sm:bg-[#2c2c2e]/50 hover:bg-white/10 sm:border border-transparent sm:hover:border-white/10"
                               title="Edit Name"
                             >
-                              <Pencil size={11} />
+                              <Pencil size={13} />
                             </button>
                             <button
-                              onClick={() => handleDeleteMaterial(mat.id)}
-                              className="p-1 text-[#86868b] hover:text-red-400 transition-colors cursor-pointer"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                handleDeleteMaterial(mat.id);
+                              }}
+                              className="p-2 sm:p-2.5 flex items-center justify-center text-[#86868b] hover:text-red-400 transition-colors cursor-pointer rounded-md sm:rounded-xl sm:bg-[#2c2c2e]/50 hover:bg-red-500/10 sm:border border-transparent sm:hover:border-red-500/20"
                               title="Delete"
                             >
-                              <Trash2 size={11} />
+                              <Trash2 size={13} />
                             </button>
                           </div>
                         </div>
@@ -237,14 +263,14 @@ export default function AdminFolderPage({ params }: { params: Promise<{ id: stri
           </Droppable>
         </DragDropContext>
 
-          {materials.length === 0 && (
-            <div className="py-12 text-center border border-dashed border-white/10 rounded-2xl bg-[#1c1c1e]/10">
-              <FileText size={24} className="mx-auto text-[#86868b]/30 mb-2" />
-              <p className="text-xs text-[#86868b] font-medium">No files uploaded to this folder yet</p>
-              <p className="text-[10px] text-[#86868b]/70 mt-0.5">Use the media uploader above to add files.</p>
-            </div>
-          )}
-        </div>
+        {materials.length === 0 && (
+          <div className="py-12 text-center border border-dashed border-white/10 rounded-2xl bg-[#1c1c1e]/10">
+            <FileText size={24} className="mx-auto text-[#86868b]/30 mb-2" />
+            <p className="text-xs text-[#86868b] font-medium">No files uploaded to this folder yet</p>
+            <p className="text-[10px] text-[#86868b]/70 mt-0.5">Use the media uploader above to add files.</p>
+          </div>
+        )}
+      </div>
 
       {/* Apple Settings Sheet-Style Modal Dialog */}
       {isModalOpen && (

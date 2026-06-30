@@ -80,12 +80,12 @@ export default function PublicFolderPage({ params }: { params: Promise<{ id: str
         const materialSnap = await getDocs(q);
         const materialsData = materialSnap.docs.map(d => ({ id: d.id, ...(d.data() as any) }));
         
-        // Sort by order first (ascending), then creation date
+        // Sort by order first (ascending), then creation date descending for new items
         materialsData.sort((a, b) => {
-          const orderA = typeof a.order === 'number' ? a.order : 999999;
-          const orderB = typeof b.order === 'number' ? b.order : 999999;
+          const orderA = typeof a.order === 'number' ? a.order : -1;
+          const orderB = typeof b.order === 'number' ? b.order : -1;
           if (orderA !== orderB) return orderA - orderB;
-          return (a.createdAt?.toMillis() || 0) - (b.createdAt?.toMillis() || 0);
+          return (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0);
         });
 
         setMaterials(materialsData);
@@ -338,10 +338,10 @@ export default function PublicFolderPage({ params }: { params: Promise<{ id: str
                   {activeMaterial.type === "pdf" && (
                     <div className="w-full min-h-[650px] h-[75vh] flex flex-col relative bg-zinc-950/40">
                       {/* Background Ambient Glow */}
-                      <div className="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-[#0a84ff]/15 to-transparent pointer-events-none blur-3xl opacity-50" />
+                      <div className="absolute top-0 inset-x-0 h-40 bg-linear-to-b from-[#0a84ff]/15 to-transparent pointer-events-none blur-3xl opacity-50" />
                       
                       {/* Top Action Bar */}
-                      <div className="relative z-10 w-full px-4 sm:px-6 py-4 flex items-center justify-between border-b border-white/5 bg-white/[0.02] backdrop-blur-xl">
+                      <div className="relative z-10 w-full px-4 sm:px-6 py-4 flex items-center justify-between border-b border-white/5 bg-white/2 backdrop-blur-xl">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-xl bg-[#0a84ff]/10 border border-[#0a84ff]/20 flex items-center justify-center text-[#0a84ff] shadow-inner shrink-0">
                             <FileText size={18} />
@@ -367,7 +367,7 @@ export default function PublicFolderPage({ params }: { params: Promise<{ id: str
                       <div className="flex-1 w-full p-3 sm:p-6 lg:p-8 relative z-10 flex flex-col min-h-0">
                         <div className="flex-1 w-full max-w-5xl mx-auto rounded-2xl overflow-hidden border border-white/10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.8)] bg-[#1e1e1e] ring-1 ring-white/5 flex flex-col relative">
                           {/* macOS-style window header */}
-                          <div className="h-9 w-full bg-gradient-to-b from-[#3a3a3c] to-[#2c2c2e] border-b border-[#1c1c1e] flex items-center px-4 justify-between shrink-0">
+                          <div className="h-9 w-full bg-linear-to-b from-[#3a3a3c] to-[#2c2c2e] border-b border-[#1c1c1e] flex items-center px-4 justify-between shrink-0">
                              <div className="flex gap-1.5 items-center">
                                <div className="w-3 h-3 rounded-full bg-[#ff5f56] shadow-inner border border-black/20" />
                                <div className="w-3 h-3 rounded-full bg-[#ffbd2e] shadow-inner border border-black/20" />
