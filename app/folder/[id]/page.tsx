@@ -336,26 +336,63 @@ export default function PublicFolderPage({ params }: { params: Promise<{ id: str
                   )}
 
                   {activeMaterial.type === "pdf" && (
-                    <div className="w-full h-[50vh] min-h-[400px] bg-black/40 flex flex-col items-center justify-center relative px-6 text-center">
-                      <div className="absolute inset-0 bg-linear-to-b from-[#0a84ff]/10 to-transparent pointer-events-none" />
+                    <div className="w-full min-h-[650px] h-[75vh] flex flex-col relative bg-zinc-950/40">
+                      {/* Background Ambient Glow */}
+                      <div className="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-[#0a84ff]/15 to-transparent pointer-events-none blur-3xl opacity-50" />
                       
-                      <div className="w-24 h-24 rounded-3xl bg-[#0a84ff]/10 border border-[#0a84ff]/20 shadow-[0_0_40px_-10px_rgba(10,132,255,0.3)] flex items-center justify-center mb-6 relative z-10 backdrop-blur-md">
-                        <FileText size={40} className="text-[#0a84ff]" />
+                      {/* Top Action Bar */}
+                      <div className="relative z-10 w-full px-4 sm:px-6 py-4 flex items-center justify-between border-b border-white/5 bg-white/[0.02] backdrop-blur-xl">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-[#0a84ff]/10 border border-[#0a84ff]/20 flex items-center justify-center text-[#0a84ff] shadow-inner shrink-0">
+                            <FileText size={18} />
+                          </div>
+                          <div className="min-w-0">
+                            <h3 className="text-sm font-bold text-white tracking-tight truncate">{activeMaterial.title}</h3>
+                            <p className="text-[11px] text-white/40 mt-0.5">PDF Document</p>
+                          </div>
+                        </div>
+
+                        <a 
+                          href={activeMaterial.url} 
+                          target="_blank" 
+                          rel="noreferrer" 
+                          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-semibold text-white transition-all backdrop-blur-md border border-white/10 hover:border-white/20 hover:shadow-lg active:scale-95 shrink-0"
+                        >
+                          <Download size={14} className="text-white/70" />
+                          <span className="hidden sm:inline">Open externally</span>
+                        </a>
                       </div>
-                      
-                      <h3 className="text-xl font-bold text-white mb-2 relative z-10">{activeMaterial.title}</h3>
-                      <p className="text-[13px] text-white/50 mb-8 max-w-sm leading-relaxed relative z-10">
-                        PDF documents are opened in a new secure tab for the best reading experience.
-                      </p>
-                      
-                      <a 
-                        href={activeMaterial.url} 
-                        target="_blank" 
-                        rel="noreferrer" 
-                        className="relative z-10 bg-[#0a84ff] hover:bg-[#0a84ff]/90 text-white font-bold px-8 py-3.5 rounded-full shadow-[0_4px_20px_-5px_rgba(10,132,255,0.5)] transition-all active:scale-95 flex items-center gap-2"
-                      >
-                        Read Document <ChevronRight size={16} />
-                      </a>
+
+                      {/* PDF Container */}
+                      <div className="flex-1 w-full p-3 sm:p-6 lg:p-8 relative z-10 flex flex-col min-h-0">
+                        <div className="flex-1 w-full max-w-5xl mx-auto rounded-2xl overflow-hidden border border-white/10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.8)] bg-[#1e1e1e] ring-1 ring-white/5 flex flex-col relative">
+                          {/* macOS-style window header */}
+                          <div className="h-9 w-full bg-gradient-to-b from-[#3a3a3c] to-[#2c2c2e] border-b border-[#1c1c1e] flex items-center px-4 justify-between shrink-0">
+                             <div className="flex gap-1.5 items-center">
+                               <div className="w-3 h-3 rounded-full bg-[#ff5f56] shadow-inner border border-black/20" />
+                               <div className="w-3 h-3 rounded-full bg-[#ffbd2e] shadow-inner border border-black/20" />
+                               <div className="w-3 h-3 rounded-full bg-[#27c93f] shadow-inner border border-black/20" />
+                             </div>
+                             <div className="flex items-center gap-1.5 text-[10px] text-white/30 font-medium tracking-widest uppercase">
+                               <Lock size={10} /> Secure Viewer
+                             </div>
+                             <div className="w-12" /> {/* Spacer */}
+                          </div>
+                          
+                          <div className="flex-1 w-full relative bg-[#1e1e1e]">
+                            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-white/30">
+                               <Loader2 size={24} className="animate-spin" />
+                               <span className="text-xs font-medium tracking-wider uppercase">Loading PDF</span>
+                            </div>
+                            
+                            <iframe 
+                              src={`${activeMaterial.url}#view=FitH`} 
+                              title={activeMaterial.title}
+                              className="w-full h-full border-none relative z-10 bg-white"
+                            />
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   )}
 
