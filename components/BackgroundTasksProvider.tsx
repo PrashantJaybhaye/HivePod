@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect, useRef } from "react";
 import { getPresignedUrl } from "@/app/actions/upload";
-import { transcribeAudio } from "@/app/actions/transcribe";
+import { transcribeAudioWithProgress } from "@/lib/transcribeClient";
 import { collection, addDoc, serverTimestamp, updateDoc, doc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
@@ -51,16 +51,20 @@ export function BackgroundTasksProvider({ children }: { children: ReactNode }) {
       isProcessingRef.current = true;
       updateTask(nextTask.id, { 
         transcriptionState: "processing",
-        statusText: "Transcribing audio (this may take a minute)..." 
+        statusText: "Transcribing audio (this may take a minute)...",
+        progress: 0
       });
 
       try {
-        const transcript = await transcribeAudio(nextTask.publicUrl);
+        const transcript = await transcribeAudioWithProgress(nextTask.publicUrl, (percentage) => {
+          updateTask(nextTask.id, { progress: percentage });
+        });
         await updateDoc(doc(db, "materials", nextTask.docId), { transcript });
         
         updateTask(nextTask.id, { 
           transcriptionState: "done",
           statusText: "Complete!", 
+          progress: 100,
           isComplete: true 
         });
       } catch (transcriptionError: any) {
@@ -68,6 +72,7 @@ export function BackgroundTasksProvider({ children }: { children: ReactNode }) {
         updateTask(nextTask.id, { 
           transcriptionState: "error",
           statusText: "Transcription failed, but file uploaded.", 
+          progress: 100,
           isComplete: true,
           isError: true
         });

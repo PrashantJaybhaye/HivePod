@@ -3,7 +3,7 @@
 import { DeepgramClient } from "@deepgram/sdk";
 import { GoogleGenAI } from "@google/genai";
 
-export async function transcribeAudio(audioUrl: string) {
+export async function transcribeAudioInitial(audioUrl: string) {
   try {
     const deepgram = new DeepgramClient({ apiKey: process.env.DEEPGRAM_API_KEY! });
 
@@ -16,7 +16,6 @@ export async function transcribeAudio(audioUrl: string) {
     });
 
     const data = response as any;
-    let transcript = "";
     
     if (data?.results?.utterances) {
       const utterances = data.results.utterances;
@@ -39,54 +38,55 @@ export async function transcribeAudio(audioUrl: string) {
         }
         transcriptParts.push(line);
       }
-      
-      // We will chunk the utterances into batches to fix spelling line by line
-      if (process.env.GROQ_API_KEY) {
-        try {
-          const Groq = (await import("groq-sdk")).default;
-          const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-          const prompt = `You are an expert transcriber and linguist. 
-Fix the spelling mistakes in this Hinglish (Hindi written in Latin alphabet) transcript.
-Format the output line-by-line exactly as provided (do not combine into one giant paragraph).
-DO NOT translate to English, keep the exact spoken Hinglish words.
-DO NOT add any preamble or extra text. Output ONLY the fixed transcript line-by-line.`;
-          const CHUNK_SIZE = 40;
-          let fixedChunks = [];
-          
-          // Process sequentially to avoid API rate limits
-          for (let i = 0; i < transcriptParts.length; i += CHUNK_SIZE) {
-            const chunk = transcriptParts.slice(i, i + CHUNK_SIZE).join("\n");
-            try {
-              const aiRes = await groq.chat.completions.create({
-                model: "llama-3.1-8b-instant",
-                messages: [
-                  { role: "system", content: prompt },
-                  { role: "user", content: chunk }
-                ],
-                temperature: 0.1,
-              });
-              fixedChunks.push(aiRes.choices[0]?.message?.content?.trim() || chunk);
-            } catch (err) {
-              console.error("Groq chunk error:", err);
-              fixedChunks.push(chunk);
-            }
-          }
-          transcript = fixedChunks.join("\n");
-        } catch (err) {
-          console.error("Groq init error:", err);
-          transcript = transcriptParts.join("\n");
-        }
-      } else {
-        transcript = transcriptParts.join("\n");
-      }
+      return { transcriptParts };
     } else {
       // Fallback
-      transcript = data?.results?.channels[0]?.alternatives[0]?.transcript || "No transcript generated.";
+      return { fallback: data?.results?.channels[0]?.alternatives[0]?.transcript || "No transcript generated." };
     }
-
-    return transcript;
   } catch (error: any) {
-    console.error("Transcription Server Action Error:", error);
+    console.error("Deepgram Transcription Error:", error);
     throw new Error(`Transcription failed: ${error.message || "Unknown Error"}`);
+  }
+}
+
+export async function fixTranscriptionChunk(chunk: string) {
+  if (!process.env.GROQ_API_KEY) {
+    return chunk;
+  }
+  
+  try {
+    const Groq = (await import("groq-sdk")).default;
+    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+    const prompt = `You are an expert transcriber and linguist specializing in technical subjects (like IT, networking, math). 
+Fix the spelling and formatting mistakes in this Hinglish (Hindi written in Latin alphabet) transcript.
+Format the output line-by-line exactly as provided (do not combine into one giant paragraph).
+DO NOT translate to English, keep the exact spoken Hinglish words.
+DO NOT add any preamble or extra text. Output ONLY the fixed transcript line-by-line.
+
+CRITICAL FIXES TO APPLY (DO THIS AGGRESSIVELY):
+- ANY time format like "02:55", "02:56", "02:50" MUST be converted to numbers: "255", "256", "250".
+- Convert spoken IP formatting: "1 dot 0" -> "1.0", "7 dot 255" -> "7.255", "16 dot 20" -> "16.20".
+- Translate phonetic errors into proper English networking terms in the Hinglish sentences:
+  - "mass" or "marks" -> "mask"
+  - "us address", "hosh", "os", "hopes" -> "host" or "host address"
+  - "us side" -> "host side"
+  - "subnect", "subnete", "subnedh" -> "subnet"
+  - "scene" (when used as a number) -> "teen" (3)
+  - "slash" followed by a number -> "/24", "/29", etc.
+  - "2 ja" or "to ja" -> "2 power" or "2 raised to"
+- Do NOT rewrite the sentences in English. Keep the Hinglish (Hindi words in Latin) intact, only fix the technical terms and numbers!`;
+    
+    const aiRes = await groq.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
+      messages: [
+        { role: "system", content: prompt },
+        { role: "user", content: chunk }
+      ],
+      temperature: 0.1,
+    });
+    return aiRes.choices[0]?.message?.content?.trim() || chunk;
+  } catch (err) {
+    console.error("Groq chunk error:", err);
+    return chunk;
   }
 }

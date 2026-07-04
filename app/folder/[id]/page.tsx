@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect, use } from "react";
-import { collection, getDocs, query, where, doc, getDoc, updateDoc } from "firebase/firestore";
+import { collection, getDocs, query, where, doc, getDoc, updateDoc, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { transcribeAudio } from "@/app/actions/transcribe";
+import { transcribeAudioWithProgress } from "@/lib/transcribeClient";
 import Link from "next/link";
 import { ChevronLeft, FileAudio, FileText, Image as ImageIcon, Download, Lock, Video, Folder as FolderIcon, AlignLeft, PlayCircle, CheckCircle2, XCircle, ChevronRight, BarChart2, Headphones, Zap, Award, Globe, RotateCw, Volume2, Loader2, Copy } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
+import { useBackgroundTasks } from "@/components/BackgroundTasksProvider";
 import SmartAudioPlayer from "@/components/SmartAudioPlayer";
 import { safeConvertToDate, safeGetMillis } from "@/lib/utils";
 import { markMaterialCompleted } from "@/lib/tracking";
@@ -25,6 +26,7 @@ export default function PublicFolderPage({ params }: { params: Promise<{ id: str
   const [isLoadingMaterials, setIsLoadingMaterials] = useState(true);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+  const { enqueueTranscription } = useBackgroundTasks();
 
   const handleCopy = () => {
     if (activeMaterial?.transcript) {
@@ -75,20 +77,28 @@ export default function PublicFolderPage({ params }: { params: Promise<{ id: str
 
       if (!approved) return;
 
+      let unsubscribeMaterials: (() => void) | undefined;
       try {
         const q = query(collection(db, "materials"), where("folderId", "==", folderId));
-        const materialSnap = await getDocs(q);
-        const materialsData = materialSnap.docs.map(d => ({ id: d.id, ...(d.data() as any) }));
-        
-        // Sort by order first (ascending), then creation date descending for new items
-        materialsData.sort((a, b) => {
-          const orderA = typeof a.order === 'number' ? a.order : -1;
-          const orderB = typeof b.order === 'number' ? b.order : -1;
-          if (orderA !== orderB) return orderA - orderB;
-          return (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0);
-        });
+        unsubscribeMaterials = onSnapshot(q, (materialSnap: any) => {
+          const materialsData = materialSnap.docs.map((d: any) => ({ id: d.id, ...(d.data() as any) }));
+          
+          // Sort by order first (ascending), then creation date descending for new items
+          materialsData.sort((a: any, b: any) => {
+            const orderA = typeof a.order === 'number' ? a.order : -1;
+            const orderB = typeof b.order === 'number' ? b.order : -1;
+            if (orderA !== orderB) return orderA - orderB;
+            return (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0);
+          });
 
-        setMaterials(materialsData);
+          setMaterials(materialsData);
+          setActiveMaterial((prev: any) => {
+            if (!prev) return prev;
+            const updated = materialsData.find((m: any) => m.id === prev.id);
+            return updated || prev;
+          });
+          setIsLoadingMaterials(false);
+        });
 
         // Fetch User Progress for this course
         if (user && folderData.courseId) {
@@ -107,11 +117,14 @@ export default function PublicFolderPage({ params }: { params: Promise<{ id: str
         }
       } catch (error) {
         console.error("Error fetching materials or progress:", error);
-      } finally {
         setIsLoadingMaterials(false);
       }
+      return unsubscribeMaterials;
     };
-    fetchFolderAndMaterials();
+    
+    let unsub: (() => void) | undefined;
+    fetchFolderAndMaterials().then(u => { unsub = u; });
+    return () => { if (unsub) unsub(); };
   }, [folderId, user, isAdmin]);
 
   useEffect(() => {
@@ -136,18 +149,11 @@ export default function PublicFolderPage({ params }: { params: Promise<{ id: str
 
   const handleRetranscribe = async () => {
     if (!activeMaterial || !isAdmin) return;
-    setIsTranscribing(true);
     try {
-      const newTranscript = await transcribeAudio(activeMaterial.url);
-      const materialRef = doc(db, "materials", activeMaterial.id);
-      await updateDoc(materialRef, { transcript: newTranscript });
-      setActiveMaterial({ ...activeMaterial, transcript: newTranscript });
-      setMaterials(materials.map(m => m.id === activeMaterial.id ? { ...m, transcript: newTranscript } : m));
+      enqueueTranscription(activeMaterial.id, activeMaterial.url, `Retranscribing: ${activeMaterial.title || "Audio"}`);
     } catch (error) {
-      console.error("Retranscription failed:", error);
-      alert("Failed to re-transcribe. Please try again.");
-    } finally {
-      setIsTranscribing(false);
+      console.error("Retranscription enqueue failed:", error);
+      alert("Failed to start re-transcription.");
     }
   };
 
