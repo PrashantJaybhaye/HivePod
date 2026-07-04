@@ -57,9 +57,18 @@ export function BackgroundTasksProvider({ children }: { children: ReactNode }) {
 
       try {
         const transcript = await transcribeAudioWithProgress(nextTask.publicUrl, (percentage) => {
-          updateTask(nextTask.id, { progress: percentage });
+          updateTask(nextTask.id, { progress: percentage * 0.9 });
         });
-        await updateDoc(doc(db, "materials", nextTask.docId), { transcript });
+        
+        updateTask(nextTask.id, { 
+          statusText: "Generating AI study summary...",
+          progress: 92
+        });
+        
+        const { generateStudySummary } = await import("@/app/actions/transcribe");
+        const summary = await generateStudySummary(transcript);
+        
+        await updateDoc(doc(db, "materials", nextTask.docId), { transcript, summary });
         
         updateTask(nextTask.id, { 
           transcriptionState: "done",

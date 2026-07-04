@@ -90,3 +90,29 @@ CRITICAL FIXES TO APPLY (DO THIS AGGRESSIVELY):
     return chunk;
   }
 }
+
+export async function generateStudySummary(transcript: string) {
+  if (!process.env.GEMINI_API_KEY) {
+    throw new Error("GEMINI_API_KEY is not configured.");
+  }
+  
+  try {
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    const prompt = `You are an expert AI tutor. Analyze the following transcript and generate a structured study guide. 
+Provide a clear summary, key concepts, and important takeaways. 
+Format the output for readability. Use markdown bold (**text**) for headers and key terms. Use hyphens for lists. Keep it concise and educational.
+
+Transcript:
+${transcript}`;
+    
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+    });
+    
+    return response.text?.trim() || "";
+  } catch (err: any) {
+    console.error("Gemini summary error:", err);
+    throw new Error(`Summary generation failed: ${err.message}`);
+  }
+}

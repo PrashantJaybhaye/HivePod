@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect, use, Fragment } from "react";
 import { collection, getDocs, query, where, doc, getDoc, updateDoc, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { transcribeAudioWithProgress } from "@/lib/transcribeClient";
@@ -11,6 +11,17 @@ import { useBackgroundTasks } from "@/components/BackgroundTasksProvider";
 import SmartAudioPlayer from "@/components/SmartAudioPlayer";
 import { safeConvertToDate, safeGetMillis } from "@/lib/utils";
 import { markMaterialCompleted } from "@/lib/tracking";
+
+// Helper to render simple bold markdown (**text**)
+const renderMarkdownBold = (text: string) => {
+  if (!text) return null;
+  return text.split(/(\*\*.*?\*\*)/).map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={i} className="font-bold text-white">{part.slice(2, -2)}</strong>;
+    }
+    return <Fragment key={i}>{part}</Fragment>;
+  });
+};
 
 export default function PublicFolderPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -26,6 +37,8 @@ export default function PublicFolderPage({ params }: { params: Promise<{ id: str
   const [isLoadingMaterials, setIsLoadingMaterials] = useState(true);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+  const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
+  const [activeTab, setActiveTab] = useState<"transcript" | "summary">("transcript");
   const { enqueueTranscription } = useBackgroundTasks();
 
   const handleCopy = () => {
@@ -134,6 +147,11 @@ export default function PublicFolderPage({ params }: { params: Promise<{ id: str
     }
   }, [materials]);
 
+  useEffect(() => {
+    // Reset tab when material changes
+    setActiveTab("transcript");
+  }, [activeMaterial?.id]);
+
   const handleMarkAsComplete = async () => {
     if (!user || !activeMaterial || !folder?.courseId) return;
     setIsMarkingComplete(true);
@@ -157,6 +175,29 @@ export default function PublicFolderPage({ params }: { params: Promise<{ id: str
     }
   };
 
+  const handleGenerateSummary = async () => {
+    if (!activeMaterial || !activeMaterial.transcript || !isAdmin) return;
+    setIsGeneratingSummary(true);
+    try {
+      const { generateStudySummary } = await import("@/app/actions/transcribe");
+      const summary = await generateStudySummary(activeMaterial.transcript);
+      if (summary) {
+        await updateDoc(doc(db, "materials", activeMaterial.id), { summary });
+      } else {
+        alert("Failed to generate summary.");
+      }
+    } catch (error: any) {
+      console.error("Failed to generate summary:", error);
+      const errorMsg = error.message || "";
+      if (errorMsg.includes("429") || errorMsg.includes("quota") || errorMsg.includes("RESOURCE_EXHAUSTED")) {
+        alert("You have hit the AI rate limit for this minute. Please wait about 30 seconds and try again!");
+      } else {
+        alert("Failed to generate summary. Please try again later.");
+      }
+    } finally {
+      setIsGeneratingSummary(false);
+    }
+  };
 
   if (!folder) return <div className="p-8 text-white/50 text-center w-full mt-20 font-medium">Loading workspace...</div>;
 
@@ -182,7 +223,7 @@ export default function PublicFolderPage({ params }: { params: Promise<{ id: str
   }
 
   return (
-    <div className="flex flex-col flex-1 bg-background h-full min-h-[calc(100vh-100px)]">
+    <div className="flex flex-col flex-1 bg-background h-full min-h-[calc(100vh-100px)] w-full overflow-x-hidden">
       <main className="flex-1 px-4 sm:px-5 md:px-6 pt-0 pb-6 max-w-7xl mx-auto w-full flex flex-col space-y-4 h-full overflow-hidden">
         
         <div className="flex items-center justify-between shrink-0">
@@ -439,54 +480,107 @@ export default function PublicFolderPage({ params }: { params: Promise<{ id: str
                     </p>
 
                     {(activeMaterial.type === "audio" || activeMaterial.type === "video") && (
-                      <div className="space-y-6">
-                        <div className="flex items-center justify-between pb-3 border-b border-white/6">
-                          <div className="flex items-center gap-2 text-white/50">
-                            <AlignLeft size={16} />
-                            <h3 className="text-[11px] font-bold tracking-widest uppercase">Transcript</h3>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            {activeMaterial.transcript && (
-                              <button
-                                onClick={handleCopy}
-                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-[10px] font-bold uppercase tracking-wider text-white transition-all"
+                      <div className="space-y-6 mt-4">
+                        {/* Compact Tab Header */}
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-white/10 w-full">
+                          <div className="flex p-1 bg-white/5 rounded-xl border border-white/5 w-full sm:w-auto overflow-x-auto scrollbar-hide shrink-0">
+                            <button 
+                              onClick={() => setActiveTab("transcript")}
+                              className={`flex items-center justify-center gap-1.5 px-3 sm:px-5 py-1.5 text-[12px] font-semibold rounded-lg transition-all flex-1 sm:flex-none ${activeTab === 'transcript' ? 'bg-black/60 text-white shadow-sm border border-white/10' : 'text-white/40 hover:text-white/80 border border-transparent'}`}
+                            >
+                              <AlignLeft size={14} />
+                              Transcript
+                            </button>
+                            
+                            {(activeMaterial.summary || isAdmin) && (
+                              <button 
+                                onClick={() => setActiveTab("summary")}
+                                className={`flex items-center justify-center gap-1.5 px-3 sm:px-5 py-1.5 text-[12px] font-semibold rounded-lg transition-all flex-1 sm:flex-none ${activeTab === 'summary' ? 'bg-black/60 text-[#30d158] shadow-sm border border-[#30d158]/20' : 'text-white/40 hover:text-white/80 border border-transparent'}`}
                               >
-                                {isCopied ? <CheckCircle2 size={12} className="text-[#30d158]" /> : <Copy size={12} />}
-                                {isCopied ? 'Copied' : 'Copy'}
+                                <Zap size={14} />
+                                AI Summary
                               </button>
                             )}
-                            {isAdmin && (
+                          </div>
+                          
+                          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
+                            {activeTab === 'transcript' && activeMaterial.transcript && (
+                              <button
+                                onClick={handleCopy}
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-[11px] font-medium text-white transition-all active:scale-95"
+                              >
+                                {isCopied ? <CheckCircle2 size={12} className="text-[#30d158]" /> : <Copy size={12} />}
+                                <span className="hidden sm:inline">{isCopied ? 'Copied' : 'Copy'}</span>
+                              </button>
+                            )}
+                            {activeTab === 'summary' && isAdmin && activeMaterial.transcript && (
+                              <button
+                                onClick={handleGenerateSummary}
+                                disabled={isGeneratingSummary}
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#30d158]/10 hover:bg-[#30d158]/20 border border-[#30d158]/20 text-[11px] font-medium text-[#30d158] transition-all disabled:opacity-50 active:scale-95"
+                              >
+                                {isGeneratingSummary ? (
+                                  <>
+                                    <Loader2 size={12} className="animate-spin" />
+                                    <span className="hidden sm:inline">Generating...</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    {activeMaterial.summary ? <RotateCw size={12} /> : <Zap size={12} />}
+                                    <span className="hidden sm:inline">{activeMaterial.summary ? "Re-Summary" : "Gen Summary"}</span>
+                                  </>
+                                )}
+                              </button>
+                            )}
+                            {activeTab === 'transcript' && isAdmin && (
                               <button
                                 onClick={handleRetranscribe}
                                 disabled={isTranscribing}
-                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-[10px] font-bold uppercase tracking-wider text-white transition-all disabled:opacity-50"
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-[11px] font-medium text-white transition-all disabled:opacity-50 active:scale-95"
                               >
                                 {isTranscribing ? (
                                   <>
                                     <Loader2 size={12} className="animate-spin" />
-                                    Transcribing...
+                                    <span className="hidden sm:inline">Transcribing...</span>
                                   </>
                                 ) : (
                                   <>
                                     <RotateCw size={12} />
-                                    Re-transcribe
+                                    <span className="hidden sm:inline">Re-transcribe</span>
                                   </>
                                 )}
                               </button>
                             )}
                           </div>
                         </div>
-                        
-                        {activeMaterial.transcript ? (
-                          <div className="prose prose-invert prose-zinc max-w-none text-[14px] sm:text-[15px] leading-[1.8] text-white/70 font-sans tracking-wide whitespace-pre-wrap">
-                            {activeMaterial.transcript}
-                          </div>
-                        ) : (
-                          <div className="py-16 flex flex-col items-center text-center">
-                            <AlignLeft size={32} className="text-white/10 mb-4" strokeWidth={1} />
-                            <p className="text-[13px] text-white/40 font-medium">No transcript available for this {activeMaterial.type}.</p>
-                          </div>
-                        )}
+
+                        <div className="pt-2 w-full overflow-x-hidden">
+                          {activeTab === 'transcript' && (
+                            activeMaterial.transcript ? (
+                              <div className="prose prose-invert prose-zinc max-w-none text-[14px] sm:text-[15px] leading-[1.8] text-white/70 font-sans tracking-wide whitespace-pre-wrap break-words overflow-wrap-anywhere">
+                                {activeMaterial.transcript}
+                              </div>
+                            ) : (
+                              <div className="py-16 flex flex-col items-center text-center">
+                                <AlignLeft size={32} className="text-white/10 mb-4" strokeWidth={1} />
+                                <p className="text-[13px] text-white/40 font-medium">No transcript available for this {activeMaterial.type}.</p>
+                              </div>
+                            )
+                          )}
+                          
+                          {activeTab === 'summary' && (
+                            activeMaterial.summary ? (
+                              <div className="prose prose-invert prose-zinc max-w-none text-[14px] sm:text-[15px] leading-[1.8] text-white/80 font-sans tracking-wide whitespace-pre-wrap break-words overflow-wrap-anywhere p-5 bg-[#30d158]/5 border border-[#30d158]/10 rounded-xl shadow-inner">
+                                {renderMarkdownBold(activeMaterial.summary)}
+                              </div>
+                            ) : (
+                              <div className="py-16 flex flex-col items-center text-center">
+                                <Zap size={32} className="text-[#30d158]/20 mb-4" />
+                                <p className="text-[13px] text-white/40 font-medium">No AI summary generated yet.</p>
+                              </div>
+                            )
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
