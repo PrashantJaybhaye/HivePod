@@ -288,7 +288,7 @@ export default function Header({ toggleSidebar }: { toggleSidebar?: () => void }
                                     return (
                                       <div key={result.id} className="flex items-center gap-3 px-4 py-2 hover:bg-white/5 rounded-lg transition-colors">
                                         {result.photoURL ? (
-                                          <img src={result.photoURL} alt={result.title} className="w-8 h-8 rounded-md object-cover border border-white/10" />
+                                          <img src={result.photoURL} alt={result.title} referrerPolicy="no-referrer" className="w-8 h-8 rounded-md object-cover border border-white/10" />
                                         ) : (
                                           <div className="w-8 h-8 rounded-md bg-white/10 flex items-center justify-center border border-white/5 shrink-0">
                                             <span className="text-[12px] text-white/60 font-medium">{result.title.charAt(0).toUpperCase()}</span>

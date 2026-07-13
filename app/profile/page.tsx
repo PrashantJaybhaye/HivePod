@@ -191,7 +191,7 @@ export default function ProfilePage() {
         <div className="flex items-center gap-6 pb-8 border-b border-white/10">
           <div className="w-[84px] h-[84px] rounded-full bg-linear-to-tr from-[#ff453a] to-[#ff9f0a] flex items-center justify-center text-white text-[32px] font-medium tracking-tight shadow-md overflow-hidden shrink-0">
             {photoURL ? (
-              <img src={photoURL} alt={displayName} className="w-full h-full object-cover" />
+              <img src={photoURL} referrerPolicy="no-referrer" alt={displayName} className="w-full h-full object-cover" />
             ) : (
               getInitials(fullDisplayName)
             )}

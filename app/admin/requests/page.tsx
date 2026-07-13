@@ -82,6 +82,7 @@ function UserCell({ userId, fallbackEmail, courseTitle }: { userId: string; fall
         <img
           src={photoURL}
           alt={displayName}
+          referrerPolicy="no-referrer"
           className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover border border-white/10 shrink-0"
         />
       ) : (
@@ -525,6 +526,7 @@ export default function AdminRequestsPage() {
                   <img
                     src={profileCache[selectedRequest.userId].photoURL}
                     alt={profileCache[selectedRequest.userId].displayName}
+                    referrerPolicy="no-referrer"
                     className="w-10 h-10 rounded-full object-cover border border-white/10 shrink-0"
                   />
                 ) : (
