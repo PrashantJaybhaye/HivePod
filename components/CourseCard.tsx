@@ -10,6 +10,7 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
+import { getTimeAgo } from "@/lib/utils";
 
 interface CourseCardProps {
   id: string;
@@ -30,6 +31,8 @@ interface CourseCardProps {
   language?: string;
   updatedAtText?: string;
   audioDuration?: string;
+  createdAt?: any;
+  updatedAt?: any;
 }
 
 export default function CourseCard({
@@ -44,8 +47,10 @@ export default function CourseCard({
   resourcesCount = 0,
   xpReward = 100,
   language = "English",
-  updatedAtText = "Updated Today",
-  audioDuration = ""
+  updatedAtText,
+  audioDuration = "",
+  createdAt,
+  updatedAt
 }: CourseCardProps) {
 
   const isCompleted = progressPercentage === 100;
@@ -127,6 +132,15 @@ export default function CourseCard({
   const btnConfig = getButtonConfig();
   const BtnIcon = btnConfig.icon;
 
+  let displayUpdatedAt = updatedAtText;
+  if (updatedAt) {
+    displayUpdatedAt = `Updated ${getTimeAgo(updatedAt)}`;
+  } else if (createdAt) {
+    displayUpdatedAt = `Updated ${getTimeAgo(createdAt)}`;
+  } else if (!updatedAtText || updatedAtText === "Updated Today" || updatedAtText.startsWith("Updated ")) {
+    displayUpdatedAt = "Updated just now";
+  }
+
   return (
     <Card className="relative overflow-hidden rounded-2xl border border-white/8 bg-white/1.5 bg-linear-to-b from-white/4 to-transparent backdrop-blur-[32px] flex flex-col h-full transition-all duration-300 active:scale-[0.98] active:bg-white/8 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)]">
       {/* Liquid glass light reflection sheen */}
@@ -203,8 +217,8 @@ export default function CourseCard({
               </>
             )}
           </div>
-          {updatedAtText && (
-            <span className="text-[10px] text-white/35 font-normal tracking-normal normal-case">{updatedAtText}</span>
+          {displayUpdatedAt && (
+            <span className="text-[10px] text-white/35 font-normal tracking-normal normal-case">{displayUpdatedAt}</span>
           )}
         </div>
 

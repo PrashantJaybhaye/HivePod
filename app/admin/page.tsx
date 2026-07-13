@@ -37,21 +37,55 @@ export default function AdminPage() {
   const [category, setCategory] = useState("");
   const [instructor, setInstructor] = useState("");
   const [difficulty, setDifficulty] = useState("Beginner");
-  const [audioTracks, setAudioTracks] = useState("0");
-  const [resourcesCount, setResourcesCount] = useState("0");
   const [xpReward, setXpReward] = useState("100");
   const [language, setLanguage] = useState("English");
-  const [updatedAtText, setUpdatedAtText] = useState("Updated Today");
-  const [audioDuration, setAudioDuration] = useState("2 hrs");
 
   const fetchCourses = async () => {
     setDbLoading(true);
     try {
       const querySnapshot = await getDocs(collection(db, "courses"));
-      const coursesData = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
+      const foldersSnap = await getDocs(collection(db, "folders"));
+      const materialsSnap = await getDocs(collection(db, "materials"));
+
+      const folderToCourse: Record<string, string> = {};
+      foldersSnap.docs.forEach(f => {
+        folderToCourse[f.id] = f.data().courseId;
+      });
+
+      const counts: Record<string, { audio: number; pdf: number; total: number }> = {};
+      materialsSnap.docs.forEach(m => {
+        const data = m.data();
+        const courseId = folderToCourse[data.folderId];
+        if (courseId) {
+          if (!counts[courseId]) counts[courseId] = { audio: 0, pdf: 0, total: 0 };
+          counts[courseId].total += 1;
+          if (data.type === 'audio') counts[courseId].audio += 1;
+          else if (data.type === 'pdf') counts[courseId].pdf += 1;
+        }
+      });
+
+      const coursesData = querySnapshot.docs.map(doc => {
+        const data = doc.data();
+        const stats = counts[doc.id] || { audio: 0, pdf: 0, total: 0 };
+        const audioTracks = stats.audio;
+        const resourcesCount = stats.pdf;
+        
+        // Calculate dynamic duration
+        const minutes = stats.total * 15;
+        const hours = Math.floor(minutes / 60);
+        const remainingMins = minutes % 60;
+        const audioDuration = minutes === 0 ? "0 hrs" : 
+          (minutes < 60 ? `${minutes} mins` : 
+            (remainingMins > 0 ? `${hours}h ${remainingMins}m` : `${hours} hrs`));
+
+        return {
+          id: doc.id,
+          ...data,
+          audioTracks,
+          resourcesCount,
+          audioDuration
+        };
+      });
       setCourses(coursesData);
     } catch (error) {
       console.error("Error fetching courses:", error);
@@ -70,12 +104,8 @@ export default function AdminPage() {
     setCategory("");
     setInstructor("");
     setDifficulty("Beginner");
-    setAudioTracks("0");
-    setResourcesCount("0");
     setXpReward("100");
     setLanguage("English");
-    setUpdatedAtText("Updated Today");
-    setAudioDuration("2 hrs");
     setEditingCourseId(null);
   };
 
@@ -92,12 +122,8 @@ export default function AdminPage() {
     setCategory(course.category || "");
     setInstructor(course.instructor || "");
     setDifficulty(course.difficulty || "Beginner");
-    setAudioTracks(course.audioTracks?.toString() || "0");
-    setResourcesCount(course.resourcesCount?.toString() || "0");
     setXpReward(course.xpReward?.toString() || "100");
     setLanguage(course.language || "English");
-    setUpdatedAtText(course.updatedAtText || "Updated Today");
-    setAudioDuration(course.audioDuration || "2 hrs");
     setModalMode("edit");
     setIsModalOpen(true);
   };
@@ -114,13 +140,13 @@ export default function AdminPage() {
         category: category.trim() || "IT & Tech",
         instructor: instructor.trim() || "HivePod Faculty Team",
         difficulty: difficulty,
-        audioTracks: parseInt(audioTracks) || 0,
-        resourcesCount: parseInt(resourcesCount) || 0,
         xpReward: parseInt(xpReward) || 100,
         language: language.trim() || "English",
-        updatedAtText: updatedAtText.trim() || "Updated Today",
-        audioDuration: audioDuration.trim() || "2 hrs",
+        audioTracks: 0,
+        resourcesCount: 0,
+        audioDuration: "0 hrs",
         createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
       });
       setIsModalOpen(false);
       resetForm();
@@ -145,12 +171,9 @@ export default function AdminPage() {
         category: category.trim() || "IT & Tech",
         instructor: instructor.trim() || "HivePod Faculty Team",
         difficulty: difficulty,
-        audioTracks: parseInt(audioTracks) || 0,
-        resourcesCount: parseInt(resourcesCount) || 0,
         xpReward: parseInt(xpReward) || 100,
         language: language.trim() || "English",
-        updatedAtText: updatedAtText.trim() || "Updated Today",
-        audioDuration: audioDuration.trim() || "2 hrs"
+        updatedAt: serverTimestamp(),
       });
       setIsModalOpen(false);
       resetForm();
@@ -452,62 +475,16 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              {/* Field 5: Audio Pods & PDF count */}
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-[10px] font-semibold text-[#86868b] mb-1 capitalizetracking-wider">Audio Tracks</label>
-                  <input
-                    type="number"
-                    min="0"
-                    className="w-full bg-[#2c2c2e]/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary"
-                    value={audioTracks}
-                    onChange={(e) => setAudioTracks(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-semibold text-[#86868b] mb-1 capitalizetracking-wider">PDF Resources</label>
-                  <input
-                    type="number"
-                    min="0"
-                    className="w-full bg-[#2c2c2e]/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary"
-                    value={resourcesCount}
-                    onChange={(e) => setResourcesCount(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-semibold text-[#86868b] mb-1 capitalizetracking-wider">XP Reward</label>
-                  <input
-                    type="number"
-                    min="0"
-                    className="w-full bg-[#2c2c2e]/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary"
-                    value={xpReward}
-                    onChange={(e) => setXpReward(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              {/* Field 6: Duration & Update Freq */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[10px] font-semibold text-[#86868b] mb-1 capitalizetracking-wider">Listen Time</label>
-                  <input
-                    type="text"
-                    className="w-full bg-[#2c2c2e]/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary"
-                    value={audioDuration}
-                    onChange={(e) => setAudioDuration(e.target.value)}
-                    placeholder="e.g. 2 hrs"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-semibold text-[#86868b] mb-1 capitalizetracking-wider">Update Freq</label>
-                  <input
-                    type="text"
-                    className="w-full bg-[#2c2c2e]/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary"
-                    value={updatedAtText}
-                    onChange={(e) => setUpdatedAtText(e.target.value)}
-                    placeholder="e.g. Updated Today"
-                  />
-                </div>
+              {/* Field 5: XP Reward */}
+              <div>
+                <label className="block text-[10px] font-semibold text-[#86868b] mb-1 capitalizetracking-wider">XP Reward</label>
+                <input
+                  type="number"
+                  min="0"
+                  className="w-full bg-[#2c2c2e]/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary"
+                  value={xpReward}
+                  onChange={(e) => setXpReward(e.target.value)}
+                />
               </div>
 
               {/* Footer Actions */}

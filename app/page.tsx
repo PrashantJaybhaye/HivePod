@@ -17,7 +17,7 @@ export default function Home() {
   const [courses, setCourses] = useState<any[]>([]);
   const [userStats, setUserStats] = useState({ timeInvestedMinutes: 0, currentStreak: 0 });
   const [completedItemsByCourse, setCompletedItemsByCourse] = useState<Record<string, number>>({});
-  const [courseItemCounts, setCourseItemCounts] = useState<Record<string, number>>({});
+  const [courseItemCounts, setCourseItemCounts] = useState<Record<string, { audio: number; pdf: number; total: number }>>({});
   const [isDataLoading, setIsDataLoading] = useState(true);
 
   useEffect(() => {
@@ -37,12 +37,16 @@ export default function Home() {
         folderToCourse[f.id] = f.data().courseId;
       });
 
-      const counts: Record<string, number> = {};
+      const counts: Record<string, { audio: number; pdf: number; total: number }> = {};
       materialsSnap.docs.forEach(m => {
-        const folderId = m.data().folderId;
+        const data = m.data();
+        const folderId = data.folderId;
         const courseId = folderToCourse[folderId];
         if (courseId) {
-          counts[courseId] = (counts[courseId] || 0) + 1;
+          if (!counts[courseId]) counts[courseId] = { audio: 0, pdf: 0, total: 0 };
+          counts[courseId].total += 1;
+          if (data.type === 'audio') counts[courseId].audio += 1;
+          else if (data.type === 'pdf') counts[courseId].pdf += 1;
         }
       });
       setCourseItemCounts(counts);
@@ -82,7 +86,9 @@ export default function Home() {
   let coursesWithProgress = 0;
 
   const coursesWithCalculations = courses.map(course => {
-    const totalItems = courseItemCounts[course.id] || 0;
+    const totalItems = courseItemCounts[course.id]?.total || 0;
+    const audioTracks = courseItemCounts[course.id]?.audio || 0;
+    const resourcesCount = courseItemCounts[course.id]?.pdf || 0;
     const completedItems = completedItemsByCourse[course.id] || 0;
     const progressPercentage = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
     
@@ -91,7 +97,7 @@ export default function Home() {
       coursesWithProgress += 1;
     }
     
-    return { ...course, totalItems, completedItems, progressPercentage };
+    return { ...course, totalItems, audioTracks, resourcesCount, completedItems, progressPercentage };
   });
 
   // Determine user's first name for greeting
@@ -170,12 +176,12 @@ export default function Home() {
                   difficulty={course.difficulty}
                   rating={course.rating}
                   reviewsCount={course.reviewsCount}
-                  audioTracks={course.audioTracks}
-                  resourcesCount={course.resourcesCount}
                   xpReward={course.xpReward}
                   language={course.language}
                   updatedAtText={course.updatedAtText}
                   audioDuration={course.audioDuration}
+                  createdAt={course.createdAt}
+                  updatedAt={course.updatedAt}
                 />
               ))
             )}

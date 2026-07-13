@@ -65,3 +65,37 @@ export function safeGetMillis(value: any, fallback: number = 0): number {
   
   return fallback;
 }
+
+/**
+ * Returns a human-readable relative time string (e.g., '1m ago', '1D ago', '1month ago')
+ */
+export function getTimeAgo(timestamp: any): string {
+  const date = safeConvertToDate(timestamp);
+  if (!date) return "just now";
+
+  const now = new Date();
+  const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  switch (true) {
+    case (seconds < 60):
+      return "just now";
+    case (seconds < 3600):
+      return `${Math.floor(seconds / 60)}m ago`;
+    case (seconds < 86400):
+      return `${Math.floor(seconds / 3600)}h ago`;
+    case (seconds < 604800):
+      return `${Math.floor(seconds / 86400)}D ago`;
+    case (seconds < 2592000): {
+      const weeks = Math.floor(seconds / 604800);
+      return `${weeks}week${weeks > 1 ? 's' : ''} ago`;
+    }
+    case (seconds < 31536000): {
+      const months = Math.floor(seconds / 2592000);
+      return `${months}month${months > 1 ? 's' : ''} ago`;
+    }
+    default: {
+      const years = Math.floor(seconds / 31536000);
+      return `${years}year${years > 1 ? 's' : ''} ago`;
+    }
+  }
+}

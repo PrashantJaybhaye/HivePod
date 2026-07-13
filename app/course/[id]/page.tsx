@@ -29,7 +29,6 @@ export default function PublicCoursePage({ params }: { params: Promise<{ id: str
       let courseData = null;
       if (courseSnap.exists()) {
         courseData = { id: courseSnap.id, ...courseSnap.data() };
-        setCourse(courseData);
       }
 
       if (user && courseData) {
@@ -65,6 +64,40 @@ export default function PublicCoursePage({ params }: { params: Promise<{ id: str
       const folderSnap = await getDocs(q);
       const foldersData = folderSnap.docs.map(d => ({ id: d.id, ...d.data() }));
       setFolders(foldersData);
+
+      // Fetch Materials for these folders to calculate dynamic counts
+      if (courseData && foldersData.length > 0) {
+        const folderIds = foldersData.map(f => f.id);
+        const materialsQ = query(collection(db, "materials"), where("folderId", "in", folderIds));
+        const materialsSnap = await getDocs(materialsQ);
+        
+        let audio = 0;
+        let pdf = 0;
+        let total = 0;
+        
+        materialsSnap.docs.forEach(m => {
+          total += 1;
+          const type = m.data().type;
+          if (type === 'audio') audio += 1;
+          else if (type === 'pdf') pdf += 1;
+        });
+
+        const minutes = total * 15;
+        const hours = Math.floor(minutes / 60);
+        const remainingMins = minutes % 60;
+        const audioDuration = minutes === 0 ? "0 hrs" : 
+          (minutes < 60 ? `${minutes} mins` : 
+            (remainingMins > 0 ? `${hours}h ${remainingMins}m` : `${hours} hrs`));
+
+        setCourse({
+          ...courseData,
+          audioTracks: audio,
+          resourcesCount: pdf,
+          audioDuration: audioDuration
+        });
+      } else if (courseData) {
+        setCourse({ ...courseData, audioTracks: 0, resourcesCount: 0, audioDuration: "0 hrs" });
+      }
     };
     fetchCourseAndFolders();
   }, [courseId, user, isAdmin]);
