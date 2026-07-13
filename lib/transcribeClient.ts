@@ -15,7 +15,7 @@ export async function transcribeAudioWithProgress(audioUrl: string, onProgress?:
   }
 
   const transcriptParts = res.transcriptParts || [];
-  const CHUNK_SIZE = 40;
+  const CHUNK_SIZE = 20;
   let fixedChunks: string[] = [];
   
   const totalChunks = Math.ceil(transcriptParts.length / CHUNK_SIZE);
@@ -32,7 +32,17 @@ export async function transcribeAudioWithProgress(audioUrl: string, onProgress?:
     
     try {
       const fixedChunk = await fixTranscriptionChunk(chunk);
-      fixedChunks.push(fixedChunk);
+      
+      // Strict Line-by-Line Validation (Fail-Safe)
+      const inputLines = chunk.split("\n").length;
+      const outputLines = fixedChunk.split("\n").length;
+      
+      if (inputLines === outputLines) {
+        fixedChunks.push(fixedChunk);
+      } else {
+        console.warn(`Line count mismatch (expected ${inputLines}, got ${outputLines}). Falling back to original chunk.`);
+        fixedChunks.push(chunk);
+      }
     } catch (err) {
       console.error("Error fixing chunk in client loop:", err);
       fixedChunks.push(chunk);

@@ -33,7 +33,9 @@ export default function AdminCoursePage({ params }: { params: Promise<{ id: stri
       // Fetch Folders
       const q = query(collection(db, "folders"), where("courseId", "==", courseId));
       const folderSnap = await getDocs(q);
-      const foldersData = folderSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+      const foldersData = folderSnap.docs.map(d => ({ id: d.id, ...d.data() as any }));
+      // Sort alphabetically by title
+      foldersData.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
       setFolders(foldersData);
     } catch (error) {
       console.error("Error fetching data:", error);

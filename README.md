@@ -21,6 +21,7 @@ The user interface is heavily inspired by premium iOS design patterns, featuring
 ### 🧑‍🎓 For Learners (User Experience)
 - **Course Library & Browsing:** Elegant interface to discover, preview, and enroll in courses.
 - **My Courses Dashboard:** Dedicated portal for users to track their learning progress, resume where they left off, and access course materials.
+- **Dynamic Content Metrics:** Courses automatically tally up their contents—displaying live counts of audio podcasts, PDF resources, and total estimated listening time based on the uploaded materials.
 - **Smart Audio Player:** A persistent, global audio player (`SmartAudioPlayer.tsx`) powered by Shaka Player for listening to podcast-style lectures while navigating the app, fully optimized for robustness.
 - **Transcripts & Copy Features:** Automatically read and copy lecture transcripts directly from the UI.
 - **iOS-Style Profile Management:** Clean, minimalist profile section for managing personal details, avatars, and account settings.
@@ -29,7 +30,7 @@ The user interface is heavily inspired by premium iOS design patterns, featuring
 ### 👑 For Creators (Admin Experience)
 - **Admin Dashboard:** A powerful command center featuring analytics, recent sales tracking, and platform overview.
 - **Automated Access Requests:** Receive instant email notifications (via Resend) whenever a user requests access to a private course, with 1-click links to approve/deny.
-- **Course Builder:** Intuitive tools to create and structure courses, upload videos, and organize modules.
+- **Course Builder & Dynamic Aggregation:** Intuitive tools to create and structure courses with folders automatically sorted alphabetically (A-Z) for a clean curriculum view. The system tracks database `serverTimestamp()` modifications and auto-calculates course metrics in real-time.
 - **Material Uploads:** Secure and efficient file uploads via Cloudflare R2 / AWS S3 integration.
 - **User Management:** Oversee enrolled students, manage permissions, and track engagement.
 
@@ -38,7 +39,8 @@ The user interface is heavily inspired by premium iOS design patterns, featuring
 - **Speech-to-Text Processing:** Integration with Deepgram (`@deepgram/sdk`) for automatic transcription and closed captioning of audio/video lectures.
 
 ### 🛡 Core Architecture & Security
-- **Authentication:** Secure, passwordless or multi-provider login workflows powered by Firebase Auth.
+- **Authentication:** Secure, passwordless or multi-provider login workflows powered by Firebase Auth. Google Account profile avatars are handled with strict `referrerPolicy="no-referrer"` bypassing 403 Forbidden constraints seamlessly.
+- **Dynamic Timestamps:** Built-in `getTimeAgo` utilities precisely convert database timestamps into relative time formats across all client UI cards ("Updated 2m ago", "1D ago", etc.).
 - **Bot Protection:** Integrated Cloudflare Turnstile (`@marsidev/react-turnstile`) to prevent spam and abuse.
 - **Real-time Notifications:** In-app notification system (`useNotifications.ts`) to keep users informed about new courses and community replies.
 - **Reliable Email Delivery:** Integrated with Resend API for lightning-fast transactional emails.
@@ -104,6 +106,20 @@ RESEND_API_KEY=re_your_resend_api_key
 ADMIN_EMAIL=your-admin-email@example.com
 NEXT_PUBLIC_SITE_URL=https://hivepod.vercel.app
 ```
+
+### 🔒 Version Control Best Practices (Git)
+
+When pushing your code to a repository (like GitHub or GitLab), follow these rules for security and stability:
+
+**DO NOT PUSH (Add to `.gitignore`):**
+- `.env.local` - Never push your secret API keys to a public or private repo!
+- `node_modules/` - Automatically ignored by Next.js.
+- `.next/` - Build output, automatically ignored.
+
+**MUST PUSH:**
+- `firestore.rules` & `storage.rules` - These contain your backend security logic. Keeping them in Git allows you to track changes to your database security over time.
+- `firebase.json` - Required for deploying your Firebase rules and hosting settings.
+- `package.json` & `package-lock.json` - Ensures other developers get the exact same dependency versions.
 
 ---
 

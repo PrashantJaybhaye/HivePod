@@ -59,9 +59,9 @@ export async function fixTranscriptionChunk(chunk: string) {
     const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
     const prompt = `You are an expert transcriber and linguist specializing in technical subjects (like IT, networking, math). 
 Fix the spelling and formatting mistakes in this Hinglish (Hindi written in Latin alphabet) transcript.
-Format the output line-by-line exactly as provided (do not combine into one giant paragraph).
+Format the output line-by-line exactly as provided. DO NOT combine into one giant paragraph. YOU MUST MATCH THE INPUT LINE COUNT EXACTLY.
 DO NOT translate to English, keep the exact spoken Hinglish words.
-DO NOT add any preamble or extra text. Output ONLY the fixed transcript line-by-line.
+DO NOT add any preamble, conversational text, or extra text. Output ONLY the fixed transcript line-by-line.
 
 CRITICAL FIXES TO APPLY (DO THIS AGGRESSIVELY):
 - ANY time format like "02:55", "02:56", "02:50" MUST be converted to numbers: "255", "256", "250".
@@ -74,7 +74,18 @@ CRITICAL FIXES TO APPLY (DO THIS AGGRESSIVELY):
   - "scene" (when used as a number) -> "teen" (3)
   - "slash" followed by a number -> "/24", "/29", etc.
   - "2 ja" or "to ja" -> "2 power" or "2 raised to"
-- Do NOT rewrite the sentences in English. Keep the Hinglish (Hindi words in Latin) intact, only fix the technical terms and numbers!`;
+- Do NOT rewrite the sentences in English. Keep the Hinglish (Hindi words in Latin) intact, only fix the technical terms and numbers!
+
+EXAMPLES:
+Input:
+Toh yaha par humara pass 192 dot 168 dot 1 dot 0
+Iska subnedh mass kya hoga?
+02:55 dot 255 dot 0
+
+Output:
+Toh yaha par humara pass 192.168.1.0
+Iska subnet mask kya hoga?
+255.255.255.0`;
     
     const aiRes = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",

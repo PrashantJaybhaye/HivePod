@@ -62,7 +62,9 @@ export default function PublicCoursePage({ params }: { params: Promise<{ id: str
       // Fetch Folders (we'll do this regardless but hide in UI if not approved)
       const q = query(collection(db, "folders"), where("courseId", "==", courseId));
       const folderSnap = await getDocs(q);
-      const foldersData = folderSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+      const foldersData = folderSnap.docs.map(d => ({ id: d.id, ...d.data() as any }));
+      // Sort alphabetically by title
+      foldersData.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
       setFolders(foldersData);
 
       // Fetch Materials for these folders to calculate dynamic counts
