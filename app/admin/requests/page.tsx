@@ -304,7 +304,7 @@ export default function AdminRequestsPage() {
                     <button
                       key={tab}
                       onClick={() => setActiveTab(tab)}
-                      className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 capitalizeflex-1 sm:flex-initial text-center cursor-pointer flex items-center justify-center gap-1.5 ${activeTab === tab
+                      className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 capitalize flex-1 sm:flex-initial text-center cursor-pointer flex items-center justify-center gap-1.5 ${activeTab === tab
                         ? "bg-white/8 text-white shadow-xs"
                         : "text-white/45 hover:text-white/70"
                         }`}
