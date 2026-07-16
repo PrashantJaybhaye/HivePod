@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/components/AuthProvider";
 import DashboardLayout from "@/components/DashboardLayout";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/react";
+
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://hivepod.vercel.app"),
@@ -46,7 +49,7 @@ export default function RootLayout({
       lang="en"
       className="h-full antialiased selection:bg-[#3f3f46] selection:text-white"
     >
-      <body suppressHydrationWarning className="min-h-full flex flex-col bg-background text-foreground">
+      <body suppressHydrationWarning className={`min-h-full flex flex-col bg-background text-foreground ${inter.className}`}>
         <Script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "63eab370ca37427a9924420a960e83e4"}' />
         <AuthProvider>
           <BackgroundTasksProvider>

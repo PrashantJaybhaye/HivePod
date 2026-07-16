@@ -9,12 +9,7 @@ import { useEffect, useState } from "react";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
-interface SidebarProps {
-  isOpen?: boolean;
-  setIsOpen?: (isOpen: boolean) => void;
-}
-
-export default function Sidebar({ isOpen = false, setIsOpen }: SidebarProps) {
+export default function Sidebar() {
   const pathname = usePathname();
   const { isAdmin } = useAuth();
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
@@ -23,9 +18,15 @@ export default function Sidebar({ isOpen = false, setIsOpen }: SidebarProps) {
     if (!isAdmin) return;
     
     const q = query(collection(db, "course_requests"), where("status", "==", "pending"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      setPendingRequestsCount(snapshot.size);
-    });
+    const unsubscribe = onSnapshot(
+      q, 
+      (snapshot) => {
+        setPendingRequestsCount(snapshot.size);
+      },
+      (error) => {
+        console.error("Sidebar course_requests listener error:", error);
+      }
+    );
 
     return () => unsubscribe();
   }, [isAdmin]);
@@ -42,9 +43,7 @@ export default function Sidebar({ isOpen = false, setIsOpen }: SidebarProps) {
   ];
 
   return (
-    <aside className={`w-[85vw] max-w-[320px] md:max-w-none md:w-[260px] shrink-0 bg-[#060606]/95 md:bg-[#060606]/80 border-r border-white/4 backdrop-blur-2xl h-screen flex flex-col fixed left-0 top-0 z-30 transition-transform duration-300
-      ${isOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0
-    `}>
+    <aside className="hidden md:flex w-[260px] shrink-0 bg-[#060606]/80 border-r border-white/4 backdrop-blur-2xl h-screen flex-col fixed left-0 top-0 z-30">
       {/* Brand Header */}
       <div className="h-16 flex items-center justify-between px-6 shrink-0 relative">
         <Link
@@ -72,7 +71,6 @@ export default function Sidebar({ isOpen = false, setIsOpen }: SidebarProps) {
                 key={item.name} 
                 href={item.href} 
                 className="block w-full"
-                onClick={() => setIsOpen?.(false)}
               >
                 <motion.div
                   whileHover={{ x: 2 }}

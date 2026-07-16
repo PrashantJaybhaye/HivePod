@@ -22,7 +22,7 @@ export type SearchResultItem = {
   photoURL?: string;
 };
 
-export default function Header({ toggleSidebar }: { toggleSidebar?: () => void }) {
+export default function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const { user } = useAuth();
@@ -158,11 +158,18 @@ export default function Header({ toggleSidebar }: { toggleSidebar?: () => void }
       }
     }
 
+    function handleOpenSearch() {
+      setIsSearchOpen(true);
+      setIsNotifOpen(false);
+    }
+
     document.addEventListener("mousedown", handleClickOutside);
     window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("open-search", handleOpenSearch);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
       window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("open-search", handleOpenSearch);
     };
   }, []);
 
@@ -190,14 +197,7 @@ export default function Header({ toggleSidebar }: { toggleSidebar?: () => void }
   return (
     <header className="h-14 shrink-0 border-b border-white/4 bg-[#060606]/60 backdrop-blur-2xl flex items-center justify-between px-6 sticky top-0 z-10 w-full">
       <div className="flex items-center gap-3">
-        {toggleSidebar && (
-          <button
-            onClick={toggleSidebar}
-            className="md:hidden text-white/50 hover:text-white transition-colors cursor-pointer"
-          >
-            <Menu size={18} />
-          </button>
-        )}
+
 
         {/* Mobile Logo & Brand */}
         <div className="flex items-center gap-2 md:hidden">
