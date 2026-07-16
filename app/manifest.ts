@@ -7,12 +7,12 @@ export default function manifest(): MetadataRoute.Manifest {
     description: 'A premium, state-of-the-art platform for creators to share courses, host audio lectures, and build thriving communities.',
     start_url: '/',
     display: 'standalone',
-    background_color: '#ffffff',
-    theme_color: '#000000',
+    background_color: '#121212',
+    theme_color: '#121212',
     icons: [
       {
-        src: '/icon.png',
-        sizes: 'any',
+        src: '/logo.png',
+        sizes: '192x192',
         type: 'image/png',
       },
       {

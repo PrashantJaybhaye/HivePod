@@ -8,6 +8,10 @@ import { Analytics } from "@vercel/analytics/react";
 
 const inter = Inter({ subsets: ["latin"] });
 
+export const viewport = {
+  themeColor: "#121212",
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://hivepod.vercel.app"),
   title: "HivePod - Learning & Podcasting Platform",
