@@ -114,7 +114,7 @@ export default function ProfilePage() {
 
     if (isEditing) {
       return (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between py-5 gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between py-3 gap-4">
           <div className="space-y-1.5 w-full">
             <p className="text-xs font-semibold tracking-wide text-white">{title}</p>
             {inputType === "textarea" ? (
@@ -147,7 +147,7 @@ export default function ProfilePage() {
     }
 
     return (
-      <div className="flex items-start sm:items-center justify-between py-5 gap-4 group">
+      <div className="flex items-start sm:items-center justify-between py-3 gap-4 group">
         <div className="space-y-0.5">
           <p className="text-xs font-semibold tracking-wide text-white">{title}</p>
           <p className="text-xs text-white/60 wrap-break-words whitespace-pre-wrap max-w-sm">
@@ -172,13 +172,13 @@ export default function ProfilePage() {
 
   return (
     <div className="flex flex-col flex-1 bg-background font-sans">
-      <main className="flex-1 px-4 sm:px-6 md:px-12 lg:px-20 py-8 lg:py-12 max-w-7xl mx-auto w-full space-y-12 md:space-y-16 pb-20">
+      <main className="flex-1 px-4 sm:px-6 md:px-12 lg:px-20 py-4 lg:py-6 max-w-[1400px] mx-auto w-full space-y-6 lg:space-y-8 pb-10">
 
 
 
         {/* Profile Header */}
-        <div className="flex items-center gap-6 pb-8 border-b border-white/10">
-          <div className="w-[84px] h-[84px] rounded-full bg-linear-to-tr from-[#ff453a] to-[#ff9f0a] flex items-center justify-center text-white text-[32px] font-medium tracking-tight shadow-md overflow-hidden shrink-0">
+        <div className="flex items-center gap-4 pb-4 border-b border-white/10">
+          <div className="w-[64px] h-[64px] rounded-full bg-linear-to-tr from-[#ff453a] to-[#ff9f0a] flex items-center justify-center text-white text-[24px] font-medium tracking-tight shadow-md overflow-hidden shrink-0">
             {photoURL ? (
               <img src={photoURL} referrerPolicy="no-referrer" alt={displayName} className="w-full h-full object-cover" />
             ) : (
@@ -186,13 +186,13 @@ export default function ProfilePage() {
             )}
           </div>
           <div className="space-y-1">
-            <h1 className="text-3xl font-bold tracking-tight text-white">{displayName}</h1>
-            <p className="text-white/60 text-[15px]">{email}</p>
+            <h1 className="text-2xl font-bold tracking-tight text-white">{displayName}</h1>
+            <p className="text-white/60 text-[13px]">{email}</p>
           </div>
         </div>
 
         {/* Personal details */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-16 pt-2">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 pt-1">
           <div className="md:col-span-1">
             <h2 className="text-sm font-bold tracking-tight text-white uppercase">Personal details</h2>
             <p className="text-xs text-white/60 mt-1.5 leading-relaxed">Update your public profile information and how we can reach you.</p>
@@ -211,7 +211,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Account Details */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-16 pt-2">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 pt-1">
           <div className="md:col-span-1">
             <h2 className="text-sm font-bold tracking-tight text-white uppercase">Account details</h2>
             <p className="text-xs text-white/60 mt-1.5 leading-relaxed">Manage your login methods, password, and view your account history.</p>
@@ -234,14 +234,14 @@ export default function ProfilePage() {
         </div>
 
         {/* Manage account */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-16 pt-2">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 pt-1">
           <div className="md:col-span-1">
             <h2 className="text-sm font-bold tracking-tight text-white uppercase">Manage account</h2>
             <p className="text-xs text-white/60 mt-1.5 leading-relaxed">Permanently remove your account and all associated data.</p>
           </div>
           <div className="md:col-span-2 flex flex-col">
             <div className="h-px w-full bg-white/10 hidden md:block" />
-            <div className="flex items-center justify-between py-5">
+            <div className="flex items-center justify-between py-3">
               <div className="space-y-0.5">
                 <p className="text-xs font-semibold tracking-wide text-white">Delete account</p>
                 <p className="text-xs text-white/60">Permanently delete your account.</p>

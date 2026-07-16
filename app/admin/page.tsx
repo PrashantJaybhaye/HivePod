@@ -253,104 +253,88 @@ export default function AdminPage() {
         </div>
 
         {dbLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {[1, 2, 3, 4].map((n) => (
               <div key={n} className="bg-white/1 border border-white/5 rounded-2xl h-44 shimmer-bg"></div>
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
             {courses.map((course) => (
               <div
                 key={course.id}
-                className="bg-[#1c1c1e]/30 border border-white/5 hover:border-white/10 rounded-2xl p-4 flex flex-col justify-between h-full min-h-[220px] transition-all duration-200 group relative hover:bg-white/2 shadow-xs cursor-pointer hover:-translate-y-0.5"
+                className="rounded-xl border border-white/10 bg-[#09090b] overflow-hidden flex flex-col cursor-pointer group"
                 onClick={() => router.push(`/admin/course/${course.id}`)}
               >
-                {/* Header: Category Badge and Pencil/Trash Actions */}
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-[9px] text-[#86868b] bg-white/5 border border-white/5 px-2 py-0.5 rounded-md font-semibold tracking-wider uppercase">
-                    {course.category || "IT & Tech"}
-                  </span>
-
-                  <div className="flex gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity duration-150 relative z-10">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleOpenEditModal(course);
-                      }}
-                      className="p-1 rounded-md bg-white/5 hover:bg-white/10 text-[#86868b] hover:text-white border border-white/5 hover:border-white/10 transition-colors cursor-pointer"
-                      title="Edit"
-                    >
-                      <Pencil size={11} />
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteCourse(course.id);
-                      }}
-                      className="p-1 rounded-md bg-white/5 hover:bg-red-500/10 text-[#86868b] hover:text-red-400 border border-white/5 hover:border-red-500/10 transition-colors cursor-pointer"
-                      title="Delete"
-                    >
-                      <Trash2 size={11} />
-                    </button>
+                <div className="p-3 flex-1 flex flex-col">
+                  {/* Header */}
+                  <div className="flex justify-between items-center mb-1.5">
+                    <span className="px-1.5 py-0.5 rounded-[4px] bg-white/5 border border-white/10 text-[8px] font-bold tracking-wider text-white/50 uppercase">
+                      {course.category || "IT & Tech"}
+                    </span>
+                    <div className="flex gap-1 relative z-10">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenEditModal(course);
+                        }}
+                        className="w-5 h-5 rounded-md flex items-center justify-center bg-white/5 text-[#86868b] border border-white/5 hover:text-white"
+                        title="Edit"
+                      >
+                        <Pencil size={9} />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteCourse(course.id);
+                        }}
+                        className="w-5 h-5 rounded-md flex items-center justify-center bg-white/5 text-[#86868b] border border-white/5 hover:text-red-400"
+                        title="Delete"
+                      >
+                        <Trash2 size={9} />
+                      </button>
+                    </div>
                   </div>
-                </div>
 
-                {/* Course Metadata Content */}
-                <div className="flex-1 flex flex-col mt-1">
-                  <h3 className="font-semibold text-sm text-white tracking-tight leading-snug line-clamp-2 mb-1 group-hover:text-primary transition-colors">
+                  {/* Course Metadata Content */}
+                  <h3 className="text-[13px] font-bold text-white leading-tight mb-1 line-clamp-1">
                     {course.title}
                   </h3>
-                  <p className="text-[11px] text-[#86868b] line-clamp-2 leading-normal flex-1 mb-3">
+                  <p className="text-[10px] text-white/40 mb-2 line-clamp-1">
                     {course.description || "No description provided."}
                   </p>
 
-                  {/* iOS-Widget Styled Metrics Box */}
-                  <div className="grid grid-cols-3 gap-2 bg-white/2 border border-white/5 rounded-xl p-2 my-3 text-center">
-                    <div>
-                      <span className="text-[9px] text-[#86868b] block mb-0.5 capitalizetracking-wider font-semibold">Pods</span>
-                      <span className="text-xs font-semibold text-white flex items-center justify-center gap-1">
-                        <Headphones size={11} className="text-primary shrink-0" />
-                        {course.audioTracks || 0}
-                      </span>
+                  {/* Compact Stats Row */}
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="flex items-center gap-1">
+                      <Headphones size={10} className="text-red-500" />
+                      <span className="text-[10px] font-bold text-white">{course.audioTracks || 0}</span>
                     </div>
-                    <div className="border-x border-white/5">
-                      <span className="text-[9px] text-[#86868b] block mb-0.5 capitalizetracking-wider font-semibold">PDFs</span>
-                      <span className="text-xs font-semibold text-white flex items-center justify-center gap-1">
-                        <FileText size={11} className="text-primary shrink-0" />
-                        {course.resourcesCount || 0}
-                      </span>
+                    <div className="flex items-center gap-1">
+                      <FileText size={10} className="text-red-500" />
+                      <span className="text-[10px] font-bold text-white">{course.resourcesCount || 0}</span>
                     </div>
-                    <div>
-                      <span className="text-[9px] text-[#86868b] block mb-0.5 capitalizetracking-wider font-semibold">XP</span>
-                      <span className="text-xs font-semibold text-white flex items-center justify-center gap-1">
-                        <Zap size={11} className="text-primary shrink-0" />
-                        {course.xpReward || 0}
-                      </span>
+                    <div className="flex items-center gap-1">
+                      <Zap size={10} className="text-red-500" />
+                      <span className="text-[10px] font-bold text-white">{course.xpReward || 0}</span>
                     </div>
                   </div>
 
-                  {/* Apple Spec Sheet Key-Value Grid */}
-                  <div className="space-y-1 text-[10px] text-white/50 border-t border-white/5 pt-3 mb-1">
-                    <div className="flex items-center justify-between gap-4">
-                      <span className="text-[#86868b]">Instructor</span>
-                      <span className="text-white font-medium truncate max-w-[110px]">{course.instructor || "Faculty Team"}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[#86868b]">Difficulty</span>
-                      <span className="text-white font-medium">{course.difficulty || "Beginner"}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[#86868b]">Listening Time</span>
-                      <span className="text-white font-medium">{course.audioDuration || "2 hrs"}</span>
-                    </div>
+                  {/* Single Line Metadata */}
+                  <div className="flex justify-between items-center text-[9px] mt-auto">
+                    <span className="text-white/40">Inst: <span className="text-white/80">{course.instructor || "HivePod Faculty"}</span></span>
+                    <span className="text-white/40">{course.audioDuration || "10h 15m"}</span>
                   </div>
                 </div>
 
-                {/* Footer link overlay indicator */}
-                <div className="mt-3.5 pt-2.5 border-t border-white/5 flex items-center justify-between text-[11px] text-primary font-semibold hover:text-primary/85 transition-colors">
-                  <span>Manage Track</span>
-                  <ChevronRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
+                {/* Footer */}
+                <div className="border-t border-white/6 px-3 py-2 bg-white/[0.01]">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] font-bold text-red-500">
+                      Manage Track
+                    </span>
+                    <ChevronRight size={10} className="text-red-500" />
+                  </div>
                 </div>
               </div>
             ))}
