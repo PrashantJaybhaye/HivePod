@@ -109,10 +109,10 @@ export default function Home() {
         {/* Welcome Section */}
         <div className="mb-10 flex flex-col sm:flex-row justify-between items-start gap-4">
           <div>
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-tight text-neutral-200 mb-2">
+            <h2 className="text-xl md:text-2xl font-bold tracking-tight text-white mb-2">
               {firstName}, welcome! You're going to love it here!
             </h2>
-            <p className="text-gray-400">
+            <p className="text-white/60 text-[15px]">
               Your journey of a thousand miles begins with a single click.
             </p>
           </div>

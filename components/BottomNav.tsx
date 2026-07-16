@@ -2,33 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, BookOpen, Award, Settings, Shield, Inbox, User, Search } from "lucide-react";
+import { LayoutDashboard, BookOpen, Settings, User, Search } from "lucide-react";
 import { useAuth } from "./AuthProvider";
-import { useEffect, useState } from "react";
-import { collection, query, where, onSnapshot } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { useNotifications } from "@/hooks/useNotifications";
+import { motion } from "framer-motion";
 
 export default function BottomNav() {
   const pathname = usePathname();
-  const { isAdmin } = useAuth();
-  const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
-
-  useEffect(() => {
-    if (!isAdmin) return;
-
-    const q = query(collection(db, "course_requests"), where("status", "==", "pending"));
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        setPendingRequestsCount(snapshot.size);
-      },
-      (error) => {
-        console.error("BottomNav course_requests listener error:", error);
-      }
-    );
-
-    return () => unsubscribe();
-  }, [isAdmin]);
+  const { unreadCount } = useNotifications();
 
   type NavItem = {
     name: string;
@@ -40,16 +21,14 @@ export default function BottomNav() {
 
   const leftNavItems: NavItem[] = [
     { name: "Dashboard", href: "/", icon: LayoutDashboard },
-    { name: "Courses", href: "/my-courses", icon: BookOpen },
-    ...(isAdmin ? [{ name: "Admin", href: "/admin", icon: Shield }] : [])
+    { name: "Courses", href: "/my-courses", icon: BookOpen }
   ];
 
   const middleItem: NavItem = { name: "Search", icon: Search, isMiddle: true };
 
   const rightNavItems: NavItem[] = [
-    ...(isAdmin ? [{ name: "Requests", href: "/admin/requests", icon: Inbox, hasNotification: pendingRequestsCount > 0 }] : []),
     { name: "Profile", href: "/profile", icon: User },
-    { name: "Settings", href: "/settings", icon: Settings },
+    { name: "Settings", href: "/settings", icon: Settings, hasNotification: unreadCount > 0 },
   ];
 
   const navItems: NavItem[] = [...leftNavItems, middleItem, ...rightNavItems];

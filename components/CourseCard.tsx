@@ -175,31 +175,7 @@ export default function CourseCard({
           </div>
         </div>
 
-        {/* iOS-Style Translucent Badges */}
-        {(audioTracks > 0 || resourcesCount > 0 || xpReward > 0) && (
-          <div className="flex flex-wrap gap-1.5 mb-4 mt-1">
-            {audioTracks > 0 && (
-              <div className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide bg-[#5e5ce6]/10 text-[#7d7aff] border border-[#5e5ce6]/20 shadow-[0_2px_8px_rgba(94,92,230,0.05)]">
-                <Headphones size={11} className="stroke-[2.5]" />
-                <span>{audioTracks} Pods</span>
-              </div>
-            )}
 
-            {resourcesCount > 0 && (
-              <div className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide bg-[#64d2ff]/10 text-[#64d2ff] border border-[#64d2ff]/20 shadow-[0_2px_8px_rgba(100,210,255,0.05)]">
-                <FileText size={11} className="stroke-[2.5]" />
-                <span>{resourcesCount} PDFs</span>
-              </div>
-            )}
-
-            {xpReward > 0 && (
-              <div className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide bg-[#ff9f0a]/10 text-[#ff9f0a] border border-[#ff9f0a]/20 shadow-[0_2px_8px_rgba(255,159,10,0.05)]">
-                <Zap size={11} className="stroke-[2.5]" />
-                <span>+{xpReward} XP</span>
-              </div>
-            )}
-          </div>
-        )}
 
         {/* iOS-Style Product Sheet Spec Row */}
         <div className="flex flex-col gap-1.5 mb-4 mt-auto pt-3.5 border-t border-white/6">

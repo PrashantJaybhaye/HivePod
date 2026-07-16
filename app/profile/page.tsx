@@ -174,18 +174,7 @@ export default function ProfilePage() {
     <div className="flex flex-col flex-1 bg-background font-sans">
       <main className="flex-1 px-4 sm:px-6 md:px-12 lg:px-20 py-8 lg:py-12 max-w-7xl mx-auto w-full space-y-12 md:space-y-16 pb-20">
 
-        {/* Navigation / Back Button */}
-        <div>
-          <button
-            onClick={() => router.back()}
-            className="flex items-center gap-2 text-xs font-medium text-white/60 hover:text-white transition-colors group w-fit"
-          >
-            <svg className="w-4 h-4 text-white/40 group-hover:text-white transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="m15 18-6-6 6-6" />
-            </svg>
-            Back
-          </button>
-        </div>
+
 
         {/* Profile Header */}
         <div className="flex items-center gap-6 pb-8 border-b border-white/10">
