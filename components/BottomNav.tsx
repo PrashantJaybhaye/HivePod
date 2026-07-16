@@ -15,10 +15,10 @@ export default function BottomNav() {
 
   useEffect(() => {
     if (!isAdmin) return;
-    
+
     const q = query(collection(db, "course_requests"), where("status", "==", "pending"));
     const unsubscribe = onSnapshot(
-      q, 
+      q,
       (snapshot) => {
         setPendingRequestsCount(snapshot.size);
       },
@@ -60,13 +60,13 @@ export default function BottomNav() {
         {navItems.map((item) => {
           if (item.isMiddle) {
             return (
-              <button 
+              <button
                 key={item.name}
                 onClick={() => window.dispatchEvent(new CustomEvent('open-search'))}
                 className="relative flex flex-col items-center justify-center shrink-0 px-2 group"
               >
                 {/* 3D Bubble Glowing Button completely contained within the nav */}
-                <div className="w-[64px] h-[64px] rounded-full bg-linear-to-b from-[#dc2626] to-[#7f1d1d] flex items-center justify-center relative z-10 transition-transform duration-300 group-active:scale-95 shadow-[inset_0_2px_6px_rgba(255,255,255,0.4),0_0_24px_rgba(220,38,38,0.5)] border border-[#ef4444]/20">
+                <div className="w-[64px] h-[64px] rounded-full bg-linear-to-b from-primary-hover to-[#7f1d1d] flex items-center justify-center relative z-10 transition-transform duration-300 group-active:scale-95 shadow-[inset_0_2px_6px_rgba(255,255,255,0.4),0_0_24px_rgba(220,38,38,0.5)] border border-[#ef4444]/20">
                   <item.icon size={28} className="text-white drop-shadow-md" strokeWidth={2.5} />
                 </div>
               </button>
@@ -75,9 +75,9 @@ export default function BottomNav() {
 
           const isActive = pathname === item.href;
           return (
-            <Link 
-              key={item.name} 
-              href={item.href!} 
+            <Link
+              key={item.name}
+              href={item.href!}
               className="relative flex flex-col items-center justify-center flex-1 h-full py-2 group"
             >
               <div className={`flex flex-col items-center justify-center w-full transition-colors duration-200 group-active:scale-95`}>
